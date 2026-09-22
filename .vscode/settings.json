@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": true,
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "cmake.configureOnOpen": false,
+  "C_Cpp.clang_format_fallbackStyle": "file",
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/linux/compile_commands.json",
+  "cmake.buildDirectory": "${workspaceFolder}/build/linux"
+}

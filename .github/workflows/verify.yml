@@ -1,0 +1,38 @@
+name: Verify
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    name: Build and security checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Install distribution build tools
+        run: sudo apt-get update && sudo apt-get install -y emscripten libpq-dev ninja-build
+      - name: Build browser client
+        env:
+          CODARIS_PRODUCTION: '1'
+        run: ./scripts/build-client.sh
+      - name: Check pages, CSP, links and public artifact boundaries
+        run: python3 tests/check-site.py
+      - name: Build native C backend
+        run: cmake -S . -B build/server -G Ninja && cmake --build build/server
+      - name: Package public site only
+        run: python3 scripts/package-site.py ci
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: codaris-static-site
+          path: build/package/ci/
+          if-no-files-found: error
+          retention-days: 7

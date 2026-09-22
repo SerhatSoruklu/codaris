@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "openai.chatgpt",
+    "ms-vscode.cpptools",
+    "ms-vscode.cmake-tools",
+    "ms-ossdata.vscode-pgsql",
+    "editorconfig.editorconfig"
+  ]
+}

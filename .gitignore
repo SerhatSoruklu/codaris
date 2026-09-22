@@ -1,0 +1,40 @@
+# Build output
+build/
+out/
+
+# Local secrets and environment
+.env
+.env.*
+!.env.example
+config/local.ps1
+*.secret
+*.secrets
+
+# Editor / OS noise
+.vs/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Logs / crash dumps
+*.log
+*.dmp
+
+# Codex local runtime state
+.codex/
+
+# Private local development database and browser artifacts
+.local/
+output/
+.playwright-cli/
+
+# Private SSH/TLS material and local tooling
+*.pem
+*.key
+*.p12
+*.pfx
+.ssh/
+.agents/
+__pycache__/
+*.pyc

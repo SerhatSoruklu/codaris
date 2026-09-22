@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "",
+    "file": "home",
+    "title": "Build. Verify. Advance.",
+    "label": "Home",
+    "description": "Coalition Of Developers Advancing Responsible Intelligent Systems. Developer-led progress, verification, and trust engineered in.",
+    "interactive": true
+  },
+  {
+    "slug": "mission",
+    "title": "The Mission",
+    "label": "The mission",
+    "description": "Our mission: advance responsible intelligent systems through progress, safety, developer leadership, and a global perspective."
+  },
+  {
+    "slug": "global-reach",
+    "title": "Global Reach",
+    "label": "Global reach",
+    "description": "Explore an illustrative model of developer communities around the world and the global perspective behind CODARIS.",
+    "interactive": true
+  },
+  {
+    "slug": "ecosystem",
+    "title": "Ecosystem and Trust",
+    "label": "Ecosystem",
+    "description": "Understand the platforms, communities, and planned operational relationships around CODARIS, with independence and transparency."
+  },
+  {
+    "slug": "privacy",
+    "title": "Privacy",
+    "label": "Privacy",
+    "description": "Our privacy notice is being prepared. This placeholder is not a published privacy policy. Coalition applications are not open and the application form does not collect personal details.",
+    "placeholder": true
+  },
+  {
+    "slug": "github",
+    "title": "GitHub",
+    "label": "GitHub",
+    "description": "Explore the CODARIS source code, development history, and engineering documentation on GitHub."
+  },
+  {
+    "slug": "terms",
+    "title": "Terms",
+    "label": "Terms",
+    "description": "Our terms are being prepared. This placeholder is not a legal agreement or an offer of services.",
+    "placeholder": true
+  },
+  {
+    "slug": "contact",
+    "title": "Contact",
+    "label": "Contact",
+    "description": "Contact details and enquiry workflows are being prepared. In the meantime, follow official updates on X at @codarisorg.",
+    "placeholder": true
+  }
+]

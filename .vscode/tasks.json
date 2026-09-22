@@ -1,0 +1,69 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CODARIS: Build browser client",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/build-client.sh",
+      "args": [],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "CODARIS: Run browser client",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/run-client.sh",
+      "args": [],
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Build backend",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/build-server.sh",
+      "args": [],
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Run backend health check",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/run-server.sh",
+      "args": [],
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Start local database",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/db-local.sh",
+      "args": [
+        "start"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Stop local database",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/db-local.sh",
+      "args": [
+        "stop"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Apply database migration",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/db-migrate.sh",
+      "args": [],
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Check Linux tools",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/doctor.sh",
+      "args": [],
+      "problemMatcher": []
+    }
+  ]
+}
