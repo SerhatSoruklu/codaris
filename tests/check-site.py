@@ -78,6 +78,9 @@ for path, doc in pages.items():
         assert (OUT / asset.lstrip('/')).is_file(), (path, asset)
     for link in doc.links:
         parsed = urlsplit(link)
+        if parsed.scheme == 'mailto':
+            assert re.fullmatch(r'[a-z-]+@codaris\.org', parsed.path) and not parsed.query and not parsed.fragment, link
+            continue
         if parsed.scheme or parsed.netloc:
             assert parsed.scheme == 'https', link
             continue

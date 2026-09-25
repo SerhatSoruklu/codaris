@@ -1,0 +1,3 @@
+﻿purpose,source,url,notes
+Current website server usage,W3Techs web server comparison,"https://w3techs.com/technologies/comparison/ws-apache,ws-cloudflare,ws-nginx","Daily website detection snapshot; 23 Sep 2026: Cloudflare Server 30.9%, Nginx 30.9%, Apache 22.0% among websites with known web server."
+Web server survey,Netcraft Web Server Survey,https://www.netcraft.com/resources/web-server-survey,"Monthly survey tracking Apache, Nginx, IIS, OpenResty, LiteSpeed and others."

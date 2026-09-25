@@ -1,0 +1,234 @@
+<div class="join-band">
+      <section
+        id="join"
+        class="wrap section join-section join-scene"
+        aria-labelledby="join-title"
+      >
+        <div class="join-code" aria-hidden="true"><div class="join-code-pulse"></div></div>
+        <div class="join-copy">
+          <div class="join-motion"><input id="join-motion-pause" type="checkbox"><label for="join-motion-pause">Pause background</label></div>
+
+          <p class="eyebrow">
+            <span class="signal"></span> 04 / JOIN THE COALITION
+          </p>
+          <h1 class="join-heading" id="join-title">
+            The future needs<br />people who<br /><span>build and verify.</span>
+          </h1>
+          <p>
+            Bring your expertise, your questions, and your willingness to make
+            progress. Help shape what responsible intelligent systems become.
+          </p>
+          <div class="join-manifesto">
+            Different disciplines.<br />Many countries.<br /><strong
+              >One shared responsibility.</strong
+            >
+          </div>
+          <p>Verify your email to activate your membership.</p>
+        </div>
+        <div class="join-gate join-development">
+          <form
+            id="join-form"
+            aria-label="Coalition application"
+            data-account-form="register"
+          >
+            <fieldset id="join-fields" disabled>
+              <legend class="sr-only">Application details</legend>
+              <div class="application-header">
+
+                <div class="application-avatar">
+                  <img class="avatar-default" data-avatar-fallback src="/assets/avatar-default.svg" width="160" height="160" alt="Default geometric profile picture">
+                  <canvas id="avatar-preview" width="100" height="100" role="img" aria-label="Selected profile picture preview" hidden></canvas>
+                </div>
+
+                <div class="application-details">
+                  <h2 aria-hidden="true">Application details</h2>
+                  <p class="form-note">Required unless marked optional.</p>
+
+                  <div class="avatar-picker"><label for="avatar-file">Profile picture (optional)</label><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="avatar-hint avatar-status"><p id="avatar-hint">JPEG, PNG or WebP · up to 5 MiB. Saved as a small profile image.</p><button type="button" id="avatar-remove" class="text-link">Remove picture</button><p id="avatar-status" class="account-notice" role="status" aria-atomic="true"></p></div>
+
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="join-name">Name</label
+                  ><input
+                    type="text"
+                    id="join-name"
+                    name="name"
+                    placeholder="Your name"
+                    maxlength="120"
+                    aria-describedby="name-hint name-count name-error"
+                    required
+                    minlength="2"
+                    autocomplete="name"
+                  /><small class="field-hint" id="name-hint"
+                    >Use 2–120 characters. All languages are welcome.</small
+                  ><small class="field-count" id="name-count">0 / 120</small>
+                  <p class="field-error" id="name-error" aria-live="polite"></p>
+                </div>
+                <div class="form-field">
+                  <label for="join-email">Email</label
+                  ><input
+                    type="email"
+                    id="join-email"
+                    name="email"
+                    placeholder="you@example.com"
+                    maxlength="254"
+                    aria-describedby="email-hint email-count email-error"
+                    required
+                    autocomplete="email"
+                  /><small class="field-hint" id="email-hint"
+                    >Use an email address you can access. Maximum 254
+                    characters.</small
+                  ><small class="field-count" id="email-count">0 / 254</small>
+                  <p
+                    class="field-error"
+                    id="email-error"
+                    aria-live="polite"
+                  ></p>
+                </div>
+                <div class="form-field">
+                  <label for="join-country">Country</label
+                  ><select
+                    id="join-country"
+                    name="country"
+                    required
+                    aria-describedby="country-hint country-error"
+                  >
+                    <option value="">Select your country</option></select
+                  ><small class="field-hint" id="country-hint"
+                    >Choose where you are based.</small
+                  >
+                  <p
+                    class="field-error"
+                    id="country-error"
+                    aria-live="polite"
+                  ></p>
+                </div>
+                <div class="form-field">
+                  <label for="join-role">Role</label
+                  ><select
+                    id="join-role"
+                    name="role"
+                    required
+                    aria-describedby="role-hint role-error"
+                  >
+                    <option value="">Select your role</option>
+                    <option>Developer / Engineer</option>
+                    <option>Researcher</option>
+                    <option>Community organiser</option>
+                    <option>Student</option>
+                    <option>Other</option></select
+                  ><small class="field-hint" id="role-hint"
+                    >Choose the closest match to your work or interests.</small
+                  >
+                  <p class="field-error" id="role-error" aria-live="polite"></p>
+                </div>
+                <div class="form-field">
+                  <label for="join-linkedin"
+                    >LinkedIn <span>(optional)</span></label
+                  ><input
+                    type="url"
+                    id="join-linkedin"
+                    name="linkedin"
+                    placeholder="https://linkedin.com/in/…"
+                    maxlength="2048"
+                    aria-describedby="linkedin-hint linkedin-count linkedin-error"
+                    pattern="https://.+"
+                  /><small class="field-hint" id="linkedin-hint"
+                    >Paste your full HTTPS profile URL. Ownership is not
+                    verified.</small
+                  ><small class="field-count" id="linkedin-count"
+                    >0 / 2048</small
+                  >
+                  <p
+                    class="field-error"
+                    id="linkedin-error"
+                    aria-live="polite"
+                  ></p>
+                </div>
+                <div class="form-field">
+                  <label for="join-github">GitHub <span>(optional)</span></label
+                  ><input
+                    type="url"
+                    id="join-github"
+                    name="github"
+                    placeholder="https://github.com/…"
+                    maxlength="2048"
+                    aria-describedby="github-hint github-count github-error"
+                    pattern="https://.+"
+                  /><small class="field-hint" id="github-hint"
+                    >Paste your full HTTPS profile URL. Ownership is not
+                    verified.</small
+                  ><small class="field-count" id="github-count">0 / 2048</small>
+                  <p
+                    class="field-error"
+                    id="github-error"
+                    aria-live="polite"
+                  ></p>
+                </div>
+                <div class="form-field full">
+                  <label for="join-website"
+                    >Website <span>(optional)</span></label
+                  ><input
+                    type="url"
+                    id="join-website"
+                    name="website"
+                    placeholder="https://…"
+                    maxlength="2048"
+                    aria-describedby="website-hint website-count website-error"
+                    pattern="https://.+"
+                  /><small class="field-hint" id="website-hint"
+                    >Use a full HTTPS URL. Maximum 2,048 characters.</small
+                  ><small class="field-count" id="website-count"
+                    >0 / 2048</small
+                  >
+                  <p
+                    class="field-error"
+                    id="website-error"
+                    aria-live="polite"
+                  ></p>
+                </div>
+                <div class="form-field full">
+                  <label for="join-motivation"
+                    >Why do you want to join CODARIS?</label
+                  ><textarea
+                    id="join-motivation"
+                    name="motivation"
+                    placeholder="What would you like to help build or improve?"
+                    maxlength="2000"
+                    aria-describedby="motivation-hint motivation-count motivation-error"
+                    required
+                    minlength="20"
+                    rows="4"
+                  ></textarea
+                  ><small class="field-hint" id="motivation-hint"
+                    >20–2,000 characters. Share your interests; do not include
+                    sensitive information.</small
+                  ><small class="field-count" id="motivation-count"
+                    >0 / 2000</small
+                  >
+                  <p
+                    class="field-error"
+                    id="motivation-error"
+                    aria-live="polite"
+                  ></p>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-field"><label for="application-password">Password</label><input id="application-password" name="password" type="password" maxlength="512" autocomplete="new-password" required aria-describedby="application-password-hint"><small id="application-password-hint">15–128 characters. Use a unique password.</small></div>
+                <div class="form-field"><label for="application-confirm">Confirm password</label><input id="application-confirm" name="confirmation" type="password" maxlength="512" autocomplete="new-password" required></div>
+              </div>
+
+              <button class="button" type="submit" disabled>
+                Create account <span aria-hidden="true">↗</span>
+              </button>
+              <p class="form-note">By creating an account, you agree to the <a href="/terms/">membership terms</a>. Read our <a href="/privacy/">privacy notice</a>. Your email must be verified before membership becomes active.</p>
+            </fieldset>
+          </form>
+          <p id="register-feedback" class="account-notice" role="status" aria-atomic="true"></p>
+        </div>
+      </section>
+
+</div>

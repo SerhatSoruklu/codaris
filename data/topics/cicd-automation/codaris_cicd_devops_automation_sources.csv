@@ -1,0 +1,4 @@
+﻿purpose,source,url,notes
+CI/CD market survey,JetBrains TeamCity - State of CI/CD 2025,https://blog.jetbrains.com/teamcity/2025/10/the-state-of-cicd/,GitHub Actions used by 62% for personal projects and 41% in organizations among survey respondents.
+Argo adoption,CNCF Argo CD End User Survey 2025,https://www.cncf.io/announcements/2025/07/24/cncf-end-user-survey-finds-argo-cd-as-majority-adopted-gitops-solution-for-kubernetes/,Nearly 60% of Kubernetes clusters managed by respondents relied on Argo CD.
+CNCF annual survey,CNCF 2025 Annual Survey,https://www.cncf.io/announcements/2026/01/20/kubernetes-established-as-the-de-facto-operating-system-for-ai-as-production-use-hits-82-in-2025-cncf-annual-cloud-native-survey/,Argo 52% production; Flux 23% production among respondents evaluating graduated projects.

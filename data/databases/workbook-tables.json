@@ -1,0 +1,1724 @@
+{
+  "Dashboard": [
+    [
+      "CODARIS Databases & Data Platforms Research Dataset"
+    ],
+    [
+      "Metric",
+      "Value"
+    ],
+    [
+      "CODARIS catalogue entries",
+      "643"
+    ],
+    [
+      "DB-Engines DBMS in Sep 2026 ranking",
+      "438"
+    ],
+    [
+      "Stack Overflow 2025 database respondents",
+      "26083"
+    ],
+    [
+      "Stack Overflow usage rows captured",
+      "16"
+    ],
+    [
+      "DB-Engines top systems captured",
+      "20"
+    ],
+    [
+      "Primary model/category labels",
+      "36"
+    ],
+    [
+      "Research sources",
+      "21"
+    ],
+    [
+      "IMPORTANT TAXONOMY: MongoDB and PostgreSQL are database engines/DBMS products; MongoDB Atlas and Neon are managed services/platforms; Firebase is a developer platform whose database products include Firestore and Realtime Database; Supabase is a development platform built around PostgreSQL. CODARIS should keep these distinctions visible rather than labelling everything simply 'database'."
+    ],
+    [
+      "POPULARITY METRICS: Stack Overflow measures self-reported developer usage. DB-Engines is a monthly popularity index using multiple signals. Neither is a census or literal market share. Do not average these columns into one universal score."
+    ]
+  ],
+  "Developer usage": [
+    [
+      "Rank",
+      "Database environment",
+      "Used %",
+      "Respondents",
+      "Interpretation",
+      "Source"
+    ],
+    [
+      "1",
+      "PostgreSQL",
+      "55.6",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "2",
+      "MySQL",
+      "40.5",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "3",
+      "SQLite",
+      "37.5",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "4",
+      "Microsoft SQL Server",
+      "30.1",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "5",
+      "Redis",
+      "28",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "6",
+      "MongoDB",
+      "24",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "7",
+      "MariaDB",
+      "22.5",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "8",
+      "Elasticsearch",
+      "16.7",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "9",
+      "Oracle Database",
+      "10.6",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "10",
+      "Amazon DynamoDB",
+      "9.8",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "11",
+      "Google BigQuery",
+      "6.5",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "12",
+      "Supabase",
+      "6",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "13",
+      "Cloud Firestore",
+      "5.7",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "14",
+      "H2",
+      "5",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "15",
+      "Firebase Realtime Database",
+      "5",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "16",
+      "Microsoft Access",
+      "4.8",
+      "26083",
+      "Stack Overflow 2025 all-respondent database question; multi-select.",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ]
+  ],
+  "DB-Engines top 20": [
+    [
+      "Rank",
+      "DBMS",
+      "Score",
+      "Model summary",
+      "Source"
+    ],
+    [
+      "1",
+      "Oracle Database",
+      "1122.27",
+      "Relational / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "2",
+      "MySQL",
+      "844.82",
+      "Relational / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "3",
+      "Microsoft SQL Server",
+      "698.69",
+      "Relational / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "4",
+      "PostgreSQL",
+      "683.26",
+      "Relational / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "5",
+      "MongoDB",
+      "381.31",
+      "Document / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "6",
+      "Snowflake",
+      "211.61",
+      "Relational",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "7",
+      "Databricks SQL",
+      "168.34",
+      "Multi-model / relational",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "8",
+      "Redis",
+      "158.06",
+      "Key-value / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "9",
+      "IBM Db2",
+      "110.57",
+      "Relational / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "10",
+      "SQLite",
+      "97.05",
+      "Relational",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "11",
+      "Elasticsearch",
+      "95.5",
+      "Search / vector / document",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "12",
+      "Apache Cassandra",
+      "93.96",
+      "Wide-column / vector-capable",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "13",
+      "MariaDB",
+      "74.42",
+      "Relational / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "14",
+      "Splunk",
+      "71.68",
+      "Search engine",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "15",
+      "Azure SQL Database",
+      "70.84",
+      "Relational / multi-model",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "16",
+      "Apache Hive",
+      "70.11",
+      "Relational / analytical",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "17",
+      "Microsoft Access",
+      "63",
+      "Relational",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "18",
+      "Amazon DynamoDB",
+      "56.36",
+      "Key-value / document",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "19",
+      "Google BigQuery",
+      "52",
+      "Relational / analytical",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "20",
+      "Neo4j",
+      "47.17",
+      "Graph",
+      "https://db-engines.com/en/ranking/"
+    ]
+  ],
+  "Model rankings": [
+    [
+      "DB-Engines category",
+      "Systems in ranking",
+      "Sep 2026 leader",
+      "Leader rank",
+      "Leader score",
+      "Source"
+    ],
+    [
+      "All DBMS",
+      "438",
+      "Oracle Database",
+      "1",
+      "1122.27",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "Relational DBMS",
+      "170",
+      "Oracle Database",
+      "1",
+      "1122.27",
+      "https://db-engines.com/en/ranking/relational%2Bdbms%26lang%3Den"
+    ],
+    [
+      "Document stores",
+      "58",
+      "MongoDB",
+      "1",
+      "381.31",
+      "https://db-engines.com/en/ranking/document%2Bstore"
+    ],
+    [
+      "Key-value stores",
+      "72",
+      "Redis",
+      "1",
+      "158.06",
+      "https://db-engines.com/en/ranking/key-value%2Bstore"
+    ],
+    [
+      "Graph DBMS",
+      "44",
+      "Neo4j",
+      "1",
+      "47.17",
+      "https://db-engines.com/en/ranking/graph%2520dbms"
+    ],
+    [
+      "Time-series DBMS",
+      "45",
+      "InfluxDB",
+      "1",
+      "22.3",
+      "https://db-engines.com/en/ranking/time%2Bseries%2Bdbms"
+    ],
+    [
+      "Vector DBMS",
+      "26",
+      "Elasticsearch",
+      "1",
+      "95.5",
+      "https://db-engines.com/en/ranking/vector%2Bdbms"
+    ],
+    [
+      "RDF stores",
+      "21",
+      "MarkLogic",
+      "1",
+      "3.81",
+      "https://db-engines.com/en/ranking/rdf%2Bstore"
+    ],
+    [
+      "Spatial DBMS",
+      "8",
+      "PostGIS",
+      "1",
+      "23.85",
+      "https://db-engines.com/en/ranking/spatial%2Bdbms"
+    ]
+  ],
+  "Developer platforms": [
+    [
+      "Product",
+      "Data model / foundation",
+      "Type",
+      "Deployment",
+      "Provider",
+      "CODARIS note",
+      "Source"
+    ],
+    [
+      "MongoDB Atlas",
+      "Managed developer data platform",
+      "Managed developer data platform",
+      "Managed cloud",
+      "MongoDB",
+      "Managed MongoDB service across AWS, Azure and Google Cloud.",
+      "https://www.mongodb.com/docs/atlas/"
+    ],
+    [
+      "Firebase",
+      "Managed developer data platform",
+      "Managed developer data platform",
+      "Managed cloud / BaaS",
+      "Google",
+      "Developer platform; database products include Cloud Firestore and Realtime Database.",
+      "https://firebase.google.com/docs/database/rtdb-vs-firestore"
+    ],
+    [
+      "Cloud Firestore",
+      "Document",
+      "Managed developer data platform",
+      "Managed cloud / BaaS",
+      "Google",
+      "Serverless NoSQL document database in Firebase / Google Cloud.",
+      "https://firebase.google.com/docs/firestore"
+    ],
+    [
+      "Firebase Realtime Database",
+      "Document / realtime JSON",
+      "Database engine / DBMS",
+      "Managed cloud / BaaS",
+      "Google",
+      "Cloud-hosted JSON database with realtime client synchronization.",
+      "https://firebase.google.com/docs/database"
+    ],
+    [
+      "Supabase",
+      "Developer data platform / PostgreSQL",
+      "Managed developer data platform",
+      "Managed cloud / self-host options",
+      "Supabase",
+      "Hosted development platform; every project gets a full PostgreSQL database.",
+      "https://supabase.com/docs/guides/database/overview"
+    ],
+    [
+      "Neon",
+      "Developer data platform / PostgreSQL",
+      "Managed developer data platform",
+      "Managed cloud",
+      "Neon",
+      "Serverless Postgres platform with database branching.",
+      "https://neon.com/docs/get-started-with-neon/workflow-primer"
+    ],
+    [
+      "PlanetScale",
+      "Developer database platform",
+      "Managed developer data platform",
+      "Managed cloud",
+      "PlanetScale",
+      "Managed relational platform offering PostgreSQL, Vitess and Neki.",
+      "https://planetscale.com/features"
+    ],
+    [
+      "Turso Cloud",
+      "Embedded / distributed SQLite-family",
+      "Managed developer data platform",
+      "Managed cloud / edge",
+      "Turso",
+      "Managed service around Turso's SQLite-descended database technology.",
+      "https://docs.turso.tech/blog"
+    ],
+    [
+      "Convex",
+      "Reactive database / backend platform",
+      "Managed developer data platform",
+      "Managed cloud / self-host",
+      "Convex",
+      "Open-source reactive database with TypeScript queries and backend functions.",
+      "https://docs.convex.dev/"
+    ],
+    [
+      "PocketBase",
+      "Embedded SQLite backend",
+      "Managed developer data platform",
+      "Self-hosted",
+      "PocketBase",
+      "Open-source backend built around embedded SQLite, realtime subscriptions and auth.",
+      "https://pocketbase.io/docs/"
+    ],
+    [
+      "Appwrite",
+      "Developer data platform",
+      "Managed developer data platform",
+      "Managed cloud / self-host",
+      "Appwrite",
+      "Backend platform offering TablesDB, DocumentsDB, VectorsDB plus managed PostgreSQL/MySQL.",
+      "https://appwrite.io/docs/products/databases"
+    ],
+    [
+      "Upstash",
+      "Serverless data platform",
+      "Managed developer data platform",
+      "Managed cloud / serverless",
+      "Upstash",
+      "Developer platform including managed serverless Redis.",
+      "https://upstash.com/redis"
+    ],
+    [
+      "Cloudflare D1",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "Xata",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "Nhost",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "Hasura Cloud",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "CockroachDB Cloud",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "TiDB Cloud",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "Couchbase Capella",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "DataStax Astra DB",
+      "Wide-column / columnar",
+      "Database engine / DBMS",
+      "Self-managed or varies",
+      "",
+      "",
+      "https://en.wikipedia.org/wiki/List_of_column-oriented_DBMSes"
+    ],
+    [
+      "Neo4j Aura",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "Redis Cloud",
+      "Developer data platform / BaaS",
+      "Managed developer data platform",
+      "Managed cloud / developer platform",
+      "",
+      "Platform or managed service rather than a standalone database engine.",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "MotherDuck",
+      "Analytical / warehouse / lakehouse",
+      "Analytical data platform / warehouse",
+      "Self-managed or varies",
+      "",
+      "",
+      "https://db-engines.com/en/ranking/"
+    ],
+    [
+      "Tinybird",
+      "Analytical / warehouse / lakehouse",
+      "Analytical data platform / warehouse",
+      "Self-managed or varies",
+      "",
+      "",
+      "https://db-engines.com/en/ranking/"
+    ]
+  ],
+  "Survey geography": [
+    [
+      "Rank",
+      "Country / region",
+      "Responses",
+      "Share %",
+      "Interpretation"
+    ],
+    [
+      "1",
+      "United States of America",
+      "7218",
+      "20.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "2",
+      "Germany",
+      "3022",
+      "8.6",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "3",
+      "India",
+      "2536",
+      "7.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "4",
+      "United Kingdom of Great Britain and Northern Ireland",
+      "2036",
+      "5.8",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "5",
+      "France",
+      "1408",
+      "4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "6",
+      "Canada",
+      "1303",
+      "3.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "7",
+      "Ukraine",
+      "963",
+      "2.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "8",
+      "Poland",
+      "886",
+      "2.5",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "9",
+      "Netherlands",
+      "867",
+      "2.5",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "10",
+      "Italy",
+      "833",
+      "2.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "11",
+      "Brazil",
+      "822",
+      "2.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "12",
+      "Australia",
+      "802",
+      "2.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "13",
+      "Spain",
+      "716",
+      "2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "14",
+      "Sweden",
+      "616",
+      "1.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "15",
+      "Switzerland",
+      "546",
+      "1.6",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "16",
+      "Czech Republic",
+      "520",
+      "1.5",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "17",
+      "Austria",
+      "410",
+      "1.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "18",
+      "Romania",
+      "322",
+      "0.9",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "19",
+      "Belgium",
+      "320",
+      "0.9",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "20",
+      "Denmark",
+      "316",
+      "0.9",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "21",
+      "Israel",
+      "297",
+      "0.8",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "22",
+      "Turkey",
+      "294",
+      "0.8",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "23",
+      "Mexico",
+      "284",
+      "0.8",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "24",
+      "Portugal",
+      "279",
+      "0.8",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "25",
+      "China",
+      "255",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "26",
+      "New Zealand",
+      "255",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "27",
+      "Finland",
+      "254",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "28",
+      "Greece",
+      "252",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "29",
+      "South Africa",
+      "251",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "30",
+      "Bulgaria",
+      "244",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "31",
+      "Pakistan",
+      "238",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "32",
+      "Norway",
+      "237",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "33",
+      "Hungary",
+      "235",
+      "0.7",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "34",
+      "Argentina",
+      "222",
+      "0.6",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "35",
+      "Bangladesh",
+      "219",
+      "0.6",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "36",
+      "Ireland",
+      "209",
+      "0.6",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "37",
+      "Colombia",
+      "202",
+      "0.6",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "38",
+      "Russian Federation",
+      "200",
+      "0.6",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "39",
+      "Nigeria",
+      "199",
+      "0.6",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "40",
+      "Japan",
+      "188",
+      "0.5",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "41",
+      "Indonesia",
+      "180",
+      "0.5",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "42",
+      "Serbia",
+      "158",
+      "0.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "43",
+      "Iran",
+      "149",
+      "0.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "44",
+      "Kenya",
+      "147",
+      "0.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "45",
+      "Slovakia",
+      "147",
+      "0.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "46",
+      "Viet Nam",
+      "145",
+      "0.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "47",
+      "Philippines",
+      "141",
+      "0.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "48",
+      "Egypt",
+      "139",
+      "0.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "49",
+      "Chile",
+      "131",
+      "0.4",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "50",
+      "Thailand",
+      "119",
+      "0.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "51",
+      "Taiwan",
+      "118",
+      "0.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "52",
+      "Croatia",
+      "113",
+      "0.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "53",
+      "Lithuania",
+      "101",
+      "0.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "54",
+      "Sri Lanka",
+      "95",
+      "0.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "55",
+      "Singapore",
+      "89",
+      "0.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "56",
+      "United Arab Emirates",
+      "89",
+      "0.3",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "57",
+      "South Korea",
+      "86",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "58",
+      "Nepal",
+      "83",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "59",
+      "Malaysia",
+      "82",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "60",
+      "Slovenia",
+      "78",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "61",
+      "Hong Kong (S.A.R.)",
+      "72",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "62",
+      "Estonia",
+      "70",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "63",
+      "Peru",
+      "64",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "64",
+      "Latvia",
+      "62",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "65",
+      "Morocco",
+      "55",
+      "0.2",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "66",
+      "Uruguay",
+      "52",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "67",
+      "Algeria",
+      "48",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "68",
+      "Georgia",
+      "48",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "69",
+      "Venezuela",
+      "47",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "70",
+      "Ghana",
+      "46",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "71",
+      "Tunisia",
+      "46",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "72",
+      "Cyprus",
+      "39",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "73",
+      "Ethiopia",
+      "38",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "74",
+      "Saudi Arabia",
+      "37",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "75",
+      "Guatemala",
+      "33",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "76",
+      "Jordan",
+      "32",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "77",
+      "Bosnia and Herzegovina",
+      "30",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "78",
+      "Kazakhstan",
+      "29",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "79",
+      "Ecuador",
+      "28",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "80",
+      "Uganda",
+      "28",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "81",
+      "Belarus",
+      "26",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "82",
+      "Dominican Republic",
+      "26",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "83",
+      "Armenia",
+      "25",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "84",
+      "Costa Rica",
+      "25",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "85",
+      "Luxembourg",
+      "23",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "86",
+      "Albania",
+      "22",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "87",
+      "Paraguay",
+      "21",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "88",
+      "Lebanon",
+      "20",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "89",
+      "Malta",
+      "19",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "90",
+      "Azerbaijan",
+      "18",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "91",
+      "Bolivia",
+      "18",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "92",
+      "Yemen",
+      "18",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "93",
+      "Myanmar",
+      "17",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "94",
+      "Uzbekistan",
+      "16",
+      "0.1",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "95",
+      "Montenegro",
+      "15",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "96",
+      "Rwanda",
+      "15",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "97",
+      "Afghanistan",
+      "13",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "98",
+      "Cameroon",
+      "13",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "99",
+      "Iceland",
+      "13",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "100",
+      "Iraq",
+      "13",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "101",
+      "Zimbabwe",
+      "13",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "102",
+      "El Salvador",
+      "12",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "103",
+      "Zambia",
+      "12",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "104",
+      "Cambodia",
+      "11",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "105",
+      "Honduras",
+      "11",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "106",
+      "Madagascar",
+      "11",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "107",
+      "Mauritius",
+      "11",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "108",
+      "Syrian Arab Republic",
+      "11",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "109",
+      "Isle of Man",
+      "10",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "110",
+      "Kyrgyzstan",
+      "10",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "111",
+      "Panama",
+      "10",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "112",
+      "Maldives",
+      "9",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "113",
+      "Togo",
+      "9",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "114",
+      "Cuba",
+      "8",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "115",
+      "C\u00f4te d'Ivoire",
+      "8",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "116",
+      "Republic of Moldova",
+      "8",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "117",
+      "Angola",
+      "7",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "118",
+      "Bahrain",
+      "7",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "119",
+      "Democratic Republic of the Congo",
+      "7",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "120",
+      "Kuwait",
+      "7",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "121",
+      "Namibia",
+      "7",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "122",
+      "Palestine",
+      "7",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "123",
+      "Trinidad and Tobago",
+      "7",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "124",
+      "United Republic of Tanzania",
+      "7",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "125",
+      "Andorra",
+      "6",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "126",
+      "Kosovo",
+      "6",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "127",
+      "Nicaragua",
+      "6",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "128",
+      "North Korea",
+      "6",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "129",
+      "Oman",
+      "6",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "130",
+      "Benin",
+      "5",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "131",
+      "Congo, Republic of the",
+      "5",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "132",
+      "Fiji",
+      "5",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "133",
+      "Mozambique",
+      "5",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "134",
+      "Qatar",
+      "5",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "135",
+      "Senegal",
+      "5",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "136",
+      "Eswatini / Swaziland",
+      "5",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "137",
+      "Barbados",
+      "4",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "138",
+      "Guyana",
+      "4",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "139",
+      "Jamaica",
+      "4",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "140",
+      "Malawi",
+      "4",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "141",
+      "Somalia",
+      "4",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "142",
+      "Belize",
+      "3",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "143",
+      "Bhutan",
+      "3",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "144",
+      "Brunei Darussalam",
+      "3",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "145",
+      "Mongolia",
+      "3",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ],
+    [
+      "146",
+      "Papua New Guinea",
+      "3",
+      "0",
+      "Overall Stack Overflow 2025 respondent geography; not database usage within that country."
+    ]
+  ],
+  "Methodology": [
+    [
+      "Issue",
+      "CODARIS treatment",
+      "Why"
+    ],
+    [
+      "What counts as a database?",
+      "Catalogue database engines, managed database services, warehouses, embedded databases, search/vector data systems and developer data platforms, but preserve Product Type and Primary Model.",
+      "Developers commonly choose among all of these, but they are architecturally different layers."
+    ],
+    [
+      "DB-Engines ranking",
+      "Show rank and score only as DB-Engines popularity index values, dated September 2026.",
+      "The score is generated from several popularity signals and is not a percentage of developers or deployments."
+    ],
+    [
+      "Stack Overflow usage",
+      "Show 2025 'Have Used' percentage only for environments with verified published values.",
+      "The database question had 26,083 respondents and allowed multiple selections."
+    ],
+    [
+      "Firebase",
+      "Treat Firebase as a developer platform; list Cloud Firestore and Firebase Realtime Database as the actual database products.",
+      "Avoids presenting a platform brand and its databases as if they were one engine."
+    ],
+    [
+      "Supabase / Neon / PlanetScale",
+      "Classify as managed developer/database platforms and retain their PostgreSQL, Vitess/MySQL or other foundations.",
+      "Users need to understand whether they are selecting a database engine or an operational platform around one."
+    ],
+    [
+      "Search and vector systems",
+      "Include systems such as Elasticsearch, OpenSearch, Pinecone, Milvus, Qdrant and Weaviate, labelled by type.",
+      "Modern application data architectures increasingly use search/vector stores alongside transactional databases."
+    ],
+    [
+      "Country data",
+      "Do not infer per-database country shares from overall respondent geography.",
+      "A country's representation in a survey does not establish database usage in that country."
+    ],
+    [
+      "Gender data",
+      "Leave per-database gender values blank unless an explicit cross-tab with sample sizes is available.",
+      "Prevents fabricated demographic precision and preserves non-binary/non-response categories."
+    ],
+    [
+      "Completeness",
+      "Call this an extensive curated catalogue of 643 entries, not 'every database ever made'.",
+      "DB-Engines alone tracks 438 DBMS products, while platforms/services create additional naming and taxonomy complexity."
+    ]
+  ]
+}

@@ -1,0 +1,23 @@
+# Future static staff site. Not installed or activated by the build.
+# Requires DNS, a certificate for admin.codaris.org and a separately deployed root.
+# Production builds intentionally show unavailable pages until backend auth exists.
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name admin.codaris.org;
+    ssl_certificate /etc/letsencrypt/live/admin.codaris.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/admin.codaris.org/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_tickets off;
+    server_tokens off;
+    root /srv/codaris-admin/current;
+    index index.html;
+    autoindex off;
+    include /etc/nginx/snippets/codaris-security-headers.conf;
+    add_header Cache-Control "no-store" always;
+    add_header X-Robots-Tag "noindex, nofollow" always;
+    if ($request_method !~ ^(GET|HEAD)$) { return 405; }
+    location ~ /\. { return 404; }
+    location ~ \.wasm$ { types { application/wasm wasm; } try_files $uri =404; }
+    location / { try_files $uri $uri/ =404; }
+}

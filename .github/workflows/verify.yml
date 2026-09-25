@@ -19,7 +19,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Install distribution build tools
-        run: sudo apt-get update && sudo apt-get install -y emscripten libpq-dev ninja-build
+        run: sudo apt-get update && sudo apt-get install -y emscripten libpq-dev libmicrohttpd-dev libsodium-dev libcurl4-openssl-dev libjson-c-dev ninja-build
+      - name: Initialize isolated build configuration
+        run: python3 scripts/init-env.py
       - name: Build browser client
         env:
           CODARIS_PRODUCTION: '1'

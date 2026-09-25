@@ -1,0 +1,22 @@
+﻿dataset,source,url,notes
+Overall DBMS universe and popularity,DB-Engines Ranking,https://db-engines.com/en/ranking/,"Monthly popularity ranking; 438 systems listed in September 2026. Score is a popularity index, not usage share."
+Developer database usage,Stack Overflow Developer Survey 2025 - Technology,https://survey.stackoverflow.co/2025/technology/,"Database question had 26,083 respondents. Multi-select self-reported extensive development work over the prior year."
+Relational catalogue,Wikipedia - List of relational DBMS,https://en.wikipedia.org/wiki/List_of_relational_database_management_systems,Alphabetical reference list of relational database management systems.
+DBMS taxonomy indexes,Wikipedia - Lists of DBMS,https://en.wikipedia.org/wiki/Lists_of_database_management_systems,"Links to relational, object, document, column-oriented and in-memory DBMS lists."
+Object database catalogue,Wikipedia - Comparison of object DBMS,https://en.wikipedia.org/wiki/Comparison_of_object_database_management_systems,Reference list of notable object database management systems.
+Document model background,Wikipedia - Document-oriented database,https://en.wikipedia.org/wiki/Document-oriented_database,Reference for document-oriented database concepts and notable implementations.
+Column-oriented catalogue,Wikipedia - List of column-oriented DBMSes,https://en.wikipedia.org/wiki/List_of_column-oriented_DBMSes,Reference list for column-oriented database systems.
+In-memory catalogue,Wikipedia - List of in-memory databases,https://en.wikipedia.org/wiki/List_of_in-memory_databases,Reference list for in-memory database systems.
+Firebase databases,Firebase - Firestore vs Realtime Database,https://firebase.google.com/docs/database/rtdb-vs-firestore,Firebase offers Cloud Firestore and Realtime Database; Firestore is recommended for new customers.
+AWS database services,AWS Database Decision Guide,https://docs.aws.amazon.com/decision-guides/latest/decision-guides/databases-on-aws-how-to-choose.html,"Current AWS database portfolio includes relational, key-value, document, in-memory, graph, time-series and wide-column services."
+Google Cloud databases,Google Cloud Database Products,https://cloud.google.com/products/databases,"Current managed database portfolio includes Cloud SQL, AlloyDB, Spanner, Bigtable, Firestore and Memorystore."
+Azure databases,Microsoft Azure Products,https://azure.microsoft.com/en-us/products,"Azure database portfolio includes Cosmos DB, Azure SQL, Azure SQL Database and Azure SQL Managed Instance."
+MongoDB managed platform,MongoDB Atlas Docs,https://www.mongodb.com/docs/atlas/,Atlas is MongoDB's managed multi-cloud database service.
+Supabase,Supabase Database Docs,https://supabase.com/docs/guides/database/overview,"Each Supabase project gets a full Postgres database; Supabase adds APIs, auth, realtime, storage and other platform features."
+Neon,Neon Docs,https://neon.com/docs/get-started-with-neon/workflow-primer,Serverless Postgres platform with database branching and scale-to-zero capabilities.
+PlanetScale,PlanetScale Features,https://planetscale.com/features,"Managed relational platform offering PostgreSQL, Vitess and Neki databases."
+Turso,Turso Docs,https://docs.turso.tech/blog,Turso Cloud managed service plus an embedded SQLite-descended database engine.
+Convex,Convex Docs,https://docs.convex.dev/,"Open-source reactive database with TypeScript queries, server functions and client libraries."
+PocketBase,PocketBase Docs,https://pocketbase.io/docs/,"Open-source backend consisting of embedded SQLite, realtime subscriptions, auth and REST-style API."
+Appwrite,Appwrite Databases Docs,https://appwrite.io/docs/products/databases,"Developer backend platform offering TablesDB, DocumentsDB, VectorsDB and managed native PostgreSQL/MySQL."
+Upstash Redis,Upstash Redis,https://upstash.com/redis,Managed serverless Redis-compatible database service.

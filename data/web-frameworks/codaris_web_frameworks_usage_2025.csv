@@ -1,0 +1,27 @@
+﻿rank,web_framework_or_technology,used_pct_2025,source,sample_size,note
+1,Node.js,48.7,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+2,React,44.7,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+3,jQuery,23.4,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+4,Next.js,20.8,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+5,Express,19.9,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+6,ASP.NET Core,19.7,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+7,Angular,18.2,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+8,Vue.js,17.6,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+9,FastAPI,14.8,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+10,Spring Boot,14.7,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+11,Flask,14.4,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+12,ASP.NET,14.2,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+13,WordPress,13.6,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+14,Django,12.6,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+15,Laravel,8.9,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+16,AngularJS,7.2,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+17,Svelte,7.2,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+18,Blazor,7.0,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+19,NestJS,6.7,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+20,Ruby on Rails,5.9,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+21,Astro,4.5,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+22,Nuxt,4.0,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+23,Symfony,4.0,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+24,Deno,4.0,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+25,Phoenix,2.4,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.
+26,Drupal,2.2,https://survey.stackoverflow.co/2025/technology/,23678,All respondents to Stack Overflow web frameworks/technologies question; multi-select.

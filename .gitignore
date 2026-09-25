@@ -5,7 +5,6 @@ out/
 # Local secrets and environment
 .env
 .env.*
-!.env.example
 config/local.ps1
 *.secret
 *.secrets
@@ -38,3 +37,36 @@ output/
 .agents/
 __pycache__/
 *.pyc
+
+# Real frontend/backend environment files and editor copies
+*.env
+*.env.*
+*.env~
+*.env.bak
+*.env.backup
+*.env.save
+*.env.swp
+*.env.swo
+# Database exports and private credential stores
+*.dump
+*.sql.gz
+*.pgpass
+.pgpass
+pgpass.conf
+*.sqlite
+*.sqlite3
+credentials.json
+service-account*.json
+
+# Private key files without extensions and local cloud credentials
+id_rsa
+id_ed25519
+id_ecdsa
+*.jks
+*.keystore
+.aws/
+.azure/
+.gcloud/
+.pg_service.conf
+backups/
+dumps/

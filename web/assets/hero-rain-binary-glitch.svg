@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
+<defs><linearGradient id="trail" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#59e4eb" stop-opacity="0"/><stop offset=".8" stop-color="#59e4eb" stop-opacity=".5"/><stop offset="1" stop-color="#b8fbff"/></linearGradient></defs>
+<g font-family="monospace" font-size="12" text-anchor="middle" fill="url(#trail)">
+<text>
+<tspan opacity="0" x="25" y="18">C</tspan>
+<tspan x="25" y="36">#</tspan>
+<tspan x="25" y="54">#</tspan>
+<tspan opacity="0" x="25" y="72">7</tspan>
+<tspan opacity="0" x="25" y="90">V</tspan>
+<tspan opacity="0" x="25" y="108">E</tspan>
+<tspan opacity="0" x="25" y="126">R</tspan>
+<tspan opacity="0" x="25" y="144">I</tspan>
+<tspan opacity="0" x="25" y="162">F</tspan>
+<tspan opacity="0" x="25" y="180">Y</tspan>
+<tspan x="25" y="198">#</tspan>
+<tspan x="25" y="216">#</tspan>
+</text>
+<text>
+<tspan x="85" y="65">#</tspan>
+<tspan x="85" y="83">#</tspan>
+<tspan opacity="0" x="85" y="101">B</tspan>
+<tspan opacity="0" x="85" y="119">U</tspan>
+<tspan opacity="0" x="85" y="137">I</tspan>
+<tspan opacity="0" x="85" y="155">L</tspan>
+<tspan opacity="0" x="85" y="173">D</tspan>
+<tspan x="85" y="191">#</tspan>
+<tspan x="85" y="209">#</tspan>
+<tspan opacity="0" x="85" y="227">C</tspan>
+<tspan x="85" y="245">#</tspan>
+<tspan opacity="0" x="85" y="263">7</tspan>
+</text>
+<text>
+<tspan x="145" y="112">#</tspan>
+<tspan x="145" y="130">#</tspan>
+<tspan opacity="0" x="145" y="148">A</tspan>
+<tspan opacity="0" x="145" y="166">D</tspan>
+<tspan opacity="0" x="145" y="184">V</tspan>
+<tspan opacity="0" x="145" y="202">A</tspan>
+<tspan opacity="0" x="145" y="220">N</tspan>
+<tspan opacity="0" x="145" y="238">C</tspan>
+<tspan opacity="0" x="145" y="256">E</tspan>
+<tspan x="145" y="274">#</tspan>
+<tspan x="145" y="292">#</tspan>
+</text>
+<text>
+<tspan opacity="0" x="205" y="49">C</tspan>
+<tspan x="205" y="67">#</tspan>
+<tspan opacity="0" x="205" y="85">7</tspan>
+<tspan opacity="0" x="205" y="103">{</tspan>
+<tspan opacity="0" x="205" y="121">}</tspan>
+<tspan x="205" y="139">#</tspan>
+<tspan x="205" y="157">#</tspan>
+<tspan x="205" y="175">#</tspan>
+<tspan x="205" y="193">#</tspan>
+<tspan opacity="0" x="205" y="211">+</tspan>
+<tspan opacity="0" x="205" y="229">+</tspan>
+</text>
+<text>
+<tspan x="265" y="96">#</tspan>
+<tspan x="265" y="114">#</tspan>
+<tspan opacity="0" x="265" y="132">T</tspan>
+<tspan opacity="0" x="265" y="150">R</tspan>
+<tspan opacity="0" x="265" y="168">U</tspan>
+<tspan opacity="0" x="265" y="186">S</tspan>
+<tspan opacity="0" x="265" y="204">T</tspan>
+<tspan x="265" y="222">#</tspan>
+<tspan x="265" y="240">#</tspan>
+<tspan x="265" y="258">#</tspan>
+<tspan x="265" y="276">#</tspan>
+</text>
+<text>
+<tspan x="325" y="33">#</tspan>
+<tspan x="325" y="51">#</tspan>
+<tspan opacity="0" x="325" y="69">C</tspan>
+<tspan opacity="0" x="325" y="87">O</tspan>
+<tspan opacity="0" x="325" y="105">D</tspan>
+<tspan opacity="0" x="325" y="123">A</tspan>
+<tspan opacity="0" x="325" y="141">R</tspan>
+<tspan opacity="0" x="325" y="159">I</tspan>
+<tspan opacity="0" x="325" y="177">S</tspan>
+<tspan x="325" y="195">#</tspan>
+<tspan x="325" y="213">#</tspan>
+</text>
+<text>
+<tspan x="385" y="80">#</tspan>
+<tspan x="385" y="98">#</tspan>
+<tspan x="385" y="116">#</tspan>
+<tspan x="385" y="134">#</tspan>
+<tspan opacity="0" x="385" y="152">&lt;</tspan>
+<tspan opacity="0" x="385" y="170">&gt;</tspan>
+<tspan opacity="0" x="385" y="188">C</tspan>
+<tspan x="385" y="206">#</tspan>
+<tspan opacity="0" x="385" y="224">7</tspan>
+<tspan x="385" y="242">#</tspan>
+</text>
+<text>
+<tspan opacity="0" x="445" y="127">V</tspan>
+<tspan opacity="0" x="445" y="145">E</tspan>
+<tspan opacity="0" x="445" y="163">R</tspan>
+<tspan opacity="0" x="445" y="181">I</tspan>
+<tspan opacity="0" x="445" y="199">F</tspan>
+<tspan opacity="0" x="445" y="217">Y</tspan>
+<tspan x="445" y="235">#</tspan>
+<tspan x="445" y="253">#</tspan>
+<tspan x="445" y="271">#</tspan>
+<tspan x="445" y="289">#</tspan>
+</text>
+</g>
+</svg>

@@ -1,0 +1,17 @@
+﻿rank,database_environment,used_pct_2025,respondents,source,note
+1,PostgreSQL,55.6,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+2,MySQL,40.5,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+3,SQLite,37.5,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+4,Microsoft SQL Server,30.1,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+5,Redis,28.0,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+6,MongoDB,24.0,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+7,MariaDB,22.5,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+8,Elasticsearch,16.7,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+9,Oracle Database,10.6,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+10,Amazon DynamoDB,9.8,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+11,Google BigQuery,6.5,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+12,Supabase,6.0,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+13,Cloud Firestore,5.7,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+14,H2,5.0,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+15,Firebase Realtime Database,5.0,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.
+16,Microsoft Access,4.8,26083,https://survey.stackoverflow.co/2025/technology/,All respondents; multi-select; extensive development work in prior year.

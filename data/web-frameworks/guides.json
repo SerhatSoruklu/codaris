@@ -1,0 +1,110 @@
+[
+  {
+    "name": "React",
+    "type": "UI library / browser",
+    "role": "Frontend developers use React to compose interactive interfaces from reusable components.",
+    "technical": "Components express output from props and state. Events update state; the UI is rendered again. Routing and application-level data access require additional choices.",
+    "tradeoffs": "Keep state ownership explicit, use stable list keys and test keyboard behavior. Rendering a login screen does not implement server authorization.",
+    "exercise": "Build a searchable list with loading, empty and error states.",
+    "source": "https://react.dev/learn"
+  },
+  {
+    "name": "Angular",
+    "type": "Application framework / client",
+    "role": "Application teams use Angular for structured browser applications with integrated platform features.",
+    "technical": "Components, templates, dependency injection and routing organize application behavior. TypeScript supports typed interfaces; reactive state helps update views.",
+    "tradeoffs": "Keep service boundaries clear and avoid turning every component into a global-state consumer. Budget browser bundles and test form accessibility.",
+    "exercise": "Build a routed settings page with validation and an unsaved-changes state.",
+    "source": "https://angular.dev/overview"
+  },
+  {
+    "name": "Vue.js",
+    "type": "UI framework / client",
+    "role": "Frontend developers use Vue for incremental enhancement or complete component-based applications.",
+    "technical": "Declarative templates and reactive state connect data to rendered UI. Single-file components can colocate template, behavior and styling.",
+    "tradeoffs": "Distinguish derived state from side effects. Choose routing, server rendering and data-fetching approaches to match the application.",
+    "exercise": "Create a filterable catalogue with reusable item components.",
+    "source": "https://vuejs.org/guide/introduction.html"
+  },
+  {
+    "name": "Next.js",
+    "type": "React application framework / full-stack",
+    "role": "Web application teams use Next.js to combine React interfaces with routing and server-side application features.",
+    "technical": "Server and client components divide work between environments. Rendering, data fetching and caching choices affect what ships to the browser.",
+    "tradeoffs": "Understand cache invalidation and the server/client boundary. Authenticate and authorize server operations; do not expose secrets through client bundles.",
+    "exercise": "Build a read-only documentation route and compare static and request-time rendering.",
+    "source": "https://nextjs.org/docs"
+  },
+  {
+    "name": "Node.js",
+    "type": "JavaScript runtime / server",
+    "role": "Backend and tooling developers use Node.js to run JavaScript outside a browser. It is a runtime, not a UI or application framework.",
+    "technical": "The runtime supplies server APIs and asynchronous I/O. An event loop coordinates callbacks and tasks; CPU-heavy work can delay other requests.",
+    "tradeoffs": "Bound request sizes, use timeouts and move expensive work off the event loop where appropriate. A framework adds routing conventions above the runtime.",
+    "exercise": "Create a small HTTP endpoint with explicit error responses.",
+    "source": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs"
+  },
+  {
+    "name": "Express",
+    "type": "HTTP framework / server",
+    "role": "Node.js backend developers use Express for HTTP routing and middleware pipelines.",
+    "technical": "Requests pass through configured middleware and route handlers. The framework provides HTTP conveniences without prescribing an entire data architecture.",
+    "tradeoffs": "Middleware order matters. Validate input, centralize error responses and configure proxy trust deliberately for the actual deployment.",
+    "exercise": "Build an API with validation, a not-found response and an error handler.",
+    "source": "https://expressjs.com/"
+  },
+  {
+    "name": "Django",
+    "type": "Python application framework / server",
+    "role": "Backend developers use Django for data-driven sites with models, routing, templates and administration.",
+    "technical": "An object-relational mapper maps models to database operations. URL routing selects views; templates render output and migrations evolve schema.",
+    "tradeoffs": "Enforce authorization at the view and object level. Review query counts, migration behavior and deployment settings; an admin interface is not a public API.",
+    "exercise": "Build a reading list with ownership checks and database constraints.",
+    "source": "https://docs.djangoproject.com/en/stable/intro/overview/"
+  },
+  {
+    "name": "FastAPI",
+    "type": "Python API framework / server",
+    "role": "API developers use FastAPI for typed request contracts and generated API documentation.",
+    "technical": "Python annotations describe inputs and outputs. Validation and OpenAPI generation support explicit contracts; async endpoints can cooperate during I/O waits.",
+    "tradeoffs": "A validated shape is not permission to act. Separate validation, authentication and authorization; avoid blocking calls inside async request paths.",
+    "exercise": "Build a paginated API that validates limits and tests error payloads.",
+    "source": "https://fastapi.tiangolo.com/"
+  },
+  {
+    "name": "Laravel",
+    "type": "PHP application framework / server",
+    "role": "PHP application teams use Laravel for web products with common routing, database and application-service needs.",
+    "technical": "Routing, dependency injection, Eloquent models, migrations and queues provide conventions around application work.",
+    "tradeoffs": "Use policies for authorization and validate input. Make background jobs idempotent and consider transactions before sending follow-up work.",
+    "exercise": "Build a request workflow with a policy check and queued notification.",
+    "source": "https://laravel.com/docs"
+  },
+  {
+    "name": "Ruby on Rails",
+    "type": "Ruby application framework / server",
+    "role": "Product developers use Rails to build database-backed web applications around shared conventions.",
+    "technical": "MVC separates models, views and controllers. Active Record and migrations organize relational persistence; routing connects requests to actions.",
+    "tradeoffs": "Keep authorization explicit and watch query volume. Use transactions and constraints for durable invariants rather than relying only on form validation.",
+    "exercise": "Build a small issue tracker with per-user access and model tests.",
+    "source": "https://guides.rubyonrails.org/getting_started.html"
+  },
+  {
+    "name": "Astro",
+    "type": "Content framework / build-time and server",
+    "role": "Documentation and content-site developers use Astro to deliver pages with selective interactivity.",
+    "technical": "Islands architecture isolates interactive components while keeping the rest of the page focused on HTML. Rendering and deployment choices depend on the project.",
+    "tradeoffs": "Only hydrate components that need client behavior. Check content provenance, accessible navigation and the cost of third-party scripts.",
+    "exercise": "Build a documentation site with one interactive search component.",
+    "source": "https://docs.astro.build/en/concepts/why-astro/"
+  },
+  {
+    "name": "WordPress",
+    "type": "Content management system / server",
+    "role": "Publishers, site administrators and developers use WordPress to manage content and extend sites through themes and plugins.",
+    "technical": "The CMS supplies content workflows and extension points. Themes present content; plugins add functionality and may expand the application\u2019s trust boundary.",
+    "tradeoffs": "Review plugin maintenance, user capabilities, updates and backups. Editorial access and administrative access should be distinct.",
+    "exercise": "Model an editorial workflow with separate author and administrator capabilities.",
+    "source": "https://developer.wordpress.org/advanced-administration/"
+  }
+]

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+MODE="${1:-${CODARIS_ENV:-development}}"
+if [[ -z "${1:-}" && -z "${CODARIS_ENV:-}" && "${CODARIS_PRODUCTION:-0}" == 1 ]]; then MODE=production; fi
+if [[ "${CODARIS_ENV_READY:-}" != frontend ]]; then
+    exec python3 "$ROOT/scripts/project.py" "$MODE" build-client
+fi
 mkdir -p "$ROOT/build/client"
 if ! command -v emcc >/dev/null && [[ -f "${EMSDK:-$HOME/emsdk}/emsdk_env.sh" ]]; then
     source "${EMSDK:-$HOME/emsdk}/emsdk_env.sh"

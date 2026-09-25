@@ -5,10 +5,15 @@ import json
 import os
 import shutil
 import re
+import runpy
 from pathlib import Path
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+runpy.run_path(str(ROOT / 'scripts/build-language-docs.py'))
+runpy.run_path(str(ROOT / 'scripts/build-framework-docs.py'))
+runpy.run_path(str(ROOT / 'scripts/build-database-docs.py'))
+runpy.run_path(str(ROOT / 'scripts/build-topic-library.py'))
 WEB = ROOT / 'web'
 OUT = ROOT / 'build/client'
 site = json.loads((WEB / 'site.json').read_text(encoding='utf-8'))
@@ -20,7 +25,9 @@ if origin:
         raise SystemExit('CODARIS_SITE_URL must be an HTTPS origin, e.g. https://your-domain.example')
 # Raster assets are copied here so Bash and PowerShell share the same policy.
 (OUT / 'assets').mkdir(parents=True, exist_ok=True)
-for asset in (WEB / 'assets').glob('*.png'):
+for asset in (WEB / 'assets').iterdir():
+    if asset.suffix not in {'.png', '.webp'}:
+        continue
     shutil.copy2(asset, OUT / 'assets' / asset.name)
 
 pages = json.loads((WEB / 'pages.json').read_text(encoding='utf-8'))
@@ -61,12 +68,18 @@ for page in pages:
             seo += '\n<script type="application/ld+json">' + json.dumps(data).replace('<', '\\u003c') + '</script>'
     runtime = ''
     if page.get('interactive'):
-        runtime = '''<p id="runtime-status" role="status">Loading interactive preview…</p>
-<noscript><p class="runtime-error">Interactive demos require JavaScript and WebAssembly. You can still read the pages and navigate the site.</p></noscript>
+        runtime = '''<p id="runtime-status" role="status">Loading interactive features…</p>
+<noscript><p class="runtime-error">Interactive features require JavaScript and WebAssembly. You can still read the pages and navigate the site.</p></noscript>
 <script src="/host.js" defer></script>
 <script id="codaris-runtime" src="/codaris.js" defer></script>'''
     breadcrumb = '<nav class="wrap breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">' + html.escape(page['label']) + '</span></nav>' if slug else ''
-    values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': (WEB / 'pages' / (page.get('file', slug) + '.html')).read_text(encoding='utf-8'), 'FOOTER': footer, 'RUNTIME': runtime}
+    content = (WEB / 'pages' / (page.get('file', slug) + '.html')).read_text(encoding='utf-8')
+    content = content.replace('{{LEARNING_LIBRARY}}', (WEB / 'partials/learning-library.html').read_text(encoding='utf-8'))
+    content = re.sub(r'<!-- DEVELOPMENT START -->(.*?)<!-- DEVELOPMENT END -->',
+                     lambda match: '' if production else match.group(1), content, flags=re.S)
+    if page.get('development_only'):
+        content = '<section class="wrap section resource-page"><p class="eyebrow">MEMBERSHIP / COMING SOON</p><h1 class="page-title">' + title + '</h1><p>Staff access is not available yet.</p><a class="button" href="/join/">Explore membership</a></section>'
+    values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'FOOTER': footer, 'RUNTIME': runtime}
     document = shell
     for key, value in values.items():
         document = document.replace('{{' + key + '}}', value)
@@ -93,3 +106,6 @@ values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page co
 for key, value in values.items():
     not_found = not_found.replace('{{' + key + '}}', value)
 (OUT / '404.html').write_text(not_found, encoding='utf-8')
+
+# The same builder is invoked by Bash and PowerShell.
+runpy.run_path(str(ROOT / "scripts/build-admin.py"), run_name="__main__")

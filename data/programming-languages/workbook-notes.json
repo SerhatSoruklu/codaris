@@ -1,0 +1,124 @@
+{
+  "Dashboard": [
+    [
+      "CODARIS Programming Languages Research Dataset"
+    ],
+    [
+      "Metric",
+      "Value"
+    ],
+    [
+      "Catalogue entries",
+      "COUNTA(Language_Catalog!C2:C1000)674"
+    ],
+    [
+      "GitHub global languages ranked",
+      "10"
+    ],
+    [
+      "Stack Overflow language usage rows",
+      "21"
+    ],
+    [
+      "Countries / regions in respondent table",
+      "146"
+    ],
+    [
+      "READ THIS FIRST\nThere is no honest single 'usage %' for every programming language. This workbook keeps separate metrics: GitHub public-code activity, Stack Overflow self-reported usage, and TIOBE search/popularity rating. Country data and gender data have different coverage and should not be inferred where absent."
+    ],
+    [
+      "Coverage note",
+      "Meaning"
+    ],
+    [
+      "Catalogue",
+      "Notable current/historical executable languages and DSLs, under 1,000 entries."
+    ],
+    [
+      "Country",
+      "GitHub supports language-by-economy counts; this pack includes methodology plus a verified Bangladesh example and SO respondent geography."
+    ],
+    [
+      "Gender",
+      "Per-language male/female percentages are intentionally not fabricated. JetBrains 2025 raw survey is a suitable source for future cross-tabs."
+    ]
+  ],
+  "Gender data notes": [
+    [
+      "Question",
+      "What is verified",
+      "What is NOT verified",
+      "CODARIS recommendation"
+    ],
+    [
+      "Can we publish male/female % for every language?",
+      "JetBrains 2025 includes gender and language variables and offers anonymized raw survey data.",
+      "No reliable published per-language male/female percentages were verified in this research pass.",
+      "Do not invent values. Cross-tab the raw survey, publish sample sizes, include non-binary/prefer-not-to-say categories, and label it as survey data."
+    ],
+    [
+      "Can we call survey gender shares 'all programmers'?",
+      "No. Surveys describe their respondents, subject to sampling/weighting choices.",
+      "They are not a census of the global developer population.",
+      "Use wording such as 'among respondents to the 2025 JetBrains Developer Ecosystem Survey'."
+    ],
+    [
+      "Should CODARIS force binary gender categories?",
+      "The cited JetBrains report includes Male, Female, Prefer not to say, and Non-binary/genderqueer/gender non-conforming.",
+      "A binary-only table would discard reported categories.",
+      "Preserve the source categories and allow 'unknown / not reported' rather than guessing."
+    ]
+  ],
+  "Methodology": [
+    [
+      "Topic",
+      "Rule used in this pack",
+      "Why it matters"
+    ],
+    [
+      "Catalogue scope",
+      "Uses the English Wikipedia index of notable programming languages. It is not a claim to contain every language ever created.",
+      "Thousands of experimental, esoteric, dialect and internal languages exist; a bounded educational catalogue needs a declared scope."
+    ],
+    [
+      "HTML/CSS",
+      "Included in Stack Overflow usage rankings because that survey category explicitly includes programming, scripting and markup languages, but not added to the core programming-language catalogue because the catalogue source excludes markup languages.",
+      "Prevents mixing incompatible taxonomies."
+    ],
+    [
+      "GitHub metric",
+      "Unique developers in an economy making at least one git push to a repository containing a language during a quarter.",
+      "Measures public GitHub coding activity, not total programmers, jobs, lines of code, or private work."
+    ],
+    [
+      "GitHub geography",
+      "Economy based on GitHub methodology; data is quarterly and public-only; low-count economies may be withheld.",
+      "Country comparisons can be incomplete and should not be treated as census estimates."
+    ],
+    [
+      "Stack Overflow usage",
+      "Self-reported extensive development work in the past year; multiple languages can be selected.",
+      "Percentages overlap and do not add to 100."
+    ],
+    [
+      "Stack Overflow countries",
+      "Where survey respondents live.",
+      "Useful for sample composition only, not for ranking the total developer population by country."
+    ],
+    [
+      "TIOBE",
+      "Popularity index derived from search/activity signals around skilled engineers, courses, vendors and web sources.",
+      "It is not a direct measure of actual language usage."
+    ],
+    [
+      "Gender",
+      "No per-language percentages are populated unless a source directly supports them.",
+      "Avoids false precision and demographic fabrication."
+    ],
+    [
+      "Ranking",
+      "No composite 'best language' score is created.",
+      "Different sources measure different constructs; combining them without a defensible model would be misleading."
+    ]
+  ]
+}

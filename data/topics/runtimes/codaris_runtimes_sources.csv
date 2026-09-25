@@ -1,0 +1,32 @@
+﻿dataset_or_purpose,source,url,notes
+Runtime taxonomy,Wikipedia - Comparison of application virtualization software,https://en.wikipedia.org/wiki/Comparison_of_application_virtualization_software,"Broad comparison of application VMs, managed runtimes and language virtual machines. Used as an index, not as a current-adoption ranking."
+JavaScript engines,Wikipedia - List of JavaScript engines,https://en.wikipedia.org/wiki/List_of_JavaScript_engines,"Catalogue and architectural summary for V8, SpiderMonkey, JavaScriptCore, ChakraCore and other ECMAScript engines."
+JavaScript runtime usage,State of JavaScript 2025 - Other Tools,https://2025.stateofjs.com/en-US/other-tools/,"JavaScript Runtimes question: 11,141 respondents; multi-select. Edge/serverless runtimes question: 9,593 respondents; multi-select."
+Developer web-tech usage,Stack Overflow Developer Survey 2025 - Technology,https://survey.stackoverflow.co/2025/technology/,Node.js and Deno appear in the mixed web frameworks/technologies section; this is kept separate from State of JS runtime usage.
+Node.js,Node.js Introduction,https://nodejs.org/en/learn/getting-started/introduction-to-nodejs,Node.js is a cross-platform JavaScript runtime built around V8.
+Node.js release status,Node.js Releases,https://nodejs.org/en/about/previous-releases,"Snapshot on 2026-09-23: Node 26 Current, Node 24 LTS, Node 22 LTS."
+Deno,Deno Runtime Docs,https://docs.deno.com/runtime/,"Deno is an open-source JavaScript, TypeScript and WebAssembly runtime with secure defaults."
+Bun,Bun Runtime Docs,https://bun.sh/docs/runtime,Bun runtime executes JavaScript/TypeScript and uses JavaScriptCore.
+V8,V8 Documentation,https://v8.dev/docs,Google's JavaScript and WebAssembly engine; used by Chrome and Node.js among others.
+JavaScriptCore,WebKit JavaScriptCore Documentation,https://docs.webkit.org/Deep%20Dive/JSC/JavaScriptCore.html,WebKit's optimizing JavaScript VM; used by Safari/WebKit and Bun.
+JVM specification,Oracle JVM Specification Java SE 27,https://docs.oracle.com/javase/specs/jvms/se27/html/index.html,Current JVM specification snapshot for Java SE 27.
+JVM implementations,Wikipedia - List of Java virtual machines,https://en.wikipedia.org/wiki/List_of_Java_virtual_machines,"Broad index of JVM implementations, including HotSpot, OpenJ9, Graal/Substrate and historical/research VMs."
+Eclipse OpenJ9,Eclipse OpenJ9 Documentation,https://eclipse.dev/openj9/docs/,Independent JVM implementation; September 2026 release line includes OpenJDK 27 support.
+GraalVM,GraalVM Reference Manuals,https://www.graalvm.org/dev/reference-manual/,"Documents GraalVM JVM, Graal compiler and language runtimes including GraalJS, GraalPy, Espresso and GraalWasm."
+.NET runtimes,Microsoft - .NET Implementations,https://learn.microsoft.com/en-us/dotnet/fundamentals/implementations,"Microsoft describes .NET (Core), .NET Framework and Mono as the three main .NET implementations."
+.NET Native AOT,Microsoft - Native AOT Deployment,https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/,Native AOT compiles IL to native code at publish time and runs without a JIT compiler.
+Python implementations,Python.org - Alternative Python Implementations,https://www.python.org/download/alternatives/,"Official Python.org index includes PyPy, IronPython, MicroPython, Stackless Python, Jython and GraalPy."
+Python catalogue,Wikipedia - List of Python software,https://en.wikipedia.org/wiki/List_of_Python_software,Secondary broad index of Python implementations and historical runtimes.
+PyPy,PyPy Documentation,https://doc.pypy.org/,PyPy is an alternative Python implementation with JIT support.
+MicroPython,MicroPython,https://www.micropython.org/,Lean Python runtime/compiler for microcontrollers and constrained systems.
+PHP engine,PHP Internals - Zend Engine,https://wiki.php.net/internals/engine,Runtime engine reference for PHP's Zend Engine.
+Erlang runtime,Erlang/OTP System Principles,https://www.erlang.org/docs/27/system/system_principles.html,"ERTS/BEAM runtime system documentation, including JIT-capable runtime startup details."
+LuaJIT,LuaJIT,https://luajit.org/luajit.html,JIT compiler/runtime for Lua with interpreter plus trace compiler.
+WebAssembly runtime catalogue,Awesome WebAssembly Runtimes,https://github.com/appcypher/awesome-wasm-runtimes,"Curated list of Wasm runtimes including Wasmtime, Wasmer, WasmEdge, WAMR, wasm3, wasmi, wazero and others."
+Wasmtime,Wasmtime Documentation,https://docs.wasmtime.dev/,"Standalone runtime for WebAssembly, WASI and the Component Model."
+WASI,WASI.dev,https://wasi.dev/,Standards-track system interfaces for software compiled to WebAssembly.
+Android Runtime,Android Platform Architecture,https://developer.android.com/guide/platform,"ART executes DEX, uses AOT and JIT compilation, and runs each app in its own process/runtime instance."
+CUDA Runtime,NVIDIA CUDA Runtime API,https://docs.nvidia.com/cuda/cuda-runtime-api/index.html,Current NVIDIA CUDA Runtime API documentation.
+Go runtime,Go package runtime,https://pkg.go.dev/runtime,"Go runtime services including goroutine scheduling, garbage collection and low-level runtime behavior."
+GHC runtime,GHC Runtime System options,https://ghc.gitlab.haskell.org/ghc/doc/users_guide/runtime_control.html,"GHC links programs with a runtime system for storage management, scheduling, profiling and related services."
+Lisp runtimes,Wikipedia - List of Lisp software and tools,https://en.wikipedia.org/wiki/List_of_Lisp_software_and_tools,Broad index of Lisp and Scheme compilers/runtimes.

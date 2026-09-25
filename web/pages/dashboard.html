@@ -1,0 +1,35 @@
+<section class="wrap section account-page" aria-labelledby="dashboard-title">
+<div class="account-heading"><div><p class="eyebrow">CODARIS / MEMBER WORKSPACE</p><h1 class="page-title" id="dashboard-title">Keep building.</h1></div><button class="text-link" data-account-action="logout" data-account-button disabled>Log out</button></div>
+<p id="account-feedback" class="account-notice" role="status" aria-atomic="true"></p><p id="logout-feedback" class="account-notice" role="status" aria-atomic="true"></p>
+<div id="account-content" hidden>
+<div class="account-tabs" role="tablist" aria-label="Dashboard sections">
+<button id="tab-overview" role="tab" data-account-button disabled aria-controls="panel-overview" aria-selected="true" data-member-tab="0">Overview</button>
+<button id="tab-profile" role="tab" data-account-button disabled aria-controls="panel-profile" aria-selected="false" tabindex="-1" data-member-tab="1">Profile</button>
+<button id="tab-security" role="tab" data-account-button disabled aria-controls="panel-security" aria-selected="false" tabindex="-1" data-member-tab="2">Security</button>
+<button id="tab-learn" role="tab" data-account-button disabled aria-controls="panel-learn" aria-selected="false" tabindex="-1" data-member-tab="3">Explore topics</button>
+<button id="tab-chat" role="tab" data-account-button disabled aria-controls="panel-chat" aria-selected="false" tabindex="-1" data-member-tab="4">Community</button>
+</div>
+<section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
+<div class="account-grid"><article class="membership-card"><img data-avatar-fallback src="/assets/avatar-default.svg" width="100" height="100" alt="CODARIS profile picture"><canvas id="member-card-avatar" width="100" height="100" role="img" aria-label="Profile picture" hidden></canvas><h2 id="member-display-name"></h2><p>MEMBERSHIP ID</p><code id="membership-id"></code><p id="email-verification" class="account-notice" role="status" aria-atomic="true"></p><button id="resend-verification" class="button" data-account-action="resend" data-account-button disabled>Resend verification email</button><p id="resend-feedback" class="account-notice" role="status" aria-atomic="true"></p></article>
+<article class="account-card"><h2>Your membership</h2><p>Keep your profile up to date in Profile, manage your email and password in Security, and continue learning in Explore topics.</p></article></div></section>
+<section id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" tabindex="0" hidden>
+<article class="account-card"><h2>Your profile</h2><form data-account-form="profile"><fieldset data-account-fields disabled><div class="avatar-picker"><img class="avatar-default" data-avatar-fallback src="/assets/avatar-default.svg" width="100" height="100" alt="CODARIS profile picture"><canvas id="avatar-preview" width="100" height="100" role="img" aria-label="Profile picture" hidden></canvas><label for="avatar-file">Profile picture (optional)</label><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="avatar-status"><p>JPEG, PNG or WebP · up to 5 MiB. Saved as a small profile image.</p><button type="button" id="avatar-remove" class="text-link">Remove picture</button><p id="avatar-status" class="account-notice" role="status" aria-atomic="true"></p></div><div class="form-grid">
+<div><label for="profile-name">Name</label><input id="profile-name" name="name" minlength="2" maxlength="120" autocomplete="name" required></div>
+<div><label for="profile-country">Country</label><input id="profile-country" name="country" minlength="2" maxlength="120" autocomplete="country-name" required></div>
+<div><label for="profile-role">Role</label><select id="profile-role" name="role" required><option>Developer / Engineer</option><option>Researcher</option><option>Community organiser</option><option>Student</option><option>Other</option></select></div>
+<div><label for="profile-linkedin">LinkedIn (optional)</label><input id="profile-linkedin" name="linkedin" type="url" maxlength="2048" pattern="https://.+" placeholder="https://linkedin.com/in/…"></div>
+<div><label for="profile-github">GitHub (optional)</label><input id="profile-github" name="github" type="url" maxlength="2048" pattern="https://.+" placeholder="https://github.com/…"></div>
+<div><label for="profile-website">Website (optional)</label><input id="profile-website" name="website" type="url" maxlength="2048" pattern="https://.+" placeholder="https://…"></div>
+</div><p>Profile links are supplied by you; ownership is not verified.</p><button class="button" type="submit">Save profile</button></fieldset></form><p id="profile-feedback" class="account-notice" role="status" aria-atomic="true"></p><h3>Why you joined CODARIS</h3><p id="application-reason"></p><small>Your original application response is retained and cannot be edited.</small></article></section>
+<section id="panel-security" role="tabpanel" aria-labelledby="tab-security" tabindex="0" hidden><div class="account-grid">
+<article class="account-card"><h2>Change password</h2><form data-account-form="password"><fieldset data-account-fields disabled>
+<label for="password-current">Current password</label><input id="password-current" name="current_password" type="password" autocomplete="current-password" maxlength="512" required>
+<label for="password-new">New password</label><input id="password-new" name="password" type="password" autocomplete="new-password" maxlength="512" required>
+<label for="password-confirm">Confirm new password</label><input id="password-confirm" name="confirmation" type="password" autocomplete="new-password" maxlength="512" required>
+<p>15–128 characters. Changing your password signs out all sessions.</p><button class="button" type="submit">Change password</button></fieldset></form><p id="password-feedback" class="account-notice" role="status" aria-atomic="true"></p></article>
+<article class="account-card"><h2>Change email</h2><p>Current email: <span id="account-email"></span></p><p>Changing your email immediately clears verification. Verify the new address using the link we send to restore member access.</p>
+<form data-account-form="email"><fieldset data-account-fields disabled><label for="email-new">New email</label><input id="email-new" name="email" type="email" autocomplete="email" maxlength="254" required><label for="email-current-password">Current password</label><input id="email-current-password" name="current_password" type="password" autocomplete="current-password" maxlength="512" required><button class="button" type="submit">Change email and send link</button></fieldset></form><p id="email-feedback" class="account-notice" role="status" aria-atomic="true"></p></article>
+</div></section>
+{{LEARNING_LIBRARY}}
+<section id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" tabindex="0" hidden><article class="account-card"><h2>Community conversations</h2><p>Community chat is not available yet.</p></article></section>
+</div></section>

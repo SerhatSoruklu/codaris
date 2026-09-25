@@ -1,0 +1,12 @@
+﻿rank,edge_or_serverless_runtime,respondent_selections,use_pct,question_respondents,source,note
+1,AWS Lambda Node.js Runtime,2532,26.4,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+2,Cloudflare Workers Runtime,1702,17.7,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+3,Vercel Functions Runtime,1608,16.8,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+4,Google Cloud Functions Runtime,995,10.4,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+5,Azure Functions Runtime,632,6.6,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+6,Netlify Edge Functions Runtime,609,6.3,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+7,Deno,379,4.0,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+8,Fly.io Machines Runtime,249,2.6,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+9,DigitalOcean Functions Runtime,155,1.6,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+10,Supabase Edge Runtime,37,0.4,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.
+11,Google Cloud Run Runtime,10,0.1,9593,https://2025.stateofjs.com/en-US/other-tools/,Multi-select edge/serverless runtime question.

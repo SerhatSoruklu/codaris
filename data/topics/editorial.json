@@ -1,0 +1,639 @@
+{
+  "runtimes": {
+    "intro": "A runtime turns executable code into work inside a host environment. Distinguish language implementation, virtual machine, engine, host APIs and managed service before comparing products. The pack spans all of these layers, including historical implementations.",
+    "audience": "Application developers choose APIs and deployment targets; platform engineers manage execution limits; performance engineers inspect startup, scheduling, memory and foreign interfaces.",
+    "flow": "Source → compiler / interpreter → executable representation\n       → runtime + host APIs → operating system / hardware",
+    "guides": [
+      {
+        "title": "Application runtime versus engine",
+        "model": "Node.js combines a JavaScript engine with host APIs, module loading and asynchronous I/O. V8 is an engine, not the complete Node application environment. Browser code and server code can share syntax while having different capabilities and globals.",
+        "pitfalls": "Do not infer API compatibility from a shared engine. Test filesystem, networking, module resolution and native dependencies on the actual target. An engine benchmark does not include the cost of the whole service.",
+        "exercise": "Draw the host boundary for a script that reads a file and serves its contents. List which capabilities a browser would not expose directly.",
+        "source": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs"
+      },
+      {
+        "title": "Bytecode, JIT and ahead-of-time compilation",
+        "model": "Managed execution may compile source into an intermediate representation, interpret it or compile hot paths during execution. Ahead-of-time compilation moves work before deployment. The JVM specification and a particular JVM implementation are different things.",
+        "pitfalls": "Startup, warmup, code size and steady-state throughput are separate measurements. Native output can still depend on runtime libraries; ahead-of-time compilation is not a promise of zero runtime support.",
+        "exercise": "Design a benchmark with separate cold-start and warmed-up phases. Record runtime configuration and explain why the results may differ.",
+        "source": "https://docs.oracle.com/javase/specs/"
+      },
+      {
+        "title": "Memory management and resource ownership",
+        "model": "Garbage collection finds memory that is no longer reachable. Ownership and reference-counting models make different lifetime tradeoffs. File descriptors, database handles and native allocations may require explicit cleanup regardless of the language memory model.",
+        "pitfalls": "A reachable object graph can grow forever without violating memory safety. Measure retained memory and allocation rate separately. Ensure cancellation also releases non-memory resources.",
+        "exercise": "Trace the lifetime of a request buffer and a socket through success, timeout and cancellation paths.",
+        "source": "https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/"
+      },
+      {
+        "title": "WebAssembly and host capabilities",
+        "model": "WebAssembly defines an executable instruction format. A concrete runtime validates and runs modules; imported functions provide access to the host. WASI supplies families of system interfaces rather than naming one execution engine.",
+        "pitfalls": "A sandbox is only as restricted as its exposed capabilities and resource budgets. Validate imports, bound memory and execution, and review any host function that can access files or networks.",
+        "exercise": "Compile a pure function to Wasm, list its imports, and explain which extra host function would change its trust boundary.",
+        "source": "https://webassembly.org/docs/high-level-goals/"
+      },
+      {
+        "title": "Scheduling, blocking and backpressure",
+        "model": "Event loops, threads, workers and asynchronous tasks organize concurrent work differently. Waiting asynchronously can free an execution thread, while CPU-heavy synchronous work can delay unrelated requests. Queues connect producers and consumers.",
+        "pitfalls": "Concurrency does not imply unlimited capacity. Bound queues, propagate cancellation and decide how overload is signalled. Moving work to a worker pool still needs queue limits and shutdown handling.",
+        "exercise": "Sketch a producer that receives 200 jobs per second and a consumer that completes 100. Define what happens after its queue fills.",
+        "source": "https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop"
+      },
+      {
+        "title": "Runtime selection and operational compatibility",
+        "model": "Choose using required libraries, deployment architecture, observability, support policy and workload behavior. Embedded, browser, accelerator and serverless contexts impose different limits. Imported version/status facts are dated snapshots, not installation recommendations.",
+        "pitfalls": "Check native ABI dependencies, architecture support and upgrade rollback. Managed services can restrict execution duration, memory or filesystem persistence even when they run a familiar language.",
+        "exercise": "Write a compatibility matrix for one application on a local process, container and managed function. Include startup, state, networking and debugging.",
+        "source": "https://docs.wasmtime.dev/"
+      }
+    ]
+  },
+  "package-build-tools": {
+    "intro": "Dependency resolution, package distribution, compilation and bundling are different stages of producing software. A reproducible release requires the inputs and transformations to be understood, not merely a build command that succeeds once.",
+    "audience": "Application developers maintain dependencies; release engineers produce repeatable artifacts; maintainers define build interfaces and supported platforms.",
+    "flow": "Manifest + lockfile + toolchain → dependency graph\nSources + configuration → build graph → tested artifact",
+    "guides": [
+      {
+        "title": "Manifests, lockfiles and resolution",
+        "model": "A manifest describes dependency requirements; a lockfile records a concrete resolution for a tool and ecosystem. Transitive dependencies can change the resolved graph even when an application has only a few direct requirements.",
+        "pitfalls": "A lockfile does not pin the operating system, compiler or every external download. Respect the package manager’s frozen-install mode in CI and review dependency changes as code changes.",
+        "exercise": "Compare two dependency graphs and identify which direct requirement introduced a new transitive package.",
+        "source": "https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json"
+      },
+      {
+        "title": "Build graphs and incremental work",
+        "model": "A build graph expresses targets and their inputs. An incremental build can reuse an output only if its relevant inputs are unchanged. Generated headers, environment variables and compiler flags can be hidden dependencies.",
+        "pitfalls": "An incorrectly reused artifact may appear faster while being wrong. Test a clean build and deliberately change generated input or flags to check invalidation behavior.",
+        "exercise": "Draw a C build graph with two source files and a generated header. Mark which targets must rebuild when the header changes.",
+        "source": "https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html"
+      },
+      {
+        "title": "Bundling, transforms and source maps",
+        "model": "Web tooling may resolve modules, transform syntax, split chunks and compress output. These operations affect transfer size, startup work and debugging. Development-server behavior and release-bundle behavior are not identical.",
+        "pitfalls": "Do not assume smaller bytes always mean faster interaction. Inspect duplicate dependencies, unnecessary client code and whether source maps disclose material that should remain private.",
+        "exercise": "Compare a development entry point with its production chunks. Explain one split point and test its loading failure state.",
+        "source": "https://vite.dev/guide/build"
+      },
+      {
+        "title": "Registries, provenance and install scripts",
+        "model": "A registry distributes artifacts; a package manager resolves and retrieves them. Some package installation steps execute scripts, and native modules may compile during installation. The build environment is therefore an execution boundary.",
+        "pitfalls": "Treat untrusted dependencies as code, minimize build credentials and review provenance. A familiar package name or high download count does not establish ownership or safety.",
+        "exercise": "Document every network endpoint and executable step required for a clean dependency install. Identify which steps need secrets.",
+        "source": "https://docs.npmjs.com/cli/v11/using-npm/scripts"
+      },
+      {
+        "title": "Monorepos and shared task orchestration",
+        "model": "Multiple packages can share a repository while retaining distinct build and release graphs. Task runners coordinate ordering and caches; workspaces coordinate local package relationships. These solve related but separate concerns.",
+        "pitfalls": "A cache key must include relevant inputs. Shared configuration can create broad invalidation, while hidden cross-package dependencies can cause incomplete builds.",
+        "exercise": "Given a library change, identify which applications must rebuild and which test suites must rerun. Explain your dependency assumptions.",
+        "source": "https://nx.dev/docs/concepts/how-caching-works"
+      },
+      {
+        "title": "Release reproducibility",
+        "model": "A release recipe should identify source revision, dependency resolution, toolchain, build settings and artifact checksums. Repeating the process in a clean environment exposes assumptions hidden in a developer machine.",
+        "pitfalls": "Do not rebuild a supposedly identical release differently in each environment. Promote a tested artifact where practical and keep a rollback path that includes compatible configuration.",
+        "exercise": "Write a release manifest with revision, compiler, lockfile hash, platform and output checksum; reproduce it from a clean checkout.",
+        "source": "https://reproducible-builds.org/docs/definition/"
+      }
+    ]
+  },
+  "developer-environments": {
+    "intro": "An editor is one part of the development environment. Language servers, debuggers, toolchains, extensions, terminals and remote workspaces determine how code is understood and executed. Choose configurations that remain understandable to the whole team.",
+    "audience": "Developers navigate and debug code; platform teams maintain reproducible environments; educators choose tools that make program behavior visible.",
+    "flow": "Source editor ↔ language service\n          ↔ debugger ↔ running program\n          ↔ tasks / terminal ↔ toolchain",
+    "guides": [
+      {
+        "title": "Editor versus integrated environment",
+        "model": "A source editor handles text and navigation; an IDE integrates more project, language, build and debugging features. Extension-based editors can also become rich environments. Capability depends on installed services and project configuration.",
+        "pitfalls": "Do not confuse syntax coloring with semantic analysis. Verify that navigation and diagnostics use the same language version, include paths and dependencies as the real build.",
+        "exercise": "Open a project with an intentionally wrong include path and compare editor diagnostics with compiler diagnostics.",
+        "source": "https://code.visualstudio.com/docs/languages/overview"
+      },
+      {
+        "title": "Language servers and indexing",
+        "model": "A language service builds a model of symbols and relationships to support completion, navigation and diagnostics. It may consume compile commands or project metadata rather than infer every setting from individual files.",
+        "pitfalls": "Stale indexes or incorrect build metadata can mislead refactoring. Large workspaces also need appropriate exclusions so generated files do not dominate indexing.",
+        "exercise": "Trace a symbol from declaration to references, then confirm the refactor with a real build and tests.",
+        "source": "https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/"
+      },
+      {
+        "title": "Debugging as hypothesis testing",
+        "model": "Breakpoints, stack inspection and variable watches reveal execution state. A debugger is most useful when investigating a specific hypothesis about control flow or data, rather than stepping through every line without a question.",
+        "pitfalls": "Optimization can change the relationship between source and machine state. Record the exact binary, symbols and input that reproduce the failure. Avoid exposing production credentials in debugger captures.",
+        "exercise": "Reproduce a failing input, stop before the wrong state appears and identify the first violated invariant.",
+        "source": "https://code.visualstudio.com/docs/debugtest/debugging"
+      },
+      {
+        "title": "Workspace trust and extensions",
+        "model": "Project files and editor extensions can start tasks, load executable configuration or interact with the terminal. Opening an unknown repository is different from reading inert text when automatic features are enabled.",
+        "pitfalls": "Review trust prompts and extension permissions. Separate experimental workspaces from environments containing deployment credentials; disable unnecessary automatic execution.",
+        "exercise": "List the actions your editor performs when opening a new project and identify which are executable.",
+        "source": "https://code.visualstudio.com/docs/editor/workspace-trust"
+      },
+      {
+        "title": "Remote environments and containers",
+        "model": "Remote development moves parts of the toolchain or language service to another machine or container while keeping the interface local. This can standardize dependencies and improve access to a target environment.",
+        "pitfalls": "Network failure, forwarded ports and filesystem ownership become part of the workflow. A reproducible container image still needs explicit handling for secrets and persisted work.",
+        "exercise": "Document how a remote workspace starts, where source changes persist, and what happens when the connection drops.",
+        "source": "https://code.visualstudio.com/docs/remote/remote-overview"
+      },
+      {
+        "title": "Notebooks and reproducible execution",
+        "model": "Notebook cells combine computation, output and explanation. Interactive execution can diverge from the visible top-to-bottom order when cells are rerun selectively. A useful result must be reproducible from a fresh kernel.",
+        "pitfalls": "Hidden state and environment drift can produce misleading output. Record data versions and dependencies, and separate exploratory work from repeatable processing steps.",
+        "exercise": "Restart a notebook and execute every cell in order. Fix dependencies on variables created only during earlier exploration.",
+        "source": "https://docs.jupyter.org/en/latest/"
+      }
+    ]
+  },
+  "version-control": {
+    "intro": "Version control records changes and relationships between revisions. Hosting services add collaboration, review and automation around that history. A sound workflow makes it possible to explain, review and recover a change.",
+    "audience": "Developers prepare focused commits; reviewers evaluate intent and evidence; maintainers protect release history and repository permissions.",
+    "flow": "Working tree → staging area → local commit graph\n                              ↔ remote repository → review → integration",
+    "guides": [
+      {
+        "title": "Working tree, index and commit",
+        "model": "In Git, edited files, staged content and committed snapshots are separate states. A commit records staged content, not every working-tree edit. Understanding those states prevents accidental omissions and unrelated changes in a review.",
+        "pitfalls": "Inspect both staged and unstaged diffs before committing. Untracked files and generated artifacts need deliberate inclusion or exclusion. A clean working tree says nothing about whether the code is correct.",
+        "exercise": "Stage only one logical change, inspect the staged diff and explain what remains uncommitted.",
+        "source": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository"
+      },
+      {
+        "title": "Branches, merges and conflict resolution",
+        "model": "A branch names a position in a commit graph. Integration combines histories or replays changes; conflicts identify places where automatic combination is insufficient. Resolution needs an understanding of both intended behaviors.",
+        "pitfalls": "A conflict-free merge can still be semantically wrong. Build and test the combined behavior, especially when one change alters an interface used by another.",
+        "exercise": "Create two changes to the same function in a scratch repository, resolve the conflict and test both requirements.",
+        "source": "https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging"
+      },
+      {
+        "title": "Code hosting and review policy",
+        "model": "A forge provides pull requests, issues, permission models and integration controls. Those policies belong to the hosting service; local Git alone does not enforce reviewer approval or required checks.",
+        "pitfalls": "Review the final diff and required checks against the branch being merged. Protect privileged automation from untrusted contributions and avoid assuming all repository collaborators need administration rights.",
+        "exercise": "Design a small-team review policy with required checks, reviewer ownership and an emergency-change process.",
+        "source": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests"
+      },
+      {
+        "title": "Reverting and recovering",
+        "model": "Reverting adds a change that undoes earlier behavior without deleting history. Rewriting history changes commit identity and affects collaborators. Recovery should start by identifying the desired resulting tree and the scope of published work.",
+        "pitfalls": "Avoid rewriting shared history casually. Preserve a recoverable reference before complex operations and distinguish source rollback from database or deployment rollback.",
+        "exercise": "In a scratch repository, revert a faulty commit and verify that an unrelated later fix is retained.",
+        "source": "https://git-scm.com/docs/git-revert"
+      },
+      {
+        "title": "Large files and non-source artifacts",
+        "model": "Binary assets, generated outputs and datasets have different review and storage characteristics from source text. Specialized large-file or data-versioning tools can keep references to content outside the main repository history.",
+        "pitfalls": "External object storage must be backed up and accessible to reproducible builds. A pointer in Git is not the data itself; avoid committing credentials or private datasets as ordinary artifacts.",
+        "exercise": "Document which artifacts belong in source control and how a clean checkout obtains every required external object.",
+        "source": "https://git-lfs.com/"
+      },
+      {
+        "title": "Useful commits and provenance",
+        "model": "A focused commit explains one change with enough context to understand why it exists. Tags and release records connect source revisions to shipped artifacts. Provenance improves traceability but does not replace correctness review.",
+        "pitfalls": "Huge unrelated changes are hard to review and hard to revert. Avoid messages that describe only editing actions instead of the resulting behavior.",
+        "exercise": "Split an imagined bug fix and formatting cleanup into separate commits; write an outcome-based description and validation note for each.",
+        "source": "https://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project"
+      }
+    ]
+  },
+  "testing-qa": {
+    "intro": "Testing collects evidence about behavior under selected conditions. Quality work combines focused tests, boundary checks, realistic integration paths and useful failure diagnosis. A tool catalogue is not a test strategy by itself.",
+    "audience": "Developers test logic and interfaces; QA engineers investigate workflows and risks; reliability teams test load, recovery and operational assumptions.",
+    "flow": "Requirement → observable behavior → test setup → assertion\n                      failure → diagnosis → regression protection",
+    "guides": [
+      {
+        "title": "Unit tests and meaningful boundaries",
+        "model": "A unit test exercises a small behavior with controlled inputs and a clear observable result. Useful boundaries include empty input, invalid input, minimum and maximum values, and combinations that challenge an invariant.",
+        "pitfalls": "Avoid asserting private implementation details unless they are part of the contract. A test that repeats the implementation can reproduce its mistake rather than detect it.",
+        "exercise": "Write tests for a parser using valid, empty, truncated and oversized inputs. State which invariant each test protects.",
+        "source": "https://docs.pytest.org/en/stable/how-to/assert.html"
+      },
+      {
+        "title": "Integration and contract tests",
+        "model": "Integration tests exercise components together, such as a service and database. Contract tests verify that producers and consumers agree on data shapes and behavior. Both should make version and environment assumptions explicit.",
+        "pitfalls": "Mocks can hide incompatible serialization, transaction behavior or permissions. Use realistic boundaries where those interactions are the risk. Ensure test data is isolated and cleanup is deterministic.",
+        "exercise": "Test a service query against a disposable database and verify both results and constraint failures.",
+        "source": "https://docs.pact.io/"
+      },
+      {
+        "title": "Browser and accessibility flows",
+        "model": "End-to-end browser checks observe user-visible behavior across navigation, input and rendering. Semantic locators encourage controls with names and roles. Include keyboard operation and empty, loading and failure states.",
+        "pitfalls": "Fixed sleeps and brittle element positions produce flaky tests. Wait for observable state, isolate test accounts and verify outcomes rather than only clicks.",
+        "exercise": "Test registration validation and keyboard focus after an error. Simulate a failed response and assert a useful message.",
+        "source": "https://playwright.dev/docs/best-practices"
+      },
+      {
+        "title": "Property-based and fuzz testing",
+        "model": "Property-based testing explores many generated inputs against invariants. Fuzzing searches input space for crashes or unwanted behavior. These methods complement concrete examples by exposing cases a human may not enumerate.",
+        "pitfalls": "A weak property can pass while the program is wrong. Bound resources, preserve failing seeds and reduce failures to minimal reproductions that can become regression tests.",
+        "exercise": "For an encoder/decoder pair, test round trips within a documented domain and keep malformed inputs as separate negative cases.",
+        "source": "https://hypothesis.readthedocs.io/en/latest/"
+      },
+      {
+        "title": "Performance and load experiments",
+        "model": "Performance tests need a representative workload, environment and measurement method. Report latency distributions, throughput, resource usage and error rate together. Warmup, contention and data size can change results substantially.",
+        "pitfalls": "Do not infer capacity from a single successful request or average latency alone. Watch queue growth and recovery after overload; a saturated system can hide failures through retries.",
+        "exercise": "Compare steady traffic with a short burst and explain the difference between median and tail latency.",
+        "source": "https://grafana.com/docs/k6/latest/testing-guides/"
+      },
+      {
+        "title": "Coverage, mutation and maintenance",
+        "model": "Coverage tells you which code was executed, not whether assertions could detect a defect. Mutation testing changes behavior to investigate test sensitivity. A maintained suite gives fast, actionable feedback for real change risks.",
+        "pitfalls": "More tests are not automatically better. Remove redundant checks, investigate flakiness and keep expensive scenarios focused on risks that cheaper tests cannot cover.",
+        "exercise": "Find a condition covered by a test, invert it temporarily in a scratch branch and confirm whether the test notices.",
+        "source": "https://pitest.org/"
+      }
+    ]
+  },
+  "cloud-hosting": {
+    "intro": "Cloud architecture distributes responsibility between your team and a provider. Virtual machines, managed platforms, functions, object storage and edge networks expose different control surfaces. Choose from explicit requirements rather than treating every service as equivalent hosting.",
+    "audience": "Application teams design deployment and data boundaries; platform engineers manage identity and networks; operators own cost, recovery and incident handling.",
+    "flow": "User → DNS / edge → application compute → data services\n                 identity + network policy + telemetry",
+    "guides": [
+      {
+        "title": "Compute and the responsibility boundary",
+        "model": "A virtual machine exposes an operating-system boundary you normally manage. A platform service manages more runtime lifecycle on your behalf. Functions organize work around invocations and provider-defined execution environments.",
+        "pitfalls": "Managed does not mean responsibility-free. You still own application permissions, data handling and failure behavior. Document patching, backups and upgrade ownership for each component.",
+        "exercise": "Compare one application on a VM, a managed web platform and a function. Assign each operational responsibility to a named owner.",
+        "source": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html"
+      },
+      {
+        "title": "Regions, zones and data placement",
+        "model": "Regions and availability zones describe failure and placement domains, but their guarantees vary by service. Placing instances in separate zones can reduce one failure risk while leaving shared dependencies elsewhere.",
+        "pitfalls": "Multiple instances are not resilience if they all depend on one unhealthy database or identity service. Cross-region designs also introduce latency, replication and recovery tradeoffs.",
+        "exercise": "Draw a dependency map and identify failures that survive losing one compute instance versus an entire zone.",
+        "source": "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/global-infrastructure.html"
+      },
+      {
+        "title": "Identity, permissions and secret delivery",
+        "model": "Cloud identity determines which people and workloads can act on resources. Prefer narrowly scoped workload identities where available and separate development, deployment and runtime permissions. Secrets need a lifecycle, not only a storage location.",
+        "pitfalls": "A compromised build runner should not automatically control production data. Rotate credentials, avoid embedding them into images or logs, and review permission changes like application changes.",
+        "exercise": "Write a permission matrix for a web service, migration job and backup job. Identify which privileges each should never have.",
+        "source": "https://cloud.google.com/iam/docs/overview"
+      },
+      {
+        "title": "Serverless execution and state",
+        "model": "A function execution environment may be reused but should not be treated as durable storage. External state, retries, concurrent invocations and provider time limits influence application design.",
+        "pitfalls": "Repeated delivery can execute a handler more than once. Use idempotency for external effects, cap concurrency to protect dependencies and distinguish timeout from confirmed failure.",
+        "exercise": "Design an image-processing function with a stable job key. Explain how retries avoid duplicate billing or notifications.",
+        "source": "https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html"
+      },
+      {
+        "title": "Edge networks, caching and origins",
+        "model": "An edge network can serve cached content or execute work close to users. Cache keys, freshness and invalidation determine which response is reused. The origin remains responsible for content and many authorization decisions.",
+        "pitfalls": "Never let a cache mix private responses across users. Review cookies, authorization headers and variation rules before caching dynamic content. Validate behavior during origin failure.",
+        "exercise": "Create a caching policy for public documentation and authenticated settings. Explain why their cache keys and retention differ.",
+        "source": "https://developers.cloudflare.com/cache/concepts/"
+      },
+      {
+        "title": "Cost models and recovery drills",
+        "model": "Compute time, requests, storage, data transfer and managed features can all contribute to cost. Design with representative usage rather than free-tier assumptions, and establish recovery objectives before a failure.",
+        "pitfalls": "Autoscaling may amplify an expensive dependency problem. Set budgets and limits, measure unit cost, and rehearse restoring the application with its data and configuration.",
+        "exercise": "Estimate cost drivers for a tenfold traffic burst and run a written restoration exercise with an explicit recovery-time target.",
+        "source": "https://learn.microsoft.com/en-us/azure/well-architected/"
+      }
+    ]
+  },
+  "containers-infrastructure": {
+    "intro": "Containers package processes and dependencies; orchestrators schedule and reconcile workloads; infrastructure tools manage external resources. These layers interact but have different state and failure models. Keep application health separate from the fact that a container is running.",
+    "audience": "Developers build artifacts; platform engineers configure scheduling and networking; operators manage capacity, upgrades and persistent state.",
+    "flow": "Source → image → registry → scheduler → running workload\n                 desired state ↔ reconciliation ↔ observed state",
+    "guides": [
+      {
+        "title": "Images, layers and process isolation",
+        "model": "An image is a packaged filesystem and execution configuration. A container runs a process using isolation mechanisms supplied by the host. Image layers aid distribution and reuse; they do not by themselves establish a trusted execution boundary.",
+        "pitfalls": "Avoid embedding secrets in any layer, even if a later layer deletes them. Pin important image inputs and run with only required privileges and mounts.",
+        "exercise": "Inspect an image history and list its entry point, user, writable paths and external configuration requirements.",
+        "source": "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/"
+      },
+      {
+        "title": "Scheduling and resource requests",
+        "model": "An orchestrator places workloads based on resource requests, constraints and available capacity. Controllers reconcile desired state after changes and failures. Restarting a process is one recovery action, not proof that the underlying fault is fixed.",
+        "pitfalls": "Incorrect requests can distort placement, while aggressive limits can terminate work unexpectedly. Plan disruption budgets, graceful shutdown and overload behavior alongside scaling.",
+        "exercise": "Design resource requests for a CPU-bound worker and an I/O-bound service, then explain how you would measure whether they are appropriate.",
+        "source": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+      },
+      {
+        "title": "Readiness, liveness and startup",
+        "model": "Readiness answers whether a workload should receive traffic. Liveness asks whether restarting it may help. Startup checks allow initialization before other health decisions. Distinguishing these prevents a slow dependency from creating a restart storm.",
+        "pitfalls": "A health endpoint that always returns success hides failure; one that restarts on every external dependency failure can amplify an outage. Test degraded conditions explicitly.",
+        "exercise": "Write three health contracts and describe what happens while the database is temporarily unavailable.",
+        "source": "https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/"
+      },
+      {
+        "title": "Persistent state and configuration",
+        "model": "Container replacement should not silently destroy authoritative data. Volumes and external stores have independent lifetimes, while configuration and secret delivery define how a workload is parameterized.",
+        "pitfalls": "A persistent volume is not a backup. Review access modes, restore procedures, mount permissions and schema compatibility before rolling out an application change.",
+        "exercise": "Replace a workload in a disposable environment and verify which data survives. Document how to recover after deleting the backing storage.",
+        "source": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/"
+      },
+      {
+        "title": "Infrastructure as code and drift",
+        "model": "Infrastructure definitions describe desired resources and relationships. Planning and state tracking help tools compare intent with observed resources. Changes made outside that workflow can create drift and unexpected later operations.",
+        "pitfalls": "Review plans before applying them, secure state files and serialize conflicting changes. A successful plan is not proof that application-level behavior will remain correct.",
+        "exercise": "Identify how a renamed resource differs from an in-place update and describe the risk of an accidental replacement.",
+        "source": "https://developer.hashicorp.com/terraform/intro"
+      },
+      {
+        "title": "Configuration, packaging and supply chains",
+        "model": "Charts, templates and overlays produce deployment configuration from reusable definitions. Their values influence permissions, networking, image versions and resource limits. Generated manifests are the actual deployment input.",
+        "pitfalls": "Review rendered output as well as templates. Keep dependencies and images attributable, and avoid hiding broad privileges inside shared defaults.",
+        "exercise": "Render a deployment for two environments and compare only the settings that are supposed to differ.",
+        "source": "https://helm.sh/docs/topics/charts/"
+      }
+    ]
+  },
+  "cicd-automation": {
+    "intro": "Continuous integration checks changes together; delivery prepares deployable releases; deployment changes running systems. A pipeline is executable code with access to artifacts and often sensitive credentials, so its trust boundary deserves the same attention as application code.",
+    "audience": "Contributors produce changes; release engineers build and promote artifacts; operators decide rollout, rollback and approval policies.",
+    "flow": "Commit → isolated checks → immutable artifact → promotion\n       → staged rollout → health evidence → continue / rollback",
+    "guides": [
+      {
+        "title": "Events, jobs and dependencies",
+        "model": "A workflow starts from a defined event and schedules jobs with declared relationships. Jobs may run concurrently, so ordering and data transfer must be explicit. Required checks should correspond to the revision being integrated.",
+        "pitfalls": "Do not trust outputs from an unrelated revision or accidentally skip an essential check through a conditional. Identify the difference between a failed job, a cancelled job and a job that never ran.",
+        "exercise": "Sketch a pipeline with lint, unit tests, integration tests and packaging; mark which jobs can run independently.",
+        "source": "https://docs.github.com/en/actions/concepts/workflows-and-actions/workflows"
+      },
+      {
+        "title": "Runner isolation and untrusted changes",
+        "model": "A runner executes repository-controlled commands. Pull requests and dependency scripts may be untrusted input, particularly when they can access credentials or persistent runner state. Isolation should match that risk.",
+        "pitfalls": "Separate privileged deployment jobs from untrusted validation. Use least-privilege tokens, avoid interpolating untrusted text into shell code and clean or replace workspaces between jobs.",
+        "exercise": "Trace which secrets a forked contribution could access in a proposed workflow and remove every unnecessary path.",
+        "source": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions"
+      },
+      {
+        "title": "Artifacts versus caches",
+        "model": "An artifact is an output to retain or promote. A cache speeds up recomputation of reusable inputs or intermediates. Their integrity, retention and identity requirements differ, especially across trusted and untrusted jobs.",
+        "pitfalls": "Do not treat a mutable cache as the authoritative release. Record checksums, source revision and build inputs for artifacts, and verify what a downstream job downloads.",
+        "exercise": "Design an artifact name and manifest that unambiguously identifies the tested build across staging and production.",
+        "source": "https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts"
+      },
+      {
+        "title": "Deployment strategies and rollback",
+        "model": "A rollout changes a running population of instances. Rolling, blue/green and canary approaches provide different ways to observe impact and control exposure. Success needs application health evidence, not only process startup.",
+        "pitfalls": "A binary rollback may not reverse an incompatible schema migration. Plan backward-compatible changes and define measurable conditions for stopping a rollout.",
+        "exercise": "Design a canary experiment with an error-rate threshold and a rollback procedure that includes data compatibility.",
+        "source": "https://sre.google/sre-book/release-engineering/"
+      },
+      {
+        "title": "GitOps reconciliation",
+        "model": "GitOps controllers compare declared configuration with a running environment and reconcile differences. The repository becomes a desired-state input, while the controller still needs credentials, validation and safe operational behavior.",
+        "pitfalls": "Automatic reconciliation can undo emergency manual edits or repeatedly apply a harmful declaration. Document break-glass procedures and ownership of each resource.",
+        "exercise": "Explain how an emergency scaling change is reconciled back into version control without being silently overwritten.",
+        "source": "https://argo-cd.readthedocs.io/en/stable/"
+      },
+      {
+        "title": "Release evidence and incident learning",
+        "model": "A release record connects the change, checks, artifact, deployment and observed outcome. Failed releases are opportunities to improve detection and recovery rather than merely rerun a job until it turns green.",
+        "pitfalls": "Blind retries can conceal nondeterminism or repeat an irreversible operation. Make deployment steps idempotent where possible and preserve diagnostic evidence before cleanup.",
+        "exercise": "Write a concise release report containing the trigger, exact artifact, failed stage, user impact and recovery action.",
+        "source": "https://sre.google/sre-book/postmortem-culture/"
+      }
+    ]
+  },
+  "servers-networking": {
+    "intro": "A request may pass through DNS, transport security, proxies, load balancers and an application server before reaching business logic. Each hop can change routing, headers, buffering and timeout behavior. Trace the full path when diagnosing errors.",
+    "audience": "Backend engineers expose applications; network and platform teams manage routing and termination; operators investigate latency and failure across hops.",
+    "flow": "Client → DNS → TLS endpoint → proxy / load balancer\n                             → application → dependencies",
+    "guides": [
+      {
+        "title": "Origin server, reverse proxy and forward proxy",
+        "model": "An origin serves application content. A reverse proxy fronts one or more origins; a forward proxy acts on behalf of clients. Load balancing chooses an upstream, while caching may reuse a response without reaching that upstream.",
+        "pitfalls": "Names overlap in products but responsibilities remain distinct. Document which component terminates TLS, handles authentication, buffers requests and owns each timeout.",
+        "exercise": "Draw a request path with two proxies and identify the component that can explain each possible 4xx or 5xx response.",
+        "source": "https://nginx.org/en/docs/http/ngx_http_proxy_module.html"
+      },
+      {
+        "title": "DNS and endpoint changes",
+        "model": "DNS maps names to records that clients and resolvers may cache. A record change does not instantly move every client; propagation depends on caching and client behavior. DNS availability is part of service availability.",
+        "pitfalls": "Plan migrations with cache behavior in mind and verify authoritative and recursive answers separately. A healthy server is unreachable if the name resolves incorrectly.",
+        "exercise": "Describe a low-disruption hostname migration and how you would distinguish stale DNS from an unhealthy new origin.",
+        "source": "https://www.rfc-editor.org/rfc/rfc1034.html"
+      },
+      {
+        "title": "TLS termination and forwarded identity",
+        "model": "TLS protects a connection between endpoints; termination establishes where plaintext becomes visible. Proxies may add headers describing the original client or scheme, but those headers require an explicit trust policy.",
+        "pitfalls": "Do not trust a client-supplied forwarding header as verified identity. Strip or overwrite untrusted values at the boundary and configure the application for the actual trusted proxy chain.",
+        "exercise": "Identify which hop is authorized to set a client-address header and test a request that spoofs it.",
+        "source": "https://www.rfc-editor.org/rfc/rfc7239.html"
+      },
+      {
+        "title": "Timeouts, retries and request bodies",
+        "model": "Connect, read, write and total request deadlines cover different phases. A retry after a timeout can repeat work that the origin already performed. Buffering and body limits influence memory use and upload behavior.",
+        "pitfalls": "Align deadlines across hops and avoid retrying unsafe operations without an idempotency design. Bound request sizes before consuming unbounded resources.",
+        "exercise": "Design timeouts for a request with a ten-second client budget and a dependency that occasionally stalls.",
+        "source": "https://www.rfc-editor.org/rfc/rfc9110.html"
+      },
+      {
+        "title": "Load balancing and connection behavior",
+        "model": "Balancing may occur per connection or per request, depending on protocol and proxy design. Long-lived connections and uneven request costs can make simple request counts a poor indicator of load.",
+        "pitfalls": "Health checks and draining matter during shutdown. Avoid sending new traffic to a terminating instance while existing work still needs time to finish.",
+        "exercise": "Compare balancing short HTTP requests with long-lived WebSocket connections and propose an appropriate draining policy.",
+        "source": "https://www.haproxy.com/documentation/haproxy-configuration-tutorials/reliability/health-checks/"
+      },
+      {
+        "title": "Network diagnosis with evidence",
+        "model": "Separate name resolution, connection establishment, TLS negotiation, HTTP response and application behavior. Tools that inspect each layer help avoid blaming application code for a lower-layer failure or the reverse.",
+        "pitfalls": "A successful ping does not prove an HTTPS service works. Record timestamps, endpoint, protocol, response headers and correlation identifiers without exposing sensitive payloads.",
+        "exercise": "Build a troubleshooting sequence for a user reporting intermittent gateway timeouts. State what evidence would eliminate each hypothesis.",
+        "source": "https://everything.curl.dev/"
+      }
+    ]
+  },
+  "messaging-streaming": {
+    "intro": "Messaging separates the time and location of producing work from consuming it. Queues, retained event logs, publish/subscribe brokers and stream processors solve different coordination problems. Start by specifying delivery, ordering, retention and recovery semantics.",
+    "audience": "Backend developers design producers and consumers; data engineers build event pipelines; operators manage broker capacity, lag and recovery.",
+    "flow": "Producer → durable transport → consumer → external effect\n                  acknowledgement / offset / retry / replay",
+    "guides": [
+      {
+        "title": "Queue versus retained event log",
+        "model": "A queue commonly distributes work among consumers; a retained log preserves records for consumers to read using positions or offsets. Publish/subscribe distributes events to interested subscribers. Products may support several of these models.",
+        "pitfalls": "Do not assume every consumer sees every message or that processed data remains available for replay. Specify retention, subscription behavior and what happens when no consumer is connected.",
+        "exercise": "Compare a job-dispatch system with an audit-event stream and explain why their retention and consumer models differ.",
+        "source": "https://kafka.apache.org/41/design/design/"
+      },
+      {
+        "title": "Acknowledgement and duplicate delivery",
+        "model": "Acknowledgement tells the transport that work has reached a particular point. A consumer can perform an external effect and crash before acknowledging, causing redelivery. Delivery semantics must be considered together with the effect being performed.",
+        "pitfalls": "Exactly-once claims are scoped to particular transactions and systems. Use stable identifiers and idempotent handlers when a message can be delivered more than once.",
+        "exercise": "Design an email-job handler that records completion and explain the remaining failure window between recording and sending.",
+        "source": "https://www.rabbitmq.com/docs/confirms"
+      },
+      {
+        "title": "Ordering and partitions",
+        "model": "Partitioning distributes storage and processing while defining an ordering domain. A system can preserve order within one partition without providing a global order across all events. Consumer parallelism follows those boundaries.",
+        "pitfalls": "A poor partition key can create a hot partition; changing the key can change ordering guarantees. Decide which events actually require relative order.",
+        "exercise": "Choose a partition key for account activity and explain how one unusually active account affects capacity.",
+        "source": "https://kafka.apache.org/41/getting-started/introduction/"
+      },
+      {
+        "title": "Retries, poison messages and dead letters",
+        "model": "A retry policy determines how transient failures are retried and when processing stops. Backoff reduces repeated pressure; dead-letter handling isolates records that cannot be processed normally. Neither mechanism fixes a broken payload by itself.",
+        "pitfalls": "Unbounded retries can block progress and hide poison messages. Preserve enough context for investigation, control replay permissions and prevent repeated side effects during recovery.",
+        "exercise": "Define a maximum retry policy and an operator workflow for correcting and replaying a malformed event.",
+        "source": "https://www.rabbitmq.com/docs/dlx"
+      },
+      {
+        "title": "Backpressure, lag and overload",
+        "model": "When production outpaces consumption, backlog grows. Lag measures some distance between available and processed work; its meaning depends on whether it counts messages, bytes, offsets or time. Capacity planning needs that distinction.",
+        "pitfalls": "Autoscaling consumers may overload the database they call. Bound concurrency and measure downstream saturation rather than treating low queue depth as the only objective.",
+        "exercise": "Model a ten-minute producer burst and estimate recovery time when consumers have limited spare capacity.",
+        "source": "https://docs.nats.io/nats-concepts/jetstream/consumers"
+      },
+      {
+        "title": "Outbox patterns and schema evolution",
+        "model": "An application may need to persist data and publish an event about it. An outbox records publication intent in the same database transaction, then a separate process forwards it. Events also need compatible schemas for independent consumers.",
+        "pitfalls": "A publisher can still send duplicates, so consumers need idempotency. Avoid changing field meaning silently; plan how old events and older consumers coexist with new versions.",
+        "exercise": "Design an order-created event and an outbox row. Identify the transaction boundary and the key used to deduplicate consumption.",
+        "source": "https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html"
+      }
+    ]
+  },
+  "observability": {
+    "intro": "Observability uses evidence from a running system to investigate behavior. Metrics, logs, traces and profiles answer different questions. Instrumentation and collection are separate from storage, querying and visualization; a dashboard alone is not a reliability strategy.",
+    "audience": "Developers instrument operations; SRE and operations teams investigate incidents; platform teams manage telemetry cost, access and retention.",
+    "flow": "Application instrumentation → collector / exporter → backend\n                               → query / dashboard / alert → investigation",
+    "guides": [
+      {
+        "title": "Metrics and useful dimensions",
+        "model": "Metrics aggregate measurements such as counts, durations and resource use. Labels divide a measurement into dimensions. Counters and histograms support different analyses; units and aggregation semantics should be explicit.",
+        "pitfalls": "Unbounded labels such as request IDs or raw user input can create excessive cardinality. Choose dimensions that answer operational questions without storing a time series for every unique event.",
+        "exercise": "Design request-rate and latency metrics for an API using bounded labels. Explain which labels you deliberately exclude.",
+        "source": "https://prometheus.io/docs/practices/naming/"
+      },
+      {
+        "title": "Structured logs and sensitive data",
+        "model": "Logs record events with context. Structured fields support correlation and filtering better than inconsistent prose alone. Severity levels should reflect operational meaning rather than simply how much text a developer wants to see.",
+        "pitfalls": "Do not log credentials, session tokens or unnecessary personal data. Bound payload size and retention, and preserve useful identifiers without making every message sensitive.",
+        "exercise": "Define a failed-request log event with timestamp, operation, status and correlation ID; remove fields not needed for diagnosis.",
+        "source": "https://opentelemetry.io/docs/concepts/signals/logs/"
+      },
+      {
+        "title": "Distributed traces and context propagation",
+        "model": "A trace groups spans representing related work across component boundaries. Parent-child relationships and timing reveal where time was spent. Propagated context connects operations that otherwise look like unrelated requests.",
+        "pitfalls": "Sampling affects what evidence exists. Avoid treating a sampled trace as a complete record of all traffic, and do not trust arbitrary inbound trace fields as authorization or identity.",
+        "exercise": "Trace a request through an API, queue and worker. Explain where asynchronous work creates a new span relationship.",
+        "source": "https://opentelemetry.io/docs/concepts/signals/traces/"
+      },
+      {
+        "title": "Collection pipelines and telemetry backends",
+        "model": "Instrumentation produces signals; collectors can receive, process and export them; backends store and query them. OpenTelemetry is an instrumentation and interoperability ecosystem, not a single storage database.",
+        "pitfalls": "Telemetry pipelines can fail or saturate. Set bounded queues, understand dropping behavior and make collection failures observable without creating a feedback loop of logs.",
+        "exercise": "Draw a pipeline for traces and metrics with one collector failure. Explain what is buffered, dropped or retried.",
+        "source": "https://opentelemetry.io/docs/collector/"
+      },
+      {
+        "title": "Service objectives and actionable alerts",
+        "model": "An objective describes an acceptable level of user-visible service over a period. Indicators should measure that experience. Alerts should lead to a meaningful response when the objective is threatened or an urgent condition occurs.",
+        "pitfalls": "Alerting on every internal fluctuation creates noise. Distinguish diagnostic dashboards from paging conditions, and attach ownership and a runbook to each actionable alert.",
+        "exercise": "Define availability and latency indicators for a login endpoint, then write an alert with a clear first response.",
+        "source": "https://sre.google/sre-book/service-level-objectives/"
+      },
+      {
+        "title": "Profiles and incident investigation",
+        "model": "Profiles sample or measure where CPU time, allocations or other resources are spent. They complement traces by explaining internal resource consumption. A useful incident investigation compares evidence against a hypothesis and a timeline.",
+        "pitfalls": "Do not optimize from an unrepresentative profile. Match the binary and workload, account for measurement overhead and verify improvement against the original symptom.",
+        "exercise": "Given high latency with low CPU, list evidence that distinguishes lock contention, network waits and a saturated database.",
+        "source": "https://www.brendangregg.com/flamegraphs.html"
+      }
+    ]
+  },
+  "apis-auth-integration": {
+    "intro": "An API defines a contract across a boundary. Protocols transport messages; schemas describe shapes; identity standards establish authentication or authorization flows; products implement parts of those systems. Keeping these layers separate makes integration easier to reason about.",
+    "audience": "Backend developers design contracts; integration teams coordinate consumers; identity and security engineers define trust, permissions and credential lifecycles.",
+    "flow": "Client → protocol + contract → validation → identity / authorization\n                                      → application operation → response",
+    "guides": [
+      {
+        "title": "HTTP methods and resource contracts",
+        "model": "HTTP specifies method semantics, status codes and representation metadata. An application contract adds resource meaning, validation rules and error shapes. A documented endpoint should describe both successful and unsuccessful outcomes.",
+        "pitfalls": "Do not use a status code alone as a complete error contract. Consider caching, conditional requests and whether a method can be retried safely after a lost response.",
+        "exercise": "Design create and read operations for a project resource, including invalid input, missing resources and permission failures.",
+        "source": "https://www.rfc-editor.org/rfc/rfc9110.html"
+      },
+      {
+        "title": "Schemas, compatibility and evolution",
+        "model": "Schemas describe message structures and constraints, while compatibility rules determine whether old and new participants can communicate. Adding a field is not automatically harmless if consumers reject unknown fields or interpret absence differently.",
+        "pitfalls": "Avoid changing a field’s meaning without a migration plan. Specify nullability, defaults and version behavior, and test consumers against representative older payloads.",
+        "exercise": "Evolve an event with an optional field, then explain how an old consumer and a new consumer handle both versions.",
+        "source": "https://spec.openapis.org/oas/latest.html"
+      },
+      {
+        "title": "Authentication versus authorization",
+        "model": "Authentication establishes an identity claim; authorization decides what that identity may do. OAuth addresses delegated authorization, while OpenID Connect adds identity functionality on top of OAuth. An identity product is an implementation, not the protocol itself.",
+        "pitfalls": "A valid token does not grant access to every object. Validate the intended issuer and audience, enforce object-level permissions, and use maintained protocol libraries rather than inventing a flow.",
+        "exercise": "For a project API, separate token validation from checking membership of the specific project being requested.",
+        "source": "https://openid.net/specs/openid-connect-core-1_0.html"
+      },
+      {
+        "title": "OAuth threat boundaries",
+        "model": "Redirects, authorization codes, clients and tokens cross multiple trust boundaries. Modern security guidance addresses risks such as code interception, token leakage and misdirected authorization responses. The correct flow depends on the type of client.",
+        "pitfalls": "Do not embed confidential-client secrets in browser or mobile applications. Follow current protocol guidance, validate redirect handling and keep tokens out of logs and URLs where they can leak.",
+        "exercise": "Draw a browser sign-in flow and mark where code exchange, session creation and API authorization occur.",
+        "source": "https://www.rfc-editor.org/rfc/rfc9700.html"
+      },
+      {
+        "title": "Webhooks and long-lived connections",
+        "model": "A webhook delivers an event through a request initiated by the producer; a WebSocket provides a long-lived bidirectional connection. Both need authentication, resource limits, reconnect behavior and a strategy for missed or repeated messages.",
+        "pitfalls": "A live connection does not guarantee application delivery. Verify webhook signatures with maintained implementations and replay protection; make repeated events safe to process.",
+        "exercise": "Design a reconnect flow that resumes from a last-seen event ID without silently losing or duplicating visible work.",
+        "source": "https://www.rfc-editor.org/rfc/rfc6455.html"
+      },
+      {
+        "title": "Integration reliability and idempotency",
+        "model": "Integrations fail through timeouts, partial success and incompatible assumptions. A stable operation identifier can help make retries safe. Deadlines, bounded retries and clear ownership limit the blast radius of a failing dependency.",
+        "pitfalls": "A timeout is uncertainty, not proof of failure. Avoid retrying irreversible actions blindly, and expose a way to reconcile status after an ambiguous result.",
+        "exercise": "Specify an idempotent job-submission endpoint and explain what it returns when the same key is reused with a different payload.",
+        "source": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/"
+      }
+    ]
+  },
+  "ai-developer-tools": {
+    "intro": "AI coding tools combine models, interfaces, repository context and sometimes executable tools. Completion, chat, code review and autonomous task execution have different capabilities and risk boundaries. Evaluate the actual workflow and its evidence, not only a product label or benchmark score.",
+    "audience": "Developers review and test suggested changes; platform teams configure access and data boundaries; evaluators measure performance on representative tasks.",
+    "flow": "Task + repository context → model → proposed edit / tool action\n                          → permission boundary → execution → verification",
+    "guides": [
+      {
+        "title": "Assistant surfaces and agency",
+        "model": "Inline completion predicts a continuation near the cursor. Chat supports explicit requests. An agent can choose intermediate actions such as searching files, editing code or running tests when tools are available. These surfaces can share a model while behaving differently.",
+        "pitfalls": "Do not infer authority from fluent output. Limit executable capabilities to the task and inspect the actual diff and command results. Product snapshots in the pack are dated descriptions, not guarantees of present features.",
+        "exercise": "Compare the permissions needed to explain a function, edit it and deploy the changed application.",
+        "source": "https://docs.github.com/en/copilot/get-started/what-is-github-copilot"
+      },
+      {
+        "title": "Context selection and repository understanding",
+        "model": "A model only reasons over context made available to it. Retrieval and search help locate relevant files, but missing configuration, generated code or platform constraints can lead to an apparently plausible but incompatible change.",
+        "pitfalls": "Large context is not the same as correct context. Include the contract, failure example and relevant tests; verify assumptions about dependencies and architecture before accepting an edit.",
+        "exercise": "Prepare a task brief with a minimal reproduction, repository rules and expected behavior, then identify what evidence would validate the result.",
+        "source": "https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot"
+      },
+      {
+        "title": "Tool permissions and untrusted content",
+        "model": "Tool-enabled systems can act on filesystem, network or service capabilities. Repository text and retrieved documents may contain instructions that are not authorized user requests. Separate information being read from authority to perform an action.",
+        "pitfalls": "A prompt is not a substitute for an enforced permission boundary. Restrict secrets, isolate execution and require appropriate review for irreversible actions. Treat external tool descriptions and outputs as untrusted data.",
+        "exercise": "Trace how a malicious comment in a source file could influence a task and list controls that prevent it from granting new permissions.",
+        "source": "https://modelcontextprotocol.io/specification/latest/basic/security_best_practices"
+      },
+      {
+        "title": "Evaluation and realistic tasks",
+        "model": "An evaluation needs a defined task set, scoring method and environment. Pass rates depend on tool access, time budget, dependencies and what the tests actually cover. A benchmark result does not automatically predict performance in your repository.",
+        "pitfalls": "Keep evaluation tasks separate from tuning examples where possible. Include negative cases, regressions and human review of failure modes rather than only counting successful builds.",
+        "exercise": "Create five repository tasks with acceptance tests and record task completion, regressions, review effort and unsupported claims.",
+        "source": "https://www.swebench.com/"
+      },
+      {
+        "title": "Reviewing generated changes",
+        "model": "Review generated code as code: check interfaces, failure paths, data handling and tests. An explanation is useful context but is not evidence that the implementation behaves as claimed. Independent execution supplies stronger evidence.",
+        "pitfalls": "Do not accept a test result that was never run or that exercises only a mock of the changed behavior. Inspect dependency additions and broad rewrites for unnecessary scope.",
+        "exercise": "Given a generated patch, write a review covering correctness, edge cases, validation and rollback without relying on the model’s summary.",
+        "source": "https://docs.github.com/en/copilot/responsible-use/copilot-code-review"
+      },
+      {
+        "title": "Data handling and operational fit",
+        "model": "Using a coding assistant can involve moving prompts, repository context or telemetry across service boundaries. Local execution, hosted inference and enterprise controls describe different parts of the data path. Terms and capabilities change over time.",
+        "pitfalls": "Identify what leaves the machine and who can access it. Keep credentials and unnecessary personal data out of task context, and evaluate retention and access settings for the actual service configuration.",
+        "exercise": "Produce a data-flow inventory for a coding workflow: source files, prompts, tool outputs, credentials and generated artifacts.",
+        "source": "https://docs.github.com/en/copilot/concepts/copilot-business-and-enterprise/data-and-privacy"
+      }
+    ]
+  }
+}

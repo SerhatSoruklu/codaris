@@ -1,0 +1,10 @@
+Subject: We received your CODARIS application
+
+CODARIS
+BUILD. VERIFY. ADVANCE.
+
+Thank you for applying, {{display_name}}. Your application is awaiting review. Applying does not yet grant membership. We will contact you when there is an update.
+
+Review your application: {{application_url}}
+
+Never reply with your password.

@@ -6,7 +6,7 @@
 #include "globe.h"
 
 /* The bridge copies strings synchronously into the DOM; C retains ownership.
- * No input values are inserted as HTML, transmitted, or persisted. */
+ * No input values are inserted as HTML. Account requests use separate JSON transport. */
 EM_JS(void, view_text, (const char *id, const char *value), {
     const element = document.getElementById(UTF8ToString(id));
     if (element) element.textContent = UTF8ToString(value);
@@ -49,14 +49,17 @@ EM_JS(void, view_empty, (int empty), {
 EM_JS(void, view_ready, (void), {
     const search = document.getElementById('country-search');
     if (search) search.disabled = false;
+    document.querySelectorAll('[data-topic]').forEach(button => { button.disabled = !document.getElementById('account-content'); });
+    const languageSearch = document.getElementById('catalogue-search');
+    if (languageSearch) languageSearch.disabled = false;
     const reset = document.getElementById('globe-reset');
     if (reset) reset.disabled = false;
     const globe = document.querySelector('.network-globe');
     if (globe) globe.dataset.ready = 'true';
-    /* Applications remain disabled until the email/API workflow is implemented. */
+    /* Account controls are enabled by the C membership controller. */
     document.getElementById('runtime-status').textContent = "";
 })
-/* Native browser validity flags are transported to C; personal values never leave DOM. */
+/* Native browser validity flags are transported to C for inline feedback. */
 EM_JS(void, view_field, (const char *name, const char *message, const char *count, int invalid, int warning), {
     const key = UTF8ToString(name);
     const field = document.getElementById('join-' + key);
@@ -134,33 +137,28 @@ EMSCRIPTEN_KEEPALIVE void codaris_filter(const char *query) {
     view_empty(visible == 0);
 }
 
-EMSCRIPTEN_KEEPALIVE void codaris_preview_join(void) {
-    view_text("join-feedback", "Applications are not open yet. Nothing has been sent or saved.");
-}
+#include "membership.h"
+#include "languages.h"
 
 EM_JS(int, view_has_countries, (void), {
     return !!document.getElementById('country-rows');
 })
 
+EM_JS(void, view_community_metrics, (void), {
+    if(!document.getElementById('supporters-metric'))return;
+    fetch('/api/community',{credentials:'same-origin',cache:'no-store'})
+      .then(response=>{if(!response.ok)throw new Error('Unavailable');return response.json();})
+      .then(data=>{document.getElementById('supporters-metric').textContent=String(data.members);
+          document.getElementById('countries-metric').textContent=String(data.countries);})
+      .catch(()=>{document.getElementById('supporters-metric').textContent='Unavailable';
+          document.getElementById('countries-metric').textContent='Unavailable';});
+})
 int main(void) {
-    unsigned supporters = 0, developers = 0, represented = 0;
-    for (size_t i = 0; i < country_count; ++i) {
-        supporters += countries[i].supporters;
-        developers += countries[i].developers;
-        if (countries[i].supporters > 0) ++represented;
-        view_country_option(countries[i].name);
-    }
+    for(size_t i=0;i<country_count;++i)view_country_option(countries[i].name);
     view_country_option("Other / not listed");
-    char number[32];
-    format_number(supporters, number);
-    view_text("supporters-metric", number);
-    format_number(represented, number);
-    view_text("countries-metric", number);
-    format_number(demo_communities, number);
-    view_text("communities-metric", number);
-    int result = snprintf(number, sizeof(number), "%.1fM", developers / 1000000.0);
-    if (result >= 0 && (size_t)result < sizeof(number)) view_text("reach-metric", number);
-    if (view_has_countries()) codaris_filter("");
+    membership_init();
+    if(catalogue_view_count())codaris_catalogue_filter("");
+    view_community_metrics();
     view_ready();
     return 0;
 }

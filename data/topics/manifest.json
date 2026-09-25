@@ -1,0 +1,186 @@
+[
+  {
+    "number": 4,
+    "slug": "runtimes",
+    "title": "Runtimes & Execution Platforms",
+    "catalog": "codaris_runtimes_execution_platforms_catalog.json",
+    "count": 581,
+    "source_files": [
+      "CODARIS_runtimes_execution_platforms_research.xlsx",
+      "README_CODARIS_runtimes_execution_platforms.md",
+      "codaris_edge_runtime_usage_stateofjs_2025.csv",
+      "codaris_runtime_usage_stateofjs_2025.csv",
+      "codaris_runtimes_execution_platforms_catalog.csv",
+      "codaris_runtimes_execution_platforms_catalog.json",
+      "codaris_runtimes_sources.csv"
+    ]
+  },
+  {
+    "number": 5,
+    "slug": "package-build-tools",
+    "title": "Package Managers, Build Tools & Bundlers",
+    "catalog": "codaris_package_build_bundlers_catalog.json",
+    "count": 229,
+    "source_files": [
+      "CODARIS_package_build_bundlers_research.xlsx",
+      "README_CODARIS_package_build_bundlers.md",
+      "codaris_package_build_bundlers_catalog.csv",
+      "codaris_package_build_bundlers_catalog.json",
+      "codaris_package_build_bundlers_sources.csv"
+    ]
+  },
+  {
+    "number": 6,
+    "slug": "developer-environments",
+    "title": "IDEs, Editors & Developer Environments",
+    "catalog": "codaris_ides_editors_environments_catalog.json",
+    "count": 178,
+    "source_files": [
+      "CODARIS_ides_editors_environments_research.xlsx",
+      "README_CODARIS_ides_editors_environments.md",
+      "codaris_ides_editors_environments_catalog.csv",
+      "codaris_ides_editors_environments_catalog.json",
+      "codaris_ides_editors_environments_sources.csv"
+    ]
+  },
+  {
+    "number": 7,
+    "slug": "version-control",
+    "title": "Version Control & Code Hosting",
+    "catalog": "codaris_version_control_code_hosting_catalog.json",
+    "count": 118,
+    "source_files": [
+      "CODARIS_version_control_code_hosting_research.xlsx",
+      "README_CODARIS_version_control_code_hosting.md",
+      "codaris_version_control_code_hosting_catalog.csv",
+      "codaris_version_control_code_hosting_catalog.json",
+      "codaris_version_control_code_hosting_sources.csv"
+    ]
+  },
+  {
+    "number": 8,
+    "slug": "testing-qa",
+    "title": "Testing & QA",
+    "catalog": "codaris_testing_qa_catalog.json",
+    "count": 277,
+    "source_files": [
+      "CODARIS_testing_qa_research.xlsx",
+      "README_CODARIS_testing_qa.md",
+      "codaris_testing_qa_catalog.csv",
+      "codaris_testing_qa_catalog.json",
+      "codaris_testing_qa_sources.csv"
+    ]
+  },
+  {
+    "number": 9,
+    "slug": "cloud-hosting",
+    "title": "Cloud, Hosting & Serverless",
+    "catalog": "codaris_cloud_hosting_serverless_catalog.json",
+    "count": 140,
+    "source_files": [
+      "CODARIS_cloud_hosting_serverless_research.xlsx",
+      "README_CODARIS_cloud_hosting_serverless.md",
+      "codaris_cloud_hosting_serverless_catalog.csv",
+      "codaris_cloud_hosting_serverless_catalog.json",
+      "codaris_cloud_hosting_serverless_sources.csv"
+    ]
+  },
+  {
+    "number": 10,
+    "slug": "containers-infrastructure",
+    "title": "Containers, Orchestration & Infrastructure",
+    "catalog": "codaris_containers_orchestration_infrastructure_catalog.json",
+    "count": 168,
+    "source_files": [
+      "CODARIS_containers_orchestration_infrastructure_research.xlsx",
+      "README_CODARIS_containers_orchestration_infrastructure.md",
+      "codaris_containers_orchestration_infrastructure_catalog.csv",
+      "codaris_containers_orchestration_infrastructure_catalog.json",
+      "codaris_containers_orchestration_infrastructure_sources.csv"
+    ]
+  },
+  {
+    "number": 11,
+    "slug": "cicd-automation",
+    "title": "CI/CD & DevOps Automation",
+    "catalog": "codaris_cicd_devops_automation_catalog.json",
+    "count": 123,
+    "source_files": [
+      "CODARIS_cicd_devops_automation_research.xlsx",
+      "README_CODARIS_cicd_devops_automation.md",
+      "codaris_cicd_devops_automation_catalog.csv",
+      "codaris_cicd_devops_automation_catalog.json",
+      "codaris_cicd_devops_automation_sources.csv"
+    ]
+  },
+  {
+    "number": 12,
+    "slug": "servers-networking",
+    "title": "Web Servers, Proxies & Networking",
+    "catalog": "codaris_web_servers_proxies_networking_catalog.json",
+    "count": 168,
+    "source_files": [
+      "CODARIS_web_servers_proxies_networking_research.xlsx",
+      "README_CODARIS_web_servers_proxies_networking.md",
+      "codaris_web_servers_proxies_networking_catalog.csv",
+      "codaris_web_servers_proxies_networking_catalog.json",
+      "codaris_web_servers_proxies_networking_sources.csv"
+    ]
+  },
+  {
+    "number": 13,
+    "slug": "messaging-streaming",
+    "title": "Messaging, Queues & Event Streaming",
+    "catalog": "codaris_messaging_queues_streaming_catalog.json",
+    "count": 133,
+    "source_files": [
+      "CODARIS_messaging_queues_streaming_research.xlsx",
+      "README_CODARIS_messaging_queues_streaming.md",
+      "codaris_messaging_queues_streaming_catalog.csv",
+      "codaris_messaging_queues_streaming_catalog.json",
+      "codaris_messaging_queues_streaming_sources.csv"
+    ]
+  },
+  {
+    "number": 14,
+    "slug": "observability",
+    "title": "Observability, Logging & Monitoring",
+    "catalog": "codaris_observability_logging_monitoring_catalog.json",
+    "count": 172,
+    "source_files": [
+      "CODARIS_observability_logging_monitoring_research.xlsx",
+      "README_CODARIS_observability_logging_monitoring.md",
+      "codaris_observability_logging_monitoring_catalog.csv",
+      "codaris_observability_logging_monitoring_catalog.json",
+      "codaris_observability_logging_monitoring_sources.csv"
+    ]
+  },
+  {
+    "number": 15,
+    "slug": "apis-auth-integration",
+    "title": "APIs, Protocols, Auth & Integration",
+    "catalog": "codaris_apis_protocols_auth_integration_catalog.json",
+    "count": 226,
+    "source_files": [
+      "CODARIS_apis_protocols_auth_integration_research.xlsx",
+      "README_CODARIS_apis_protocols_auth_integration.md",
+      "codaris_apis_protocols_auth_integration_catalog.csv",
+      "codaris_apis_protocols_auth_integration_catalog.json",
+      "codaris_apis_protocols_auth_integration_sources.csv"
+    ]
+  },
+  {
+    "number": 16,
+    "slug": "ai-developer-tools",
+    "title": "AI Developer Tools & Coding Systems",
+    "catalog": "codaris_ai_developer_tools_catalog.json",
+    "count": 160,
+    "source_files": [
+      "CODARIS_ai_developer_tools_research.xlsx",
+      "README_CODARIS_ai_developer_tools.md",
+      "codaris_ai_developer_tools_catalog.csv",
+      "codaris_ai_developer_tools_catalog.json",
+      "codaris_ai_developer_tools_sources.csv"
+    ]
+  }
+]

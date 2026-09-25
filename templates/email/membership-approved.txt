@@ -1,0 +1,10 @@
+Subject: Welcome to CODARIS
+
+CODARIS
+BUILD. VERIFY. ADVANCE.
+
+Your application has been approved, {{display_name}}. Your membership ID is {{membership_id}}. Keep it for signing in; it is an identifier, not a password.
+
+Open your membership: {{login_url}}
+
+Never reply with your password.

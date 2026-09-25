@@ -1,0 +1,10 @@
+﻿rank,runtime,respondent_selections,use_pct,question_respondents,source,note
+1,Node.js,10062,90.3,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."
+2,Browser JavaScript Runtime,9682,86.9,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."
+3,Bun,2321,20.8,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."
+4,Service Worker Runtime,1660,14.9,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."
+5,Cloudflare Workers Runtime,1294,11.6,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."
+6,Deno,1244,11.2,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."
+7,Hermes,354,3.2,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."
+8,ChakraCore,33,0.3,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."
+9,AWS Lambda Node.js Runtime,12,0.1,11141,https://2025.stateofjs.com/en-US/other-tools/,"Multi-select JavaScript Runtimes question. Browser and Service Workers are execution contexts, not standalone downloadable runtimes."

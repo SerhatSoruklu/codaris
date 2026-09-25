@@ -1,0 +1,10 @@
+Subject: Confirm your new CODARIS email
+
+CODARIS
+BUILD. VERIFY. ADVANCE.
+
+A change to your account email was requested. Verify this new address using the link below, which expires at {{expires_at}}. Your existing address stays active until verification completes.
+
+Verify new email: {{verification_url}}
+
+Never reply with your password.

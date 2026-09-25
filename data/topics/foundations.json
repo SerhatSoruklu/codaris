@@ -1,0 +1,350 @@
+[
+  {
+    "slug": "software-development",
+    "title": "Software Development",
+    "intro": "Build software as a sequence of explicit decisions: define behavior, model the problem, implement a small change, verify it and maintain it. This guide follows one feature from requirement to release instead of treating coding as the entire lifecycle.",
+    "audience": "Developers implement behavior; reviewers assess correctness and scope; maintainers preserve understandable interfaces and evidence for future changes.",
+    "flow": "Problem → acceptance criteria → design → implementation\n        → review + tests → release → feedback",
+    "project": "Build a reading-list feature with add, list and archive operations. Deliver a short requirement note, interface description, implementation, focused tests and release note. Include invalid input, duplicate submission, storage failure and recovery behavior.",
+    "guides": [
+      {
+        "title": "Define observable behavior",
+        "model": "A requirement should say what a user or caller can observe, under which conditions, and what happens when the operation cannot complete. Constraints such as latency, privacy and accessibility belong beside functional behavior.",
+        "pitfalls": "Ambiguous words such as fast or secure do not define acceptance criteria. Separate confirmed requirements from assumptions so a reviewer can challenge the right decision.",
+        "exercise": "Turn “members can save articles” into acceptance cases for a valid URL, an invalid URL, an existing article and an unavailable datastore.",
+        "source": "https://swebokwiki.org/1._Software_Requirements",
+        "code": "Given an authenticated member and a valid article URL\nWhen the member submits the URL\nThen exactly one saved item is created\nAnd retrying the same request does not create another item"
+      },
+      {
+        "title": "Model state and invariants",
+        "model": "Identify the states an entity can occupy and the transitions that are valid. An invariant is a condition that must remain true across operations. Place durable invariants in the datastore when its constraints can express them.",
+        "pitfalls": "UI validation is only one input path. Background jobs, migrations and concurrent requests must obey the same rules. Avoid scattering different definitions of a valid state across layers.",
+        "exercise": "Model a saved item as active or archived. Specify whether re-adding an archived item restores it or creates a new record.",
+        "source": "https://www.postgresql.org/docs/current/ddl-constraints.html",
+        "code": "State: active → archived\nInvariant: one item per member + normalized URL\nDecision: re-add restores the existing archived item"
+      },
+      {
+        "title": "Design interfaces and failure results",
+        "model": "An interface defines accepted inputs, ownership, results and failure behavior. A caller needs to know whether failure means nothing happened or whether the outcome is uncertain. Explicit contracts reduce accidental coupling.",
+        "pitfalls": "Avoid returning a generic success value after ignoring a failed dependency. In C, document who owns returned memory and how partial initialization is cleaned up.",
+        "exercise": "Design an add-item operation with separate invalid-input, conflict and storage-failure outcomes. Explain which outcomes can be retried safely.",
+        "source": "https://www.gnu.org/prep/standards/html_node/Writing-C.html",
+        "code": "enum SaveResult { SAVE_OK, SAVE_INVALID, SAVE_EXISTS, SAVE_STORAGE_ERROR };"
+      },
+      {
+        "title": "Implement a reviewable change",
+        "model": "A focused change connects one requirement to a limited set of edits. Keep naming, data flow and error paths clear enough that another developer can understand the behavior without replaying your editing session.",
+        "pitfalls": "Unrelated refactoring makes a behavioral change harder to review and revert. Small changes still need complete handling of the relevant edge cases; size alone is not quality.",
+        "exercise": "Split a feature and a broad formatting cleanup into separate review units, then write an outcome-focused description for the feature.",
+        "source": "https://google.github.io/eng-practices/review/developer/small-cls.html",
+        "code": "Review note:\nProblem: retries could create duplicate saved items.\nChange: enforce uniqueness and return the existing item.\nValidation: concurrent retry test and invalid-input cases."
+      },
+      {
+        "title": "Verify at the right boundaries",
+        "model": "Choose tests that challenge the behavior and its integration points. Pure logic can be tested in isolation; database constraints and transactions need realistic integration checks; user workflows need observable UI outcomes.",
+        "pitfalls": "A passing test proves only the cases and assertions it actually exercised. Avoid broad claims from a test that mocks the risky boundary or mirrors the implementation.",
+        "exercise": "For each acceptance case, name the cheapest test that provides convincing evidence and one failure it would miss.",
+        "source": "https://google.github.io/eng-practices/review/reviewer/looking-for.html",
+        "code": "Case                         Evidence\nMalformed URL                focused validator test\nConcurrent duplicate save    database integration test\nError presented accessibly   keyboard + browser check"
+      },
+      {
+        "title": "Release and maintain",
+        "model": "A release should identify the exact artifact, configuration and migration assumptions. Maintenance includes adapting behavior, addressing defects and retiring obsolete paths while preserving the ability to understand earlier decisions.",
+        "pitfalls": "A source rollback may not restore data compatibility. Record known limitations and recovery steps, and keep diagnostic information useful without logging secrets or unnecessary personal data.",
+        "exercise": "Write a release note and rollback plan for the reading-list feature, including the impact of a schema change.",
+        "source": "https://sre.google/sre-book/release-engineering/",
+        "code": "Release evidence: revision + artifact checksum + checks\nRollback condition: sustained save failures\nData requirement: previous binary can read the new schema"
+      }
+    ]
+  },
+  {
+    "slug": "system-design",
+    "title": "System Design",
+    "intro": "System design connects requirements to components, state and failure behavior. Begin with the workload and invariants, then introduce distribution only where it solves a concrete problem. A diagram is useful when every arrow has a contract and an owner.",
+    "audience": "Backend engineers define service boundaries; platform engineers manage capacity and deployment; operators validate failure and recovery assumptions.",
+    "flow": "Client → API → authoritative store\n           → outbox → worker → external service\nEvery boundary: deadline, authorization, retry and telemetry",
+    "project": "Design an application-review service. Include submission, review, notification and audit history. Produce a component diagram, data model, capacity estimate, failure table and recovery procedure.",
+    "guides": [
+      {
+        "title": "Requirements and workload estimates",
+        "model": "Separate functional requirements from constraints such as latency, availability, retention and data size. Estimate traffic and storage using explicit assumptions, then identify which assumptions dominate the design.",
+        "pitfalls": "Average traffic can hide bursts and uneven tenants. Avoid pretending estimates are measurements; record uncertainty and plan how production observations will refine the model.",
+        "exercise": "Estimate requests per second for 100,000 daily submissions concentrated in a two-hour period and compare with a uniform-day estimate.",
+        "source": "https://sre.google/sre-book/service-level-objectives/",
+        "code": "Uniform: 100000 / 86400 ≈ 1.16 requests/s\nTwo-hour window: 100000 / 7200 ≈ 13.9 requests/s\nNeither estimate includes retries or burst amplification."
+      },
+      {
+        "title": "State ownership and consistency",
+        "model": "Identify the authoritative owner of each fact and where derived copies exist. Caches, search indexes and analytics tables may lag behind the source. Operations that span boundaries need an explicit consistency model.",
+        "pitfalls": "Two writable copies without a conflict policy create ambiguity. Do not call a workflow atomic if part of it happens later in another system.",
+        "exercise": "Assign ownership for application status and notification state, then explain what the UI shows before a notification is delivered.",
+        "source": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "code": "Authoritative: application.status\nDerived: search index, dashboard counters\nAsynchronous: notification delivery status"
+      },
+      {
+        "title": "Caching and invalidation",
+        "model": "A cache trades freshness and operational complexity for lower latency or reduced load. Define keys, expiration, invalidation triggers and cache-miss behavior before introducing one. Private and public data need different isolation rules.",
+        "pitfalls": "A cache can amplify failures through synchronized expiry or repeated misses. Bound fallback load and ensure one user cannot receive another user’s cached response.",
+        "exercise": "Design a cache for public topic metadata and explain why member-specific application details need different keys or no shared cache.",
+        "source": "https://www.rfc-editor.org/rfc/rfc9111.html",
+        "code": "Cache key: topic ID + content version\nCache miss: bounded fetch from origin\nPrivate account data: separate authorization-aware policy"
+      },
+      {
+        "title": "Queues and asynchronous workflows",
+        "model": "A queue decouples request completion from later work. It introduces states such as accepted, processing, completed and failed. Users need to understand which state a successful API response actually confirms.",
+        "pitfalls": "A worker can crash after performing an effect but before acknowledgement. Use idempotent operations and record enough state to reconcile uncertain outcomes.",
+        "exercise": "Design notification processing so a retry does not generate uncontrolled duplicate messages.",
+        "source": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+        "code": "Accepted ≠ completed\nSubmission transaction → outbox row\nPublisher → queue → idempotent consumer → delivery result"
+      },
+      {
+        "title": "Overload and partial failure",
+        "model": "Dependencies can become slow without fully failing. Deadlines, concurrency limits and bounded queues keep that slowness from consuming every resource. Load shedding preserves useful service when demand exceeds capacity.",
+        "pitfalls": "Retries multiply load during an outage. Coordinate retry budgets and stop accepting work that cannot complete within its useful deadline.",
+        "exercise": "Describe what your service does when the database is slow for five minutes, including user feedback and queued work.",
+        "source": "https://sre.google/sre-book/handling-overload/",
+        "code": "Request budget: 2 s\nDatabase budget: 1 s\nQueue: bounded\nOver capacity: explicit retryable response, not unlimited waiting"
+      },
+      {
+        "title": "Recovery and design validation",
+        "model": "A design is incomplete without evidence that state and service can be recovered. Define recovery point and time objectives, backup ownership, restore checks and compatibility requirements. Rehearse failures in a controlled environment.",
+        "pitfalls": "Replication can copy an accidental deletion. A backup that has never been restored is an untested recovery assumption. Include configuration and secrets access in the restoration plan.",
+        "exercise": "Run a tabletop exercise: the primary database is unavailable and the latest deployment contains a bug. Decide the recovery order.",
+        "source": "https://sre.google/sre-book/data-integrity/",
+        "code": "Recovery checklist:\n1. Identify trusted backup and target revision.\n2. Restore to an isolated environment.\n3. Validate invariants and sample workflows.\n4. Redirect traffic with rollback criteria."
+      }
+    ]
+  },
+  {
+    "slug": "python",
+    "title": "Python",
+    "intro": "Learn Python through small, testable programs with explicit inputs and errors. The focus here is developer fundamentals: collections, functions, modules, file handling, exceptions and reproducible environments, rather than a catalogue of third-party packages.",
+    "audience": "Automation authors process data and files; application developers build services and tools; analysts use the same foundations to make workflows reproducible.",
+    "flow": "Input → parse → validate → transform → output\n       exceptions and cleanup are part of the contract",
+    "project": "Build a command-line reading-list importer that reads UTF-8 JSON, validates records, removes duplicates and writes a summary. Test empty input, missing fields, malformed JSON and inaccessible files.",
+    "guides": [
+      {
+        "title": "Values, collections and mutability",
+        "model": "Lists and dictionaries are mutable containers; tuples and strings behave differently. Assignment binds a name to an object, so two names may refer to the same mutable value. Copying a container can be shallow rather than recursively independent.",
+        "pitfalls": "Unexpected shared mutation is a common source of bugs. Decide whether a function modifies its input or returns a new value, and document that decision.",
+        "exercise": "Write a transformation that returns a new list and verify that the original list is unchanged.",
+        "source": "https://docs.python.org/3/tutorial/datastructures.html",
+        "code": "items = [\"C\", \"Python\"]\nupdated = [*items, \"SQL\"]\nassert items == [\"C\", \"Python\"]\nassert len(updated) == 3"
+      },
+      {
+        "title": "Functions and explicit validation",
+        "model": "A function should have a clear input and output contract. Type annotations describe intent to readers and tools but do not automatically validate runtime values. Reject invalid data at the boundary where its meaning is known.",
+        "pitfalls": "Avoid mutable default arguments when you intend a fresh value for each call. Distinguish absent input from an empty but valid value.",
+        "exercise": "Implement a limit parser that rejects negative numbers and values above a documented maximum.",
+        "source": "https://docs.python.org/3/tutorial/controlflow.html",
+        "code": "def parse_limit(value: str) -> int:\n    limit = int(value)\n    if not 1 <= limit <= 100:\n        raise ValueError(\"limit must be between 1 and 100\")\n    return limit"
+      },
+      {
+        "title": "Exceptions and resource cleanup",
+        "model": "Exceptions transfer control when an operation fails. Catch the specific failures you can handle, preserve useful context and let unexpected defects remain visible. Context managers help release resources even when a block raises.",
+        "pitfalls": "A broad except that returns success can hide corrupt data or programming errors. Do not expose raw sensitive values in user-facing error messages.",
+        "exercise": "Read a file with a context manager and distinguish invalid JSON from a missing file in the caller.",
+        "source": "https://docs.python.org/3/tutorial/errors.html",
+        "code": "import json\nfrom pathlib import Path\n\ndef read_records(path: Path):\n    with path.open(encoding=\"utf-8\") as stream:\n        return json.load(stream)"
+      },
+      {
+        "title": "Modules and reproducible environments",
+        "model": "Modules organize code behind explicit import boundaries. A virtual environment separates installed packages from other projects; dependency records describe what another machine needs to reproduce the workflow.",
+        "pitfalls": "A virtual environment does not pin every dependency automatically. Avoid relying on packages installed globally or on the current working directory being a particular location.",
+        "exercise": "Create a project environment and document the interpreter, dependency installation and command used to run the importer.",
+        "source": "https://docs.python.org/3/tutorial/venv.html",
+        "code": "python -m venv .venv\n# Activate with the command appropriate to your shell.\npython -m pip --version\npython -m unittest discover"
+      },
+      {
+        "title": "Tests for behavior and boundaries",
+        "model": "Use concrete examples to establish expected behavior and negative cases to verify rejection paths. Keep pure transformation tests fast and separate filesystem or network integration from core logic where that boundary is useful.",
+        "pitfalls": "A test should fail when its protected behavior breaks. Do not only test the happy path or assert a value calculated by copying the same algorithm under test.",
+        "exercise": "Test parse_limit with 1, 100, 0, 101 and non-numeric input. Explain the expected failure type.",
+        "source": "https://docs.python.org/3/library/unittest.html",
+        "code": "import unittest\n\nclass LimitsTest(unittest.TestCase):\n    def test_bounds(self):\n        self.assertEqual(parse_limit(\"1\"), 1)\n        with self.assertRaises(ValueError):\n            parse_limit(\"0\")"
+      },
+      {
+        "title": "Profiling and practical concurrency",
+        "model": "Measure the slow path before changing the architecture. I/O waits, CPU work and excessive allocations need different interventions. Async code helps coordinate waiting but does not make blocking operations or expensive computation disappear.",
+        "pitfalls": "Do not assume a function is non-blocking because it is called from async code. Bound concurrent work and preserve cancellation and error handling.",
+        "exercise": "Time parsing and transformation separately on a representative dataset, then identify which stage is worth improving.",
+        "source": "https://docs.python.org/3/library/profile.html",
+        "code": "python -m cProfile -s cumulative importer.py\n# Inspect cumulative time, then retest with representative inputs."
+      }
+    ]
+  },
+  {
+    "slug": "angular",
+    "title": "Angular",
+    "intro": "Angular organizes browser applications through components, templates, services and framework tooling. This guide focuses on data flow, forms, routing and observable behavior. It is educational content; CODARIS itself continues to use C/WebAssembly for browser application logic.",
+    "audience": "Frontend developers build interfaces; application teams maintain shared services and design systems; testers validate navigation, forms and accessibility.",
+    "flow": "Component state → template → user event → state update\n                service boundary → HTTP API",
+    "project": "Build an accessible topic browser with components, a reactive form and loading, empty and failure states. Add tests for keyboard navigation, validation and a failed data request.",
+    "guides": [
+      {
+        "title": "Components and template boundaries",
+        "model": "A component combines a class with a template and metadata. Inputs describe data supplied by a parent; outputs communicate events. Keep the component’s responsibility small enough that its state transitions are understandable.",
+        "pitfalls": "Avoid reaching into unrelated components to mutate their state. A template should not become a hidden application service or depend on expensive computations on every update.",
+        "exercise": "Split a topic list into a list component and an item component, then define their data and event contracts.",
+        "source": "https://angular.dev/guide/components",
+        "code": "import {Component} from \"@angular/core\";\n\n@Component({\n  selector: \"app-topic-title\",\n  template: \"<h2>{{ title }}</h2>\"\n})\nexport class TopicTitle {\n  title = \"Developer topics\";\n}"
+      },
+      {
+        "title": "Signals and derived state",
+        "model": "Signals track values consumed by the interface. A computed value expresses a derivation from other state, while effects are for interactions that cannot be represented as a pure derivation. Keep the source of truth explicit.",
+        "pitfalls": "Duplicating derived values into separately mutable state creates synchronization work. Avoid using effects merely to copy one value into another when a computed relationship is sufficient.",
+        "exercise": "Represent a list of topics and a derived count of completed topics without manually updating two counters.",
+        "source": "https://angular.dev/guide/signals",
+        "code": "import {signal, computed} from \"@angular/core\";\nconst completed = signal([false, true, false]);\nconst count = computed(() => completed().filter(Boolean).length);"
+      },
+      {
+        "title": "Reactive forms and validation feedback",
+        "model": "Reactive forms model controls and validation state explicitly. Labels, error descriptions and submit states should make the same workflow usable with keyboard and assistive technology. Browser validation is feedback, not server authorization.",
+        "pitfalls": "Show errors at a useful time and preserve input after failure. A disabled submit button alone does not explain what the user needs to fix.",
+        "exercise": "Build an email form with required and email validation, an inline error and a server-failure state that preserves the entered value.",
+        "source": "https://angular.dev/guide/forms/reactive-forms",
+        "code": "import {FormControl, Validators} from \"@angular/forms\";\nconst email = new FormControl(\"\", {\n  nonNullable: true,\n  validators: [Validators.required, Validators.email]\n});"
+      },
+      {
+        "title": "Dependency injection and service design",
+        "model": "Dependency injection supplies collaborators through a declared mechanism rather than hard-coding their creation everywhere. Services can encapsulate data access or shared behavior, but should still have explicit responsibilities and ownership.",
+        "pitfalls": "A single global service containing every mutable value creates coupling. Choose provider scope deliberately and keep transport details separate from presentation decisions.",
+        "exercise": "Define a topic-reading service interface and describe what the component sees during loading, success and failure.",
+        "source": "https://angular.dev/guide/di",
+        "code": "Component → TopicService → HTTP endpoint\nComponent state: idle | loading | ready | failed\nTransport error → user-facing state, not an unhandled exception"
+      },
+      {
+        "title": "Routing and asynchronous navigation",
+        "model": "Routing maps URLs to application views and supports navigation state. Data loading and authorization can involve asynchronous operations; the interface needs an intentional experience while those operations are pending or fail.",
+        "pitfalls": "A client route guard does not secure server data. The server must independently authorize every protected operation. Preserve useful URLs and avoid losing user work on accidental navigation.",
+        "exercise": "Design a detail route with loading, not-found and forbidden states. Explain which decisions belong to the server.",
+        "source": "https://angular.dev/guide/routing",
+        "code": "/topics                 → catalogue\n/topics/:slug           → topic detail\nUnknown slug            → not-found view\nProtected API response  → server-enforced authorization"
+      },
+      {
+        "title": "Testing component behavior",
+        "model": "Component tests should verify rendered behavior and interactions; integration tests should exercise routing and service boundaries where those are the risk. Use semantic queries and test the keyboard path as well as pointer clicks.",
+        "pitfalls": "Tests tightly coupled to private component methods can pass while the interface is broken. Cover asynchronous completion and failure rather than only initial rendering.",
+        "exercise": "Test that a form error is associated with its input and that a successful topic selection updates the displayed content.",
+        "source": "https://angular.dev/guide/testing",
+        "code": "Arrange: service returns a failed request\nAct: user submits the form\nAssert: inline error is visible, input is retained, retry is possible"
+      }
+    ]
+  },
+  {
+    "slug": "web-foundations",
+    "title": "Web Foundations",
+    "intro": "The web combines semantic documents, styling, browser behavior and a request/response protocol. Start with accessible HTML and understand the network and trust boundaries before adding complex interaction. A page should remain understandable when a capability fails.",
+    "audience": "Frontend developers build interfaces; backend engineers expose HTTP behavior; accessibility and QA specialists verify that workflows remain usable across devices and input methods.",
+    "flow": "HTML semantics + CSS layout + browser interaction\n             ↔ HTTP ↔ server authorization + data",
+    "project": "Build a responsive documentation page with semantic navigation, a labelled form and a progressively enhanced search. Test narrow screens, keyboard use, script failure and safe rendering of user text.",
+    "guides": [
+      {
+        "title": "Semantic HTML and document structure",
+        "model": "Headings, landmarks, links, buttons and form controls carry meaning beyond their appearance. Use the element that matches the action: links navigate, buttons perform actions, and labels identify inputs. This supports keyboards and assistive technologies.",
+        "pitfalls": "Clickable generic elements need extra behavior and semantics that native controls already provide. Keep heading order and accessible names meaningful rather than styling every title identically.",
+        "exercise": "Build a topic card with a heading, description and named navigation link. Test it using only the keyboard.",
+        "source": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
+        "code": "<article>\n  <h2>Databases</h2>\n  <p>Explore models, transactions and recovery.</p>\n  <a href=\"/databases/\">View database topic</a>\n</article>"
+      },
+      {
+        "title": "Responsive layout and readable content",
+        "model": "CSS layout defines relationships between elements under changing space constraints. Grid and flex layouts can adapt without fixed pixel assumptions, while sensible line lengths and wrapping preserve readability.",
+        "pitfalls": "A desktop screenshot does not establish mobile usability. Test long labels, large text, narrow screens and wide tables; local scrolling should not force the entire page wider than the viewport.",
+        "exercise": "Make a three-column topic grid collapse to one column and verify that a long title does not overflow.",
+        "source": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design",
+        "code": ".topics {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));\n  gap: 1rem;\n}"
+      },
+      {
+        "title": "Forms and useful feedback",
+        "model": "A form needs labels, constraints, instructions and feedback that survives failure. Associate errors with the affected control and explain how to recover. Preserve valid input where possible instead of forcing users to restart.",
+        "pitfalls": "Client validation can be bypassed and must be repeated at the trusted boundary. Do not use placeholder text as the only label or rely only on color to communicate an error.",
+        "exercise": "Create a required display-name input with an inline error and a status region for submission results.",
+        "source": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms",
+        "code": "<label for=\"display-name\">Display name</label>\n<input id=\"display-name\" aria-describedby=\"name-error\" required>\n<p id=\"name-error\">Enter a display name.</p>\n<p role=\"status\" aria-live=\"polite\"></p>"
+      },
+      {
+        "title": "HTTP requests and representations",
+        "model": "HTTP messages carry methods, targets, status codes, headers and optional bodies. A response body is a representation whose type and caching behavior should be explicit. Network success and application success are different layers.",
+        "pitfalls": "A successful connection can still return an application error. Handle timeouts, malformed responses and unexpected status codes deliberately instead of assuming every response contains the expected JSON.",
+        "exercise": "Describe the client behavior for 200, 400, 401, 404 and 503 responses without exposing internal server details.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview",
+        "code": "GET /topics HTTP/1.1\nAccept: application/json\n\nHTTP/1.1 200 OK\nContent-Type: application/json\nCache-Control: public, max-age=60"
+      },
+      {
+        "title": "Browser trust and safe rendering",
+        "model": "Browser code executes in a user-controlled environment. Server authorization protects data, while safe DOM operations prevent untrusted text from becoming executable markup. Origin and content-security policies add boundaries but do not replace correct rendering.",
+        "pitfalls": "Do not interpolate arbitrary text into HTML or expose server credentials to client code. Treat URL handling, script loading and third-party code as explicit trust decisions.",
+        "exercise": "Render a user message containing angle brackets as literal text and verify that no new element or event handler is created.",
+        "source": "https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent",
+        "code": "const message = document.createElement(\"p\");\nmessage.textContent = userSuppliedText;\ncontainer.append(message);"
+      },
+      {
+        "title": "Progressive enhancement and performance",
+        "model": "Start from usable content and add interaction where it improves a workflow. Loading, failure and reduced-capability states should remain understandable. Measure transferred bytes, main-thread work and visible responsiveness separately.",
+        "pitfalls": "An animation or client bundle can improve appearance while delaying useful interaction. Respect reduced motion and avoid making static reading depend on a successful runtime download.",
+        "exercise": "Disable JavaScript on a documentation page and list which capabilities still work. Add a fallback for any essential task that disappears.",
+        "source": "https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement",
+        "code": "Baseline: readable content + native links + disclosures\nEnhancement: search + local progress + richer interaction\nFailure: explain missing enhancement without hiding the content"
+      }
+    ]
+  },
+  {
+    "slug": "sql-postgresql",
+    "title": "SQL & PostgreSQL",
+    "intro": "Learn relational modelling and SQL by protecting a small application’s invariants. This guide complements the database catalogue with practical schema, query, transaction and execution-plan work. Examples are educational and should be run in a disposable database.",
+    "audience": "Backend developers define data contracts; analysts query related records; database engineers maintain correctness, performance and recovery.",
+    "flow": "Application request → parameterized SQL → transaction\n                    → constraints + query plan → durable data",
+    "project": "Build a reading-list schema with users and saved items. Add a uniqueness rule, write a join and aggregation, test rollback, inspect a query plan and document a restore procedure.",
+    "guides": [
+      {
+        "title": "Tables, keys and constraints",
+        "model": "A relational schema models entities and relationships using tables, primary keys, foreign keys and constraints. Constraints protect durable rules regardless of which application path performs a write. Nullability is part of the model, not only a UI choice.",
+        "pitfalls": "Do not rely solely on checking for duplicates before inserting: concurrent requests can both pass that check. Express uniqueness in the database and handle its outcome.",
+        "exercise": "Create a saved-item table that permits one URL per member and rejects an empty title.",
+        "source": "https://www.postgresql.org/docs/current/ddl-constraints.html",
+        "code": "CREATE TABLE saved_item (\n  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n  member_id bigint NOT NULL,\n  url text NOT NULL,\n  title text NOT NULL CHECK (length(title) > 0),\n  UNIQUE (member_id, url)\n);"
+      },
+      {
+        "title": "Filtering, joins and missing values",
+        "model": "A query describes the result needed; the planner chooses an execution strategy. Joins combine related rows, and outer joins preserve unmatched rows when that is part of the requirement. NULL represents missing or unknown information and changes comparison behavior.",
+        "pitfalls": "A filter on the nullable side of an outer join can unintentionally remove unmatched rows. Use IS NULL for null tests and decide how aggregates should treat missing data.",
+        "exercise": "Write a query for members with no saved items and explain why an inner join cannot return them.",
+        "source": "https://www.postgresql.org/docs/current/tutorial-join.html",
+        "code": "SELECT m.id\nFROM member AS m\nLEFT JOIN saved_item AS s ON s.member_id = m.id\nWHERE s.id IS NULL;\n-- Assumes a separate member table with primary key id."
+      },
+      {
+        "title": "Transactions and rollback",
+        "model": "A transaction groups changes into a unit that commits or rolls back. This protects operations whose intermediate states should not become durable. Error handling must end or recover the transaction correctly before reusing a connection.",
+        "pitfalls": "Transaction boundaries that are too broad hold resources unnecessarily. A database transaction cannot automatically roll back an email already sent through an external service.",
+        "exercise": "Insert two related records, deliberately fail the second operation and verify that rollback leaves neither record.",
+        "source": "https://www.postgresql.org/docs/current/tutorial-transactions.html",
+        "code": "BEGIN;\nINSERT INTO saved_item (member_id, url, title)\nVALUES (1, 'https://example.test/article', 'Example');\nROLLBACK;\n-- The inserted row must not remain."
+      },
+      {
+        "title": "Concurrency and isolation",
+        "model": "Concurrent transactions may observe changing data according to the isolation level and operation. Locks, constraints and serialization failures are tools and outcomes to design for, not exceptional details to ignore.",
+        "pitfalls": "A read followed by a write can race with another transaction. Keep invariants enforceable, acquire locks deliberately when needed and retry only operations whose semantics permit it.",
+        "exercise": "Use two database sessions to attempt the same unique insert and record the result seen by each.",
+        "source": "https://www.postgresql.org/docs/current/transaction-iso.html",
+        "code": "Session A: BEGIN; insert unique item; keep transaction open\nSession B: attempt same unique item\nSession A: COMMIT\nObserve B: uniqueness enforcement, not two durable duplicates"
+      },
+      {
+        "title": "Indexes and EXPLAIN",
+        "model": "Indexes trade storage and write work for alternate read access paths. EXPLAIN describes a plan; EXPLAIN ANALYZE executes the statement and reports actual observations. Compare estimates with measured behavior using representative data.",
+        "pitfalls": "Do not run EXPLAIN ANALYZE on a modifying statement assuming it is read-only. An index can be unused because a scan is cheaper, statistics differ or the query does not match the expected pattern.",
+        "exercise": "Load a representative dataset and compare plans for a member-filtered lookup before and after an appropriate index.",
+        "source": "https://www.postgresql.org/docs/current/using-explain.html",
+        "code": "EXPLAIN\nSELECT id, title FROM saved_item\nWHERE member_id = 42\nORDER BY id\nLIMIT 20;"
+      },
+      {
+        "title": "Parameterized access and operations",
+        "model": "Parameterized APIs keep values separate from SQL syntax. The backend owns connection credentials and query execution. Operational correctness also requires bounded connection use, migrations and tested recovery, not only a valid SELECT statement.",
+        "pitfalls": "Parameters do not stand in for arbitrary identifiers. If table or column choices vary, select from a controlled allowlist rather than concatenating untrusted text. Always check query results and release handles.",
+        "exercise": "Describe the ownership of a libpq connection and result object through success and error paths.",
+        "source": "https://www.postgresql.org/docs/current/libpq-exec.html",
+        "code": "const char *values[] = {member_id_text};\nPGresult *result = PQexecParams(conn,\n  \"SELECT id, title FROM saved_item WHERE member_id = $1\",\n  1, NULL, values, NULL, NULL, 0);\n/* Check result and status; copy needed values; PQclear(result). */"
+      }
+    ]
+  }
+]
