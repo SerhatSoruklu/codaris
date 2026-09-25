@@ -1,0 +1,4 @@
+﻿purpose,source,url,notes
+Developer usage,Stack Overflow Developer Survey 2025,https://survey.stackoverflow.co/2025/technology/,"Cloud-development category; 24,473 respondents; includes cloud, containers, package managers, build tools and IaC."
+Survey headline,Stack Overflow 2025 press release,https://stackoverflow.co/company/press/archive/stack-overflow-2025-developer-survey/,AWS 43% headline usage within mixed cloud-development category.
+Cloud-native population,CNCF/SlashData 2025,https://www.cncf.io/announcements/2025/11/11/cncf-and-slashdata-survey-finds-cloud-native-ecosystem-surges-to-15-6m-developers/,"15.6M developers use cloud-native technologies; hybrid 32%, multi-cloud 26% among developers."

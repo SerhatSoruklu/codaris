@@ -1,0 +1,13 @@
+﻿category_number,category,catalogue_entries,folder
+5,"Package Managers, Build Tools & Bundlers",229,05_package_build_bundlers
+6,"IDEs, Editors & Developer Environments",178,06_ides_editors_environments
+7,Version Control & Code Hosting,118,07_version_control_code_hosting
+8,Testing & QA,277,08_testing_qa
+9,"Cloud, Hosting & Serverless",140,09_cloud_hosting_serverless
+10,"Containers, Orchestration & Infrastructure",168,10_containers_orchestration_infrastructure
+11,CI/CD & DevOps Automation,123,11_cicd_devops_automation
+12,"Web Servers, Proxies & Networking",168,12_web_servers_proxies_networking
+13,"Messaging, Queues & Event Streaming",133,13_messaging_queues_streaming
+14,"Observability, Logging & Monitoring",172,14_observability_logging_monitoring
+15,"APIs, Protocols, Auth & Integration",226,15_apis_protocols_auth_integration
+16,AI Developer Tools & Coding Systems,160,16_ai_developer_tools

@@ -1,0 +1,110 @@
+[
+  {
+    "name": "PostgreSQL",
+    "type": "Relational database / server",
+    "role": "Backend engineers and database developers use PostgreSQL for structured application data, queries and durable invariants.",
+    "technical": "Tables, SQL, foreign keys and transactions model related records. Indexes support access paths; concurrency and transaction isolation govern how concurrent work observes changes.",
+    "tradeoffs": "Use constraints for durable rules, parameterized queries for values and explicit transaction boundaries. Inspect query plans and test backup restoration. CODARIS uses PostgreSQL through libpq from its native C backend.",
+    "exercise": "Build a reading-list schema with unique and foreign-key constraints, then test a concurrent update.",
+    "source": "https://www.postgresql.org/docs/current/tutorial.html"
+  },
+  {
+    "name": "SQLite",
+    "type": "Embedded relational database",
+    "role": "Application and device developers use SQLite when data should live with the application rather than behind a separate database server.",
+    "technical": "An in-process SQL engine stores a database in a local file. Transactions and indexes remain useful even when there is no separate server process.",
+    "tradeoffs": "Plan file ownership, backup and write contention. Embedded deployment changes operational boundaries; it does not make concurrent writes unlimited.",
+    "exercise": "Build an offline catalogue and verify a rollback leaves no partial update.",
+    "source": "https://www.sqlite.org/whentouse.html"
+  },
+  {
+    "name": "MySQL",
+    "type": "Relational database / server",
+    "role": "Backend and database teams use MySQL for SQL-based application storage and transactional workloads.",
+    "technical": "The InnoDB storage engine provides transactions, row-level locking and foreign keys. SQL queries use indexes and an optimizer to select access paths.",
+    "tradeoffs": "Review isolation, deadlocks and index choices. Treat migration locking and replication behavior as operational design decisions.",
+    "exercise": "Model an order and its items with a transaction and test rollback on failure.",
+    "source": "https://dev.mysql.com/doc/refman/8.4/en/innodb-introduction.html"
+  },
+  {
+    "name": "MongoDB",
+    "type": "Document database",
+    "role": "Application developers use MongoDB for data represented as documents with related values and nested structures.",
+    "technical": "Documents can embed related data or reference other documents. Schema design follows access patterns; indexes support queries and validation can constrain stored shapes.",
+    "tradeoffs": "Flexible schema still needs a data model. Weigh duplication and document growth against the cost of separate reads and cross-document updates.",
+    "exercise": "Model a product catalogue and compare embedding variants with referencing them.",
+    "source": "https://www.mongodb.com/docs/manual/data-modeling/"
+  },
+  {
+    "name": "Redis",
+    "type": "In-memory data store",
+    "role": "Backend and platform engineers use Redis for fast access to keys and data structures in workloads such as caching and coordination.",
+    "technical": "Strings, hashes, lists, sets and other structures expose purpose-specific operations. Persistence, eviction and replication settings shape operational behavior.",
+    "tradeoffs": "Decide whether data is authoritative or rebuildable. Define expiration, eviction and cache-miss behavior; do not assume every deployment has the same durability guarantees.",
+    "exercise": "Build a bounded cache and test expiry, eviction and upstream failure.",
+    "source": "https://redis.io/docs/latest/develop/data-types/"
+  },
+  {
+    "name": "Apache Cassandra",
+    "type": "Distributed wide-column database",
+    "role": "Distributed-systems teams use Cassandra for partitioned data and workloads designed around known access patterns.",
+    "technical": "Partition keys distribute records; clustering organizes data within partitions. Replication and tunable consistency affect availability and read/write behavior.",
+    "tradeoffs": "Design queries before tables and avoid unbounded hot partitions. Plan repairs, retention and failure testing rather than treating distribution as automatic reliability.",
+    "exercise": "Design a time-bucketed event table and explain its partition-size bound.",
+    "source": "https://cassandra.apache.org/doc/latest/cassandra/architecture/overview.html"
+  },
+  {
+    "name": "Neo4j",
+    "type": "Property graph database",
+    "role": "Developers working with connected data use Neo4j to model relationships explicitly and traverse them.",
+    "technical": "Nodes and relationships can carry properties; labels and relationship types express meaning. Graph queries follow patterns across connected records.",
+    "tradeoffs": "Bound traversal depth and inspect query plans. Graph modelling is useful when relationships drive the queries; it does not remove indexing or transaction design.",
+    "exercise": "Model projects, contributors and dependencies, then query a bounded dependency path.",
+    "source": "https://neo4j.com/docs/getting-started/appendix/graphdb-concepts/"
+  },
+  {
+    "name": "Elasticsearch",
+    "type": "Search and analytics system",
+    "role": "Search and platform teams use Elasticsearch to retrieve and aggregate indexed documents.",
+    "technical": "Search visibility is near-real-time: an indexed change may require a refresh before appearing in search results. Analysis and mappings influence how text is indexed.",
+    "tradeoffs": "Design reindexing and source-of-truth recovery. Distinguish acknowledgement from search visibility and budget shard count, memory and storage.",
+    "exercise": "Index a small document set and test the interval between a write and searchable results.",
+    "source": "https://www.elastic.co/docs/manage-data/data-store/near-real-time-search"
+  },
+  {
+    "name": "DuckDB",
+    "type": "Embedded analytical database",
+    "role": "Analysts and data-tool developers use DuckDB for SQL analytics within an application or local workflow.",
+    "technical": "An in-process analytical engine supports column-oriented execution and data-file workflows. Its role differs from a shared transactional application server.",
+    "tradeoffs": "Test memory requirements and representative scans. Separate analytical access patterns from highly concurrent request-by-request updates.",
+    "exercise": "Query a local dataset and compare a full scan with a filtered aggregation.",
+    "source": "https://duckdb.org/docs/stable/"
+  },
+  {
+    "name": "Amazon DynamoDB",
+    "type": "Managed key-value and document database",
+    "role": "Cloud application teams use DynamoDB for managed, partitioned application data with key-oriented access.",
+    "technical": "Partition and sort keys shape access patterns. Secondary indexes add alternate query paths; throughput and consistency behavior depend on the operation and configuration.",
+    "tradeoffs": "Avoid hot keys, understand index limitations and model cost under real traffic. Managed operation still requires access control, backup and failure planning.",
+    "exercise": "Design keys for a tenant-scoped activity feed and test a heavily active tenant.",
+    "source": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html"
+  },
+  {
+    "name": "Qdrant",
+    "type": "Vector search system",
+    "role": "Search and machine-learning teams use Qdrant to retrieve vectors by similarity with associated payload filters.",
+    "technical": "Collections organize points containing vectors and payload data. Similarity search depends on the embedding model, distance metric and index configuration.",
+    "tradeoffs": "Measure recall and latency on representative queries. Enforce tenant filters and plan embedding-version migrations; similarity is not factual correctness.",
+    "exercise": "Create a small semantic-search benchmark with labelled relevant results.",
+    "source": "https://qdrant.tech/documentation/overview/"
+  },
+  {
+    "name": "Supabase",
+    "type": "Developer platform / PostgreSQL foundation",
+    "role": "Application teams use Supabase to combine a PostgreSQL database with platform services and developer-facing APIs.",
+    "technical": "The database remains PostgreSQL, while the platform supplies additional integration surfaces. Engine capabilities and platform responsibilities are distinct layers.",
+    "tradeoffs": "Design row-level access policies and keep privileged credentials on the server. Review backups, migrations and the trust boundary of every exposed API.",
+    "exercise": "Create a tenant-owned table and test policies with two different users.",
+    "source": "https://supabase.com/docs/guides/database/overview"
+  }
+]

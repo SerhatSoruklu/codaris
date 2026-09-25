@@ -1,0 +1,14 @@
+[Unit]
+Description=CODARIS transactional mail queue
+After=network.target postgresql.service
+[Service]
+Type=oneshot
+User=codaris
+Group=codaris
+EnvironmentFile=/etc/codaris/backend.env
+ExecStart=/opt/codaris/codaris_server --mail-once
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+UMask=0077

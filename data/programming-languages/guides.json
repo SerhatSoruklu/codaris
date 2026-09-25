@@ -1,0 +1,137 @@
+[
+  {
+    "language": "C",
+    "domain": "Systems / embedded",
+    "role": "Systems engineers, firmware developers and library maintainers use C to work close to operating-system and hardware interfaces.",
+    "technical": "Static types, explicit pointers and manual resource lifetimes. Implementations commonly compile ahead of time to native code. The language does not automatically enforce bounds or ownership.",
+    "tradeoffs": "Reason about allocation failure, integer overflow, bounds and cleanup on every exit. Use compiler warnings, sanitizers and parameterized interfaces. CODARIS uses C17 for native code and C compiled to WebAssembly in the browser.",
+    "exercise": "Build a bounded text parser; test empty, oversized and malformed input.",
+    "source": "https://gcc.gnu.org/onlinedocs/gcc/Standards.html"
+  },
+  {
+    "language": "C++",
+    "domain": "Systems / performance",
+    "role": "Engine, graphics and native application developers use C++ when they need low-level control alongside reusable abstractions.",
+    "technical": "Static typing, templates, deterministic destruction and RAII support resource ownership. Native code can use object-oriented, generic and functional techniques.",
+    "tradeoffs": "Prefer explicit ownership and standard containers. Lifetime bugs, undefined behavior and complex build interfaces still require careful review.",
+    "exercise": "Implement a file-processing tool with RAII and unit tests for failure paths.",
+    "source": "https://gcc.gnu.org/onlinedocs/gcc/Standards.html"
+  },
+  {
+    "language": "Rust",
+    "domain": "Systems / reliability",
+    "role": "Systems and infrastructure developers use Rust for components where memory safety and predictable resource ownership matter.",
+    "technical": "Ownership, borrowing and lifetimes constrain aliasing in safe code. Traits and enums model interfaces and state; Result and Option make failure and absence explicit.",
+    "tradeoffs": "Safe Rust prevents many memory errors, but unsafe blocks and foreign interfaces need separate auditing. Concurrency still requires sound design.",
+    "exercise": "Write a command-line parser that returns structured errors without panicking.",
+    "source": "https://rust-lang.org/learn/"
+  },
+  {
+    "language": "Go",
+    "domain": "Services / infrastructure",
+    "role": "Backend and platform developers use Go for network services, command-line tools and operational software.",
+    "technical": "Static types, interfaces, garbage collection, goroutines and channels support compact concurrent programs. Packages and modules organize builds.",
+    "tradeoffs": "Design cancellation, timeouts and ownership of shared state. A goroutine is lightweight but can still leak when blocked indefinitely.",
+    "exercise": "Build a small HTTP service with bounded requests, cancellation and graceful shutdown.",
+    "source": "https://go.dev/doc/"
+  },
+  {
+    "language": "Python",
+    "domain": "Automation / data",
+    "role": "Automation developers, analysts and backend engineers use Python for scripts, data workflows and services.",
+    "technical": "Dynamic types, high-level collections and modules favor rapid iteration. Type annotations help tools but do not enforce runtime validation by themselves.",
+    "tradeoffs": "Keep environments reproducible, validate boundary data and profile before optimizing. Native extensions can accelerate work but introduce their own failure modes.",
+    "exercise": "Parse a CSV, validate rows and produce a reproducible summary with tests.",
+    "source": "https://docs.python.org/3/tutorial/"
+  },
+  {
+    "language": "JavaScript",
+    "domain": "Web / applications",
+    "role": "Browser and server developers use JavaScript for interactive interfaces and event-driven applications.",
+    "technical": "Dynamic typing, lexical closures, prototypes, promises and modules. The host supplies APIs such as the DOM or server I/O; these are not identical across runtimes.",
+    "tradeoffs": "Understand coercion and asynchronous error handling. Do not block the event loop with expensive synchronous work; validate all external input.",
+    "exercise": "Build an accessible interactive list with loading, empty and error states.",
+    "source": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide"
+  },
+  {
+    "language": "TypeScript",
+    "domain": "Web / typed applications",
+    "role": "Application teams use TypeScript to describe JavaScript interfaces and catch many mistakes before execution.",
+    "technical": "Structural typing, unions, generics and control-flow narrowing add static analysis. Most type information is erased when emitting JavaScript.",
+    "tradeoffs": "Types do not validate JSON at runtime. Treat network and storage values as untrusted until checked; avoid hiding uncertainty behind any.",
+    "exercise": "Model a request as loading, success or failure with a discriminated union.",
+    "source": "https://www.typescriptlang.org/docs/handbook/intro.html"
+  },
+  {
+    "language": "Java",
+    "domain": "Services / JVM",
+    "role": "Backend and application developers use Java within the JVM ecosystem and its extensive libraries and tools.",
+    "technical": "Static types, classes, interfaces, generics and exceptions. JVM implementations manage memory and commonly use just-in-time compilation.",
+    "tradeoffs": "Budget heap use, close external resources deterministically and choose concurrency abstractions deliberately. Garbage collection does not close every resource.",
+    "exercise": "Build a small service layer with typed inputs and tests around exception handling.",
+    "source": "https://dev.java/learn/"
+  },
+  {
+    "language": "C#",
+    "domain": "Applications / .NET",
+    "role": "Service, desktop and game-tool developers use C# with the .NET ecosystem.",
+    "technical": "Static typing with generics, pattern matching, LINQ and async/await. Managed memory reduces manual allocation work; IDisposable handles many external resources.",
+    "tradeoffs": "Await asynchronous work, propagate cancellation and dispose resources. Nullable annotations help analysis but are not a substitute for boundary validation.",
+    "exercise": "Write an asynchronous file-processing tool with cancellation and explicit errors.",
+    "source": "https://learn.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/overview"
+  },
+  {
+    "language": "Ruby",
+    "domain": "Web / scripting",
+    "role": "Web application developers and automation authors use Ruby for expressive object-oriented programs and internal tools.",
+    "technical": "Dynamic typing, objects, blocks and mixins support compact APIs. Ruby on Rails supplies a separate web framework around the language.",
+    "tradeoffs": "Metaprogramming can obscure control flow. Keep behavior discoverable, test public interfaces and monitor dependencies.",
+    "exercise": "Create a small command-line report using Enumerable and tests.",
+    "source": "https://www.ruby-lang.org/en/about/"
+  },
+  {
+    "language": "R",
+    "domain": "Statistics / research",
+    "role": "Statisticians, researchers and analysts use R for modelling, statistical computing and graphics.",
+    "technical": "Vectors, data structures and an extensible package ecosystem support analysis. Missing values and vectorized operations are central concepts.",
+    "tradeoffs": "Record package versions, random seeds and data provenance. Inspect missingness and assumptions before presenting a statistical result.",
+    "exercise": "Create a reproducible report that separates raw data, transformations and interpretation.",
+    "source": "https://www.r-project.org/about.html"
+  },
+  {
+    "language": "SQL",
+    "domain": "Data / relational systems",
+    "role": "Application developers, analysts and database engineers use SQL to define, query and modify relational data.",
+    "technical": "Declarative queries describe results; the database planner selects an execution strategy. Constraints, transactions and indexes shape correctness and performance.",
+    "tradeoffs": "Dialects differ. Use parameter binding for values, review query plans and understand transaction isolation. NULL introduces three-valued logic.",
+    "exercise": "Design a reading-list schema with foreign keys and a parameterized query.",
+    "source": "https://www.postgresql.org/docs/current/tutorial-sql.html"
+  },
+  {
+    "language": "Lua",
+    "domain": "Embedding / scripting",
+    "role": "Host-application and game developers use Lua to make software scriptable without replacing its native core.",
+    "technical": "A small embeddable language with dynamic types, tables, functions and coroutines. A C API connects the interpreter to its host.",
+    "tradeoffs": "The host decides available capabilities. Sandbox untrusted scripts deliberately and control resource consumption and exposed APIs.",
+    "exercise": "Embed a configuration script in a small host and validate the returned values.",
+    "source": "https://www.lua.org/about.html"
+  },
+  {
+    "language": "Erlang",
+    "domain": "Distributed / concurrent",
+    "role": "Developers of concurrent services use Erlang processes and message passing to isolate work.",
+    "technical": "Lightweight processes communicate through mailboxes. Links and monitors support failure observation; OTP adds reusable supervision and service patterns.",
+    "tradeoffs": "Plan overload behavior, mailbox growth and recovery. Distribution does not remove partial failure or network partitions.",
+    "exercise": "Model two communicating processes and test what happens when one stops.",
+    "source": "https://www.erlang.org/doc/system/conc_prog.html"
+  },
+  {
+    "language": "Haskell",
+    "domain": "Functional / typed modelling",
+    "role": "Developers and researchers use Haskell to express transformations and domain models with strong static types.",
+    "technical": "Pure functions, algebraic data types, type inference and non-strict evaluation are central. Effects are represented explicitly in typed interfaces.",
+    "tradeoffs": "Laziness changes when work and allocation happen. Watch space use, make effects visible and keep abstractions understandable to the team.",
+    "exercise": "Model a small domain with sum types and test pure transformations.",
+    "source": "https://www.haskell.org/"
+  }
+]

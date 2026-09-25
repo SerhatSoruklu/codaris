@@ -13,9 +13,9 @@
       }
     },
     {
-      "label": "CODARIS: Run browser client",
+      "label": "CODARIS: Run local app (database, API, browser)",
       "type": "process",
-      "command": "${workspaceFolder}/scripts/run-client.sh",
+      "command": "${workspaceFolder}/scripts/dev.sh",
       "args": [],
       "problemMatcher": []
     },
@@ -27,7 +27,7 @@
       "problemMatcher": []
     },
     {
-      "label": "CODARIS: Run backend health check",
+      "label": "CODARIS: Run account API (development)",
       "type": "process",
       "command": "${workspaceFolder}/scripts/run-server.sh",
       "args": [],
@@ -63,6 +63,34 @@
       "type": "process",
       "command": "${workspaceFolder}/scripts/doctor.sh",
       "args": [],
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Build production client",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/scripts/project.py",
+        "prod",
+        "build-client"
+      ],
+      "windows": {
+        "command": "python"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Build production backend",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/scripts/project.py",
+        "prod",
+        "build-server"
+      ],
+      "windows": {
+        "command": "python"
+      },
       "problemMatcher": []
     }
   ]

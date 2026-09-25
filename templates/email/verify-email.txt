@@ -1,0 +1,10 @@
+Subject: Verify your email for CODARIS
+
+CODARIS
+BUILD. VERIFY. ADVANCE.
+
+Confirm your email address to continue your application. This link expires at {{expires_at}} and can be used once. If you did not start this request, you can ignore this email.
+
+Verify email: {{verification_url}}
+
+Never reply with your password.

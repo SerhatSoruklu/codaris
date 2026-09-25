@@ -1,0 +1,1701 @@
+{
+  "Dashboard": [
+    [
+      "CODARIS Web Frameworks & Technologies Research Dataset"
+    ],
+    [
+      "Metric",
+      "Value"
+    ],
+    [
+      "Catalogue entries",
+      "631"
+    ],
+    [
+      "Stack Overflow 2025 ranked technologies",
+      "26"
+    ],
+    [
+      "Primary ecosystems",
+      "29"
+    ],
+    [
+      "Catalogue categories",
+      "28"
+    ],
+    [
+      "Country/region rows",
+      "146"
+    ],
+    [
+      "Research sources",
+      "21"
+    ],
+    [
+      "IMPORTANT: React is a library, Node.js/Deno/Bun are runtimes, WordPress/Drupal are CMS platforms, and CSS systems such as Tailwind/Bootstrap are styling frameworks. CODARIS should keep these types separate. The shared catalogue exists for discovery, not to claim every entry is the same kind of technology."
+    ],
+    [
+      "POPULARITY: Stack Overflow percentages describe survey respondents who reported extensive use in the prior year. State of JS percentages describe its JavaScript-community respondents. W3Techs measures detected technologies on websites. These metrics are not directly interchangeable and should never be averaged into a single universal usage percentage."
+    ]
+  ],
+  "Survey usage": [
+    [
+      "Rank",
+      "Technology",
+      "Used %",
+      "Survey responses",
+      "Taxonomy note",
+      "Source"
+    ],
+    [
+      "1",
+      "Node.js",
+      "48.7",
+      "23678",
+      "Runtime; Runtime / web platform",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "2",
+      "React",
+      "44.7",
+      "23678",
+      "Framework / UI library; Front-end application",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "3",
+      "jQuery",
+      "23.4",
+      "23678",
+      "Web technology; ",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "4",
+      "Next.js",
+      "20.8",
+      "23678",
+      "Meta-framework / full-stack framework; Meta / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "5",
+      "Express",
+      "19.9",
+      "23678",
+      "Framework / server technology; Back-end / API",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "6",
+      "ASP.NET Core",
+      "19.7",
+      "23678",
+      "Framework / web platform; .NET web",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "7",
+      "Angular",
+      "18.2",
+      "23678",
+      "Framework / UI library; Front-end application",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "8",
+      "Vue.js",
+      "17.6",
+      "23678",
+      "Framework / UI library; Front-end application",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "9",
+      "FastAPI",
+      "14.8",
+      "23678",
+      "Framework / web app toolkit; Back-end / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "10",
+      "Spring Boot",
+      "14.7",
+      "23678",
+      "Framework / web platform; Back-end / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "11",
+      "Flask",
+      "14.4",
+      "23678",
+      "Framework / web app toolkit; Back-end / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "12",
+      "ASP.NET",
+      "14.2",
+      "23678",
+      "Web technology; ",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "13",
+      "WordPress",
+      "13.6",
+      "23678",
+      "CMS / web platform; CMS / web platform",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "14",
+      "Django",
+      "12.6",
+      "23678",
+      "Framework / web app toolkit; Back-end / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "15",
+      "Laravel",
+      "8.9",
+      "23678",
+      "Framework / web app toolkit; Back-end / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "16",
+      "AngularJS",
+      "7.2",
+      "23678",
+      "Framework / UI library; Front-end application",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "17",
+      "Svelte",
+      "7.2",
+      "23678",
+      "Framework / UI library; Front-end application",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "18",
+      "Blazor",
+      "7",
+      "23678",
+      "Framework / web platform; .NET web",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "19",
+      "NestJS",
+      "6.7",
+      "23678",
+      "Framework / server technology; Back-end / API",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "20",
+      "Ruby on Rails",
+      "5.9",
+      "23678",
+      "Framework / web app toolkit; Back-end / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "21",
+      "Astro",
+      "4.5",
+      "23678",
+      "Meta-framework / full-stack framework; Meta / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "22",
+      "Nuxt",
+      "4",
+      "23678",
+      "Meta-framework / full-stack framework; Meta / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "23",
+      "Symfony",
+      "4",
+      "23678",
+      "Framework / web app toolkit; Back-end / full-stack",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "24",
+      "Deno",
+      "4",
+      "23678",
+      "Runtime; Runtime / web platform",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "25",
+      "Phoenix",
+      "2.4",
+      "23678",
+      "Framework / web toolkit; BEAM web",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ],
+    [
+      "26",
+      "Drupal",
+      "2.2",
+      "23678",
+      "CMS / web platform; CMS / web platform",
+      "https://survey.stackoverflow.co/2025/technology/"
+    ]
+  ],
+  "JavaScript sentiment": [
+    [
+      "Technology",
+      "State of JS used %",
+      "Satisfaction %",
+      "Category",
+      "Source"
+    ],
+    [
+      "Angular",
+      "",
+      "48",
+      "Front-end application",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Astro",
+      "",
+      "94",
+      "Meta / full-stack",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Docusaurus",
+      "",
+      "69",
+      "Static site / documentation",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Express",
+      "79.9",
+      "81",
+      "Back-end / API",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Fastify",
+      "",
+      "86",
+      "Back-end / API",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Gatsby",
+      "",
+      "24",
+      "Meta / full-stack",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Hono",
+      "",
+      "95",
+      "Back-end / API",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Koa",
+      "",
+      "64",
+      "Back-end / API",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "NestJS",
+      "",
+      "73",
+      "Back-end / API",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Next.js",
+      "58.6",
+      "55",
+      "Meta / full-stack",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Nuxt",
+      "",
+      "80",
+      "Meta / full-stack",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Preact",
+      "",
+      "81",
+      "Front-end application",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "React",
+      "83.6",
+      "72",
+      "Front-end application",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Remix",
+      "",
+      "68",
+      "Meta / full-stack",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "SolidJS",
+      "",
+      "89",
+      "Front-end application",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Strapi",
+      "",
+      "54",
+      "Back-end / API",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Svelte",
+      "",
+      "86",
+      "Front-end application",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "SvelteKit",
+      "",
+      "88",
+      "Meta / full-stack",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "tRPC",
+      "",
+      "83",
+      "Back-end / API",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ],
+    [
+      "Vue.js",
+      "",
+      "84",
+      "Front-end application",
+      "https://2025.stateofjs.com/en-US/libraries/"
+    ]
+  ],
+  "Website detection": [
+    [
+      "Technology",
+      "All websites %",
+      "JS-library market share %",
+      "Snapshot date",
+      "Source"
+    ],
+    [
+      "React",
+      "6",
+      "7.9",
+      "2026-09-23",
+      "https://w3techs.com/technologies/comparison/js-angularjs,js-react,js-vuejs"
+    ],
+    [
+      "Vue.js",
+      "0.6",
+      "0.8",
+      "2026-09-23",
+      "https://w3techs.com/technologies/comparison/js-angularjs,js-react,js-vuejs"
+    ],
+    [
+      "Angular",
+      "0.2",
+      "0.3",
+      "2026-09-23",
+      "https://w3techs.com/technologies/comparison/js-angularjs,js-react,js-vuejs"
+    ]
+  ],
+  "Catalogue breakdown": [
+    [
+      "Ecosystem",
+      "Catalogue entries",
+      "Category",
+      "Catalogue entries"
+    ],
+    [
+      "JavaScript",
+      "128",
+      "Back-end / full-stack",
+      "140"
+    ],
+    [
+      "Web UI",
+      "48",
+      "Back-end / API",
+      "79"
+    ],
+    [
+      "JVM",
+      "47",
+      "CSS / UI framework",
+      "48"
+    ],
+    [
+      "Python",
+      "41",
+      "Front-end application",
+      "44"
+    ],
+    [
+      "Go",
+      "38",
+      "Meta / full-stack",
+      "40"
+    ],
+    [
+      "Static web",
+      "35",
+      "Static site / documentation",
+      "35"
+    ],
+    [
+      "PHP",
+      "30",
+      "Rust web",
+      "28"
+    ],
+    [
+      "Rust",
+      "28",
+      ".NET web",
+      "27"
+    ],
+    [
+      ".NET",
+      "27",
+      "BEAM web",
+      "18"
+    ],
+    [
+      "Ruby",
+      "22",
+      "C/C++ web",
+      "18"
+    ],
+    [
+      "BEAM",
+      "18",
+      "Scala web",
+      "18"
+    ],
+    [
+      "C/C++",
+      "18",
+      "CMS / web platform",
+      "17"
+    ],
+    [
+      "Scala/JVM",
+      "18",
+      "Clojure web",
+      "16"
+    ],
+    [
+      "CMS",
+      "17",
+      "Haskell web",
+      "14"
+    ],
+    [
+      "Clojure",
+      "16",
+      "Perl web",
+      "12"
+    ],
+    [
+      "Haskell",
+      "14",
+      "Swift web",
+      "12"
+    ],
+    [
+      "Perl",
+      "12",
+      "Dart web",
+      "11"
+    ],
+    [
+      "Swift",
+      "12",
+      "Lua web",
+      "9"
+    ],
+    [
+      "Dart",
+      "11",
+      "Crystal web",
+      "7"
+    ],
+    [
+      "Lua",
+      "9",
+      "Julia web",
+      "6"
+    ],
+    [
+      "Crystal",
+      "7",
+      "Nim web",
+      "6"
+    ],
+    [
+      "Julia",
+      "6",
+      "OCaml web",
+      "6"
+    ],
+    [
+      "Nim",
+      "6",
+      "R web",
+      "6"
+    ],
+    [
+      "OCaml",
+      "6",
+      "Common Lisp web",
+      "4"
+    ],
+    [
+      "R",
+      "6",
+      "CFML web",
+      "3"
+    ],
+    [
+      "Common Lisp",
+      "4",
+      "Runtime / web platform",
+      "3"
+    ],
+    [
+      "ColdFusion / CFML",
+      "3",
+      "Racket web",
+      "2"
+    ],
+    [
+      "Racket",
+      "2",
+      "Smalltalk web",
+      "2"
+    ],
+    [
+      "Smalltalk",
+      "2"
+    ]
+  ],
+  "Survey geography": [
+    [
+      "Rank",
+      "Country / region",
+      "Responses",
+      "Share %",
+      "Interpretation"
+    ],
+    [
+      "1",
+      "United States of America",
+      "7218",
+      "20.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "2",
+      "Germany",
+      "3022",
+      "8.6",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "3",
+      "India",
+      "2536",
+      "7.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "4",
+      "United Kingdom of Great Britain and Northern Ireland",
+      "2036",
+      "5.8",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "5",
+      "France",
+      "1408",
+      "4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "6",
+      "Canada",
+      "1303",
+      "3.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "7",
+      "Ukraine",
+      "963",
+      "2.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "8",
+      "Poland",
+      "886",
+      "2.5",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "9",
+      "Netherlands",
+      "867",
+      "2.5",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "10",
+      "Italy",
+      "833",
+      "2.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "11",
+      "Brazil",
+      "822",
+      "2.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "12",
+      "Australia",
+      "802",
+      "2.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "13",
+      "Spain",
+      "716",
+      "2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "14",
+      "Sweden",
+      "616",
+      "1.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "15",
+      "Switzerland",
+      "546",
+      "1.6",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "16",
+      "Czech Republic",
+      "520",
+      "1.5",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "17",
+      "Austria",
+      "410",
+      "1.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "18",
+      "Romania",
+      "322",
+      "0.9",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "19",
+      "Belgium",
+      "320",
+      "0.9",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "20",
+      "Denmark",
+      "316",
+      "0.9",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "21",
+      "Israel",
+      "297",
+      "0.8",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "22",
+      "Turkey",
+      "294",
+      "0.8",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "23",
+      "Mexico",
+      "284",
+      "0.8",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "24",
+      "Portugal",
+      "279",
+      "0.8",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "25",
+      "China",
+      "255",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "26",
+      "New Zealand",
+      "255",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "27",
+      "Finland",
+      "254",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "28",
+      "Greece",
+      "252",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "29",
+      "South Africa",
+      "251",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "30",
+      "Bulgaria",
+      "244",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "31",
+      "Pakistan",
+      "238",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "32",
+      "Norway",
+      "237",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "33",
+      "Hungary",
+      "235",
+      "0.7",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "34",
+      "Argentina",
+      "222",
+      "0.6",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "35",
+      "Bangladesh",
+      "219",
+      "0.6",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "36",
+      "Ireland",
+      "209",
+      "0.6",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "37",
+      "Colombia",
+      "202",
+      "0.6",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "38",
+      "Russian Federation",
+      "200",
+      "0.6",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "39",
+      "Nigeria",
+      "199",
+      "0.6",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "40",
+      "Japan",
+      "188",
+      "0.5",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "41",
+      "Indonesia",
+      "180",
+      "0.5",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "42",
+      "Serbia",
+      "158",
+      "0.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "43",
+      "Iran",
+      "149",
+      "0.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "44",
+      "Kenya",
+      "147",
+      "0.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "45",
+      "Slovakia",
+      "147",
+      "0.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "46",
+      "Viet Nam",
+      "145",
+      "0.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "47",
+      "Philippines",
+      "141",
+      "0.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "48",
+      "Egypt",
+      "139",
+      "0.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "49",
+      "Chile",
+      "131",
+      "0.4",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "50",
+      "Thailand",
+      "119",
+      "0.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "51",
+      "Taiwan",
+      "118",
+      "0.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "52",
+      "Croatia",
+      "113",
+      "0.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "53",
+      "Lithuania",
+      "101",
+      "0.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "54",
+      "Sri Lanka",
+      "95",
+      "0.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "55",
+      "Singapore",
+      "89",
+      "0.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "56",
+      "United Arab Emirates",
+      "89",
+      "0.3",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "57",
+      "South Korea",
+      "86",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "58",
+      "Nepal",
+      "83",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "59",
+      "Malaysia",
+      "82",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "60",
+      "Slovenia",
+      "78",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "61",
+      "Hong Kong (S.A.R.)",
+      "72",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "62",
+      "Estonia",
+      "70",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "63",
+      "Peru",
+      "64",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "64",
+      "Latvia",
+      "62",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "65",
+      "Morocco",
+      "55",
+      "0.2",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "66",
+      "Uruguay",
+      "52",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "67",
+      "Algeria",
+      "48",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "68",
+      "Georgia",
+      "48",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "69",
+      "Venezuela",
+      "47",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "70",
+      "Ghana",
+      "46",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "71",
+      "Tunisia",
+      "46",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "72",
+      "Cyprus",
+      "39",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "73",
+      "Ethiopia",
+      "38",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "74",
+      "Saudi Arabia",
+      "37",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "75",
+      "Guatemala",
+      "33",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "76",
+      "Jordan",
+      "32",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "77",
+      "Bosnia and Herzegovina",
+      "30",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "78",
+      "Kazakhstan",
+      "29",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "79",
+      "Ecuador",
+      "28",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "80",
+      "Uganda",
+      "28",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "81",
+      "Belarus",
+      "26",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "82",
+      "Dominican Republic",
+      "26",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "83",
+      "Armenia",
+      "25",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "84",
+      "Costa Rica",
+      "25",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "85",
+      "Luxembourg",
+      "23",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "86",
+      "Albania",
+      "22",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "87",
+      "Paraguay",
+      "21",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "88",
+      "Lebanon",
+      "20",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "89",
+      "Malta",
+      "19",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "90",
+      "Azerbaijan",
+      "18",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "91",
+      "Bolivia",
+      "18",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "92",
+      "Yemen",
+      "18",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "93",
+      "Myanmar",
+      "17",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "94",
+      "Uzbekistan",
+      "16",
+      "0.1",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "95",
+      "Montenegro",
+      "15",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "96",
+      "Rwanda",
+      "15",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "97",
+      "Afghanistan",
+      "13",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "98",
+      "Cameroon",
+      "13",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "99",
+      "Iceland",
+      "13",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "100",
+      "Iraq",
+      "13",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "101",
+      "Zimbabwe",
+      "13",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "102",
+      "El Salvador",
+      "12",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "103",
+      "Zambia",
+      "12",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "104",
+      "Cambodia",
+      "11",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "105",
+      "Honduras",
+      "11",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "106",
+      "Madagascar",
+      "11",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "107",
+      "Mauritius",
+      "11",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "108",
+      "Syrian Arab Republic",
+      "11",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "109",
+      "Isle of Man",
+      "10",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "110",
+      "Kyrgyzstan",
+      "10",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "111",
+      "Panama",
+      "10",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "112",
+      "Maldives",
+      "9",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "113",
+      "Togo",
+      "9",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "114",
+      "Cuba",
+      "8",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "115",
+      "C\u00f4te d'Ivoire",
+      "8",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "116",
+      "Republic of Moldova",
+      "8",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "117",
+      "Angola",
+      "7",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "118",
+      "Bahrain",
+      "7",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "119",
+      "Democratic Republic of the Congo",
+      "7",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "120",
+      "Kuwait",
+      "7",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "121",
+      "Namibia",
+      "7",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "122",
+      "Palestine",
+      "7",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "123",
+      "Trinidad and Tobago",
+      "7",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "124",
+      "United Republic of Tanzania",
+      "7",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "125",
+      "Andorra",
+      "6",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "126",
+      "Kosovo",
+      "6",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "127",
+      "Nicaragua",
+      "6",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "128",
+      "North Korea",
+      "6",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "129",
+      "Oman",
+      "6",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "130",
+      "Benin",
+      "5",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "131",
+      "Congo, Republic of the",
+      "5",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "132",
+      "Fiji",
+      "5",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "133",
+      "Mozambique",
+      "5",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "134",
+      "Qatar",
+      "5",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "135",
+      "Senegal",
+      "5",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "136",
+      "Eswatini / Swaziland",
+      "5",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "137",
+      "Barbados",
+      "4",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "138",
+      "Guyana",
+      "4",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "139",
+      "Jamaica",
+      "4",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "140",
+      "Malawi",
+      "4",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "141",
+      "Somalia",
+      "4",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "142",
+      "Belize",
+      "3",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "143",
+      "Bhutan",
+      "3",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "144",
+      "Brunei Darussalam",
+      "3",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "145",
+      "Mongolia",
+      "3",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ],
+    [
+      "146",
+      "Papua New Guinea",
+      "3",
+      "0",
+      "Stack Overflow respondent geography, not framework usage within that country."
+    ]
+  ],
+  "Methodology": [
+    [
+      "Issue",
+      "CODARIS treatment",
+      "Reason"
+    ],
+    [
+      "Framework vs library vs runtime",
+      "Keep an explicit Type field. React is a library; Node.js/Deno/Bun are runtimes; WordPress/Drupal are CMS platforms.",
+      "Developer surveys often group heterogeneous web technologies together, but educational pages should not erase technical distinctions."
+    ],
+    [
+      "Catalogue scope",
+      "Broad curated catalogue of 631 technologies gathered across major ecosystem comparison/awesome lists.",
+      "There is no authoritative finite list of every web framework ever created. This is a researched educational catalogue, not a claim of total completeness."
+    ],
+    [
+      "Stack Overflow usage",
+      "Use the 2025 'Have Used' percentage only for entries measured in that survey.",
+      "23,678 respondents answered the web-framework/technology question; it is multi-select and self-selected."
+    ],
+    [
+      "State of JS",
+      "Keep its usage/satisfaction values separate from Stack Overflow.",
+      "State of JS samples the JavaScript community and uses different questions/denominators."
+    ],
+    [
+      "Website market share",
+      "Use W3Techs only as detected website technology share and label the snapshot date.",
+      "Website deployment share is not the same as developer usage, npm downloads, jobs, or framework satisfaction."
+    ],
+    [
+      "Country breakdown",
+      "Do not infer framework usage from the overall country distribution.",
+      "A respondent being in a country does not tell us which framework they use; cross-tabs need direct source data."
+    ],
+    [
+      "Gender breakdown",
+      "Leave per-framework gender data blank unless a survey explicitly supports the cross-tab with sample sizes and all response categories.",
+      "Inventing male/female percentages would create false demographic precision and discard non-binary/non-response categories."
+    ],
+    [
+      "Ranking",
+      "Rank only within a named source and metric, such as Stack Overflow 2025 usage.",
+      "A universal framework rank would mix incomparable measurements and silently encode editorial preferences."
+    ],
+    [
+      "Historical projects",
+      "Retain some legacy frameworks when they are relevant to web history or existing production estates.",
+      "Educational coverage should explain both modern and legacy stacks without implying equal current adoption."
+    ]
+  ]
+}

@@ -1,0 +1,21 @@
+﻿rank,dbms,score_sep_2026,model_summary,source
+1,Oracle Database,1122.27,Relational / multi-model,https://db-engines.com/en/ranking/
+2,MySQL,844.82,Relational / multi-model,https://db-engines.com/en/ranking/
+3,Microsoft SQL Server,698.69,Relational / multi-model,https://db-engines.com/en/ranking/
+4,PostgreSQL,683.26,Relational / multi-model,https://db-engines.com/en/ranking/
+5,MongoDB,381.31,Document / multi-model,https://db-engines.com/en/ranking/
+6,Snowflake,211.61,Relational,https://db-engines.com/en/ranking/
+7,Databricks SQL,168.34,Multi-model / relational,https://db-engines.com/en/ranking/
+8,Redis,158.06,Key-value / multi-model,https://db-engines.com/en/ranking/
+9,IBM Db2,110.57,Relational / multi-model,https://db-engines.com/en/ranking/
+10,SQLite,97.05,Relational,https://db-engines.com/en/ranking/
+11,Elasticsearch,95.5,Search / vector / document,https://db-engines.com/en/ranking/
+12,Apache Cassandra,93.96,Wide-column / vector-capable,https://db-engines.com/en/ranking/
+13,MariaDB,74.42,Relational / multi-model,https://db-engines.com/en/ranking/
+14,Splunk,71.68,Search engine,https://db-engines.com/en/ranking/
+15,Azure SQL Database,70.84,Relational / multi-model,https://db-engines.com/en/ranking/
+16,Apache Hive,70.11,Relational / analytical,https://db-engines.com/en/ranking/
+17,Microsoft Access,63.0,Relational,https://db-engines.com/en/ranking/
+18,Amazon DynamoDB,56.36,Key-value / document,https://db-engines.com/en/ranking/
+19,Google BigQuery,52.0,Relational / analytical,https://db-engines.com/en/ranking/
+20,Neo4j,47.17,Graph,https://db-engines.com/en/ranking/

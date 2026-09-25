@@ -1,0 +1,4 @@
+﻿purpose,source,url,notes
+API industry survey,Postman State of the API 2025,https://www.postman.com/state-of-api/2025/,"5,700+ developers/architects/executives; REST 93%, webhooks 50%, WebSockets 35%, GraphQL 33%; MCP awareness 70%, regular use 10%."
+Keycloak specifications,Keycloak implemented specifications,https://www.keycloak.org/securing-apps/specifications,"Current OpenID Connect, OAuth, SAML and related support matrix."
+MCP,Model Context Protocol,https://modelcontextprotocol.io/,Open protocol for connecting AI applications to tools and data.

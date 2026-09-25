@@ -1,0 +1,5 @@
+﻿purpose,source,url,notes
+Broad build catalogue,Wikipedia - List of build automation software,https://en.wikipedia.org/wiki/List_of_build_automation_software,Index of notable build and automation tools.
+JavaScript build adoption,State of JavaScript 2025 - Build Tools,https://2025.stateofjs.com/en-US/libraries/build-tools/,"Usage/sentiment for webpack, Vite, esbuild, tsc, Rollup, Parcel, SWC, Turbopack, Rspack, Rolldown, Bun and others."
+Cross-ecosystem developer usage,Stack Overflow Developer Survey 2025,https://survey.stackoverflow.co/2025/technology/,"Cloud-development question mixes package managers/build/IaC/cloud; denominator 24,473."
+Survey headline,Stack Overflow 2025 press release,https://stackoverflow.co/company/press/archive/stack-overflow-2025-developer-survey/,"Docker 71%, npm 57%, AWS 43% headline usage in cloud-development category."

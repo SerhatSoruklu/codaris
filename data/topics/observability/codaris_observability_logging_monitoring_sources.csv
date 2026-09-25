@@ -1,0 +1,4 @@
+﻿purpose,source,url,notes
+CNCF project adoption,CNCF 2025 Annual Survey,https://www.cncf.io/announcements/2026/01/20/kubernetes-established-as-the-de-facto-operating-system-for-ai-as-production-use-hits-82-in-2025-cncf-annual-cloud-native-survey/,Prometheus 77% production; Fluentd 41%; Jaeger 22% among graduated-project respondents.
+OpenTelemetry momentum,CNCF 2025 survey announcement,https://www.cncf.io/announcements/2026/01/20/kubernetes-established-as-the-de-facto-operating-system-for-ai-as-production-use-hits-82-in-2025-cncf-annual-cloud-native-survey/,OpenTelemetry was the second-highest-velocity CNCF project.
+Prometheus/OpenTelemetry interoperability,Prometheus survey 2026,https://prometheus.io/blog/2026/09/21/otel-prometheus-interoperability-survey/,"Among screened active users, Prometheus exporters 72%, OTel receivers 57%; OTel SDKs 65% for application instrumentation."

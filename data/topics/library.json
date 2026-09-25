@@ -1,0 +1,150 @@
+[
+  {
+    "slug": "programming-languages",
+    "title": "Programming Languages",
+    "count": 674,
+    "topic_id": 6,
+    "description": "Language roles, technical models, tradeoffs and research snapshots."
+  },
+  {
+    "slug": "web-frameworks",
+    "title": "Web Frameworks & Technologies",
+    "count": 631,
+    "topic_id": 7,
+    "description": "UI libraries, runtimes, frameworks and full-stack architecture."
+  },
+  {
+    "slug": "databases",
+    "title": "Databases & Data Platforms",
+    "count": 643,
+    "topic_id": 8,
+    "description": "Data models, transactions, indexing, deployment and recovery."
+  },
+  {
+    "slug": "runtimes",
+    "title": "Runtimes & Execution Platforms",
+    "count": 581,
+    "topic_id": 9,
+    "description": "A runtime turns executable code into work inside a host environment. Distinguish language implementation, virtual machine, engine, host APIs and managed service before comparing products. The pack spans all of these layers, including historical implementations."
+  },
+  {
+    "slug": "package-build-tools",
+    "title": "Package Managers, Build Tools & Bundlers",
+    "count": 229,
+    "topic_id": 10,
+    "description": "Dependency resolution, package distribution, compilation and bundling are different stages of producing software. A reproducible release requires the inputs and transformations to be understood, not merely a build command that succeeds once."
+  },
+  {
+    "slug": "developer-environments",
+    "title": "IDEs, Editors & Developer Environments",
+    "count": 178,
+    "topic_id": 11,
+    "description": "An editor is one part of the development environment. Language servers, debuggers, toolchains, extensions, terminals and remote workspaces determine how code is understood and executed. Choose configurations that remain understandable to the whole team."
+  },
+  {
+    "slug": "version-control",
+    "title": "Version Control & Code Hosting",
+    "count": 118,
+    "topic_id": 12,
+    "description": "Version control records changes and relationships between revisions. Hosting services add collaboration, review and automation around that history. A sound workflow makes it possible to explain, review and recover a change."
+  },
+  {
+    "slug": "testing-qa",
+    "title": "Testing & QA",
+    "count": 277,
+    "topic_id": 13,
+    "description": "Testing collects evidence about behavior under selected conditions. Quality work combines focused tests, boundary checks, realistic integration paths and useful failure diagnosis. A tool catalogue is not a test strategy by itself."
+  },
+  {
+    "slug": "cloud-hosting",
+    "title": "Cloud, Hosting & Serverless",
+    "count": 140,
+    "topic_id": 14,
+    "description": "Cloud architecture distributes responsibility between your team and a provider. Virtual machines, managed platforms, functions, object storage and edge networks expose different control surfaces. Choose from explicit requirements rather than treating every service as equivalent hosting."
+  },
+  {
+    "slug": "containers-infrastructure",
+    "title": "Containers, Orchestration & Infrastructure",
+    "count": 168,
+    "topic_id": 15,
+    "description": "Containers package processes and dependencies; orchestrators schedule and reconcile workloads; infrastructure tools manage external resources. These layers interact but have different state and failure models. Keep application health separate from the fact that a container is running."
+  },
+  {
+    "slug": "cicd-automation",
+    "title": "CI/CD & DevOps Automation",
+    "count": 123,
+    "topic_id": 16,
+    "description": "Continuous integration checks changes together; delivery prepares deployable releases; deployment changes running systems. A pipeline is executable code with access to artifacts and often sensitive credentials, so its trust boundary deserves the same attention as application code."
+  },
+  {
+    "slug": "servers-networking",
+    "title": "Web Servers, Proxies & Networking",
+    "count": 168,
+    "topic_id": 17,
+    "description": "A request may pass through DNS, transport security, proxies, load balancers and an application server before reaching business logic. Each hop can change routing, headers, buffering and timeout behavior. Trace the full path when diagnosing errors."
+  },
+  {
+    "slug": "messaging-streaming",
+    "title": "Messaging, Queues & Event Streaming",
+    "count": 133,
+    "topic_id": 18,
+    "description": "Messaging separates the time and location of producing work from consuming it. Queues, retained event logs, publish/subscribe brokers and stream processors solve different coordination problems. Start by specifying delivery, ordering, retention and recovery semantics."
+  },
+  {
+    "slug": "observability",
+    "title": "Observability, Logging & Monitoring",
+    "count": 172,
+    "topic_id": 19,
+    "description": "Observability uses evidence from a running system to investigate behavior. Metrics, logs, traces and profiles answer different questions. Instrumentation and collection are separate from storage, querying and visualization; a dashboard alone is not a reliability strategy."
+  },
+  {
+    "slug": "apis-auth-integration",
+    "title": "APIs, Protocols, Auth & Integration",
+    "count": 226,
+    "topic_id": 20,
+    "description": "An API defines a contract across a boundary. Protocols transport messages; schemas describe shapes; identity standards establish authentication or authorization flows; products implement parts of those systems. Keeping these layers separate makes integration easier to reason about."
+  },
+  {
+    "slug": "ai-developer-tools",
+    "title": "AI Developer Tools & Coding Systems",
+    "count": 160,
+    "topic_id": 21,
+    "description": "AI coding tools combine models, interfaces, repository context and sometimes executable tools. Completion, chat, code review and autonomous task execution have different capabilities and risk boundaries. Evaluate the actual workflow and its evidence, not only a product label or benchmark score."
+  },
+  {
+    "slug": "software-development",
+    "title": "Software Development",
+    "topic_id": 0,
+    "description": "Build software as a sequence of explicit decisions: define behavior, model the problem, implement a small change, verify it and maintain it. This guide follows one feature from requirement to release instead of treating coding as the entire lifecycle."
+  },
+  {
+    "slug": "system-design",
+    "title": "System Design",
+    "topic_id": 1,
+    "description": "System design connects requirements to components, state and failure behavior. Begin with the workload and invariants, then introduce distribution only where it solves a concrete problem. A diagram is useful when every arrow has a contract and an owner."
+  },
+  {
+    "slug": "python",
+    "title": "Python",
+    "topic_id": 2,
+    "description": "Learn Python through small, testable programs with explicit inputs and errors. The focus here is developer fundamentals: collections, functions, modules, file handling, exceptions and reproducible environments, rather than a catalogue of third-party packages."
+  },
+  {
+    "slug": "angular",
+    "title": "Angular",
+    "topic_id": 3,
+    "description": "Angular organizes browser applications through components, templates, services and framework tooling. This guide focuses on data flow, forms, routing and observable behavior. It is educational content; CODARIS itself continues to use C/WebAssembly for browser application logic."
+  },
+  {
+    "slug": "web-foundations",
+    "title": "Web Foundations",
+    "topic_id": 4,
+    "description": "The web combines semantic documents, styling, browser behavior and a request/response protocol. Start with accessible HTML and understand the network and trust boundaries before adding complex interaction. A page should remain understandable when a capability fails."
+  },
+  {
+    "slug": "sql-postgresql",
+    "title": "SQL & PostgreSQL",
+    "topic_id": 5,
+    "description": "Learn relational modelling and SQL by protecting a small application’s invariants. This guide complements the database catalogue with practical schema, query, transaction and execution-plan work. Examples are educational and should be run in a disposable database."
+  }
+]

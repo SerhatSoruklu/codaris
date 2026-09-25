@@ -1,0 +1,22 @@
+﻿dataset,source,url,notes
+Core survey usage,Stack Overflow Developer Survey 2025 - Technology,https://survey.stackoverflow.co/2025/technology/,"Web frameworks and technologies question; 23,678 responses. Multi-select, so percentages do not sum to 100."
+Front-end JS catalogue/current survey,State of JavaScript 2025 - Front-end Frameworks,https://2025.stateofjs.com/en-US/libraries/front-end-frameworks/,"Front-end framework/library usage, awareness and satisfaction among State of JS respondents."
+Back-end JS catalogue/current survey,State of JavaScript 2025 - Back-end Frameworks,https://2025.stateofjs.com/en-US/libraries/back-end-frameworks/,"Server-side JavaScript framework usage and satisfaction; includes Express, NestJS, Fastify, Hono, Koa, ElysiaJS and others."
+Meta-framework survey,State of JavaScript 2025 - Meta-Frameworks,https://2025.stateofjs.com/en-US/libraries/meta-frameworks/,"Frameworks focused on rendering and serving applications, including Next.js, Astro, Nuxt, SvelteKit and others."
+JS survey all libraries,State of JavaScript 2025 - Libraries,https://2025.stateofjs.com/en-US/libraries/,Cross-category usage/satisfaction snapshot. Selected exact values are included in this pack.
+Website technology share,W3Techs React vs Vue vs Angular,"https://w3techs.com/technologies/comparison/js-angularjs,js-react,js-vuejs","Daily website-detection statistics. On 2026-09-23: React 6.0% of all websites, Vue 0.6%, Angular 0.2%."
+JavaScript framework catalogue,Wikipedia - Comparison of JavaScript-based web frameworks,https://en.wikipedia.org/wiki/Comparison_of_JavaScript-based_web_frameworks,Reference list for notable JavaScript front-end frameworks/libraries.
+Server-side framework catalogue,Wikipedia - Comparison of server-side web frameworks,https://en.wikipedia.org/wiki/Comparison_of_server-side_web_frameworks,Reference comparison of notable backend web frameworks across multiple languages.
+Node.js ecosystem catalogue,Awesome Node.js,https://github.com/sindresorhus/awesome-nodejs,Curated Node.js web frameworks and related server technologies.
+Python ecosystem catalogue,Awesome Python,https://github.com/vinta/awesome-python,Curated Python web frameworks and API frameworks.
+PHP ecosystem catalogue,Awesome PHP,https://github.com/ziadoz/awesome-php,Curated PHP frameworks and micro-frameworks.
+Ruby ecosystem catalogue,Awesome Ruby,https://github.com/markets/awesome-ruby,Curated Ruby web frameworks.
+Java ecosystem catalogue,Awesome Java,https://github.com/akullpp/awesome-java,"Curated Java frameworks, REST frameworks and application platforms."
+Go ecosystem catalogue,Awesome Go,https://github.com/avelino/awesome-go,Curated Go web frameworks and toolkits.
+Elixir ecosystem catalogue,Awesome Elixir,https://github.com/h4cc/awesome-elixir,Curated Elixir/Erlang web frameworks and framework components.
+Scala ecosystem catalogue,Awesome Scala,https://github.com/lauris/awesome-scala,Curated Scala web frameworks and HTTP toolkits.
+Swift ecosystem catalogue,Awesome Swift,https://github.com/matteocrippa/awesome-swift,Curated server-side Swift frameworks.
+Haskell ecosystem catalogue,Awesome Haskell,https://github.com/krispo/awesome-haskell,Curated Haskell web-framework resources.
+CSS/UI catalogue,Awesome CSS Frameworks,https://github.com/troxler/awesome-css-frameworks,Curated current and historical CSS frameworks.
+Static site catalogue,Awesome Static Web Site Generators,https://github.com/myles/awesome-static-generators,Curated static site and documentation generators.
+JS project breadth/activity,Best of JS,https://bestofjs.org/,"Tracks 3,626 web/JavaScript projects, with 1,554 listed as active at the 2026-09-22 update."

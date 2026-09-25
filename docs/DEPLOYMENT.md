@@ -1,10 +1,10 @@
 # Isolated SSH deployment
 
-Target: the owner's existing Linux/Nginx server. CODARIS uses a dedicated account, directory, virtual host, certificate and logs. No Cloudflare, shared application environment files, shared PM2 process, or database deployment is required. The deployment host address stays in local SSH configuration and is not committed.
+Target: the owner's existing Linux/Nginx server. CODARIS uses a dedicated account, directory, virtual host, certificate and logs. Do not reuse another application’s process or database. Backend/database deployment is now required; private CODARIS configuration may use the expressly authorized Google Workspace SMTP identity. The deployment host address stays in local SSH configuration and is not committed.
 
 ## Current scope
 
-The public site is static C/WebAssembly plus HTML/CSS. Deploy only the allowlisted output produced by `scripts/package-site.py`. Do not run the native database health-check program under PM2: it exits by design and is not an API.
+The public frontend is static C/WebAssembly plus HTML/CSS, backed by the native account API and PostgreSQL. Deploy only the allowlisted frontend output produced by `scripts/package-site.py`; separately install the API, schema, backend environment and mail timer as described in [RELEASE.md](RELEASE.md). The instructions below cover static artifact activation and do not deploy the backend.
 
 The existing server was inspected read-only. The steps below are prepared instructions, not a record of changes already applied. An administrator must provision the isolated account and virtual host once. Routine releases do not require sudo, Nginx reloads, or access to other applications.
 

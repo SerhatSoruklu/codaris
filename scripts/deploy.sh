@@ -12,7 +12,7 @@ git fetch origin main
 [[ "$REVISION" == "$(git rev-parse origin/main)" ]] || { echo 'Deploy the current origin/main revision.' >&2; exit 1; }
 RELEASE="$(date -u +%Y%m%dT%H%M%SZ)-${REVISION:0:12}"
 export CODARIS_PRODUCTION=1
-"$ROOT/scripts/build-client.sh"
+python3 "$ROOT/scripts/project.py" production build-client
 python3 "$ROOT/tests/check-site.py"
 printf '%s\n' "$REVISION" > "$ROOT/build/client/version.txt"
 # Package only reviewed public files, never repository contents or backend secrets.

@@ -1,0 +1,82 @@
+{
+  "generated_date": "2026-09-23",
+  "categories_completed_in_this_batch": 12,
+  "new_catalogue_rows": 2092,
+  "previous_four_pack_rows": 2529,
+  "all_sixteen_pack_rows": 4621,
+  "note": "Row totals are catalogue rows, not guaranteed globally unique technologies because some technologies legitimately span categories.",
+  "categories": [
+    {
+      "number": 5,
+      "title": "Package Managers, Build Tools & Bundlers",
+      "entries": 229,
+      "folder": "05_package_build_bundlers"
+    },
+    {
+      "number": 6,
+      "title": "IDEs, Editors & Developer Environments",
+      "entries": 178,
+      "folder": "06_ides_editors_environments"
+    },
+    {
+      "number": 7,
+      "title": "Version Control & Code Hosting",
+      "entries": 118,
+      "folder": "07_version_control_code_hosting"
+    },
+    {
+      "number": 8,
+      "title": "Testing & QA",
+      "entries": 277,
+      "folder": "08_testing_qa"
+    },
+    {
+      "number": 9,
+      "title": "Cloud, Hosting & Serverless",
+      "entries": 140,
+      "folder": "09_cloud_hosting_serverless"
+    },
+    {
+      "number": 10,
+      "title": "Containers, Orchestration & Infrastructure",
+      "entries": 168,
+      "folder": "10_containers_orchestration_infrastructure"
+    },
+    {
+      "number": 11,
+      "title": "CI/CD & DevOps Automation",
+      "entries": 123,
+      "folder": "11_cicd_devops_automation"
+    },
+    {
+      "number": 12,
+      "title": "Web Servers, Proxies & Networking",
+      "entries": 168,
+      "folder": "12_web_servers_proxies_networking"
+    },
+    {
+      "number": 13,
+      "title": "Messaging, Queues & Event Streaming",
+      "entries": 133,
+      "folder": "13_messaging_queues_streaming"
+    },
+    {
+      "number": 14,
+      "title": "Observability, Logging & Monitoring",
+      "entries": 172,
+      "folder": "14_observability_logging_monitoring"
+    },
+    {
+      "number": 15,
+      "title": "APIs, Protocols, Auth & Integration",
+      "entries": 226,
+      "folder": "15_apis_protocols_auth_integration"
+    },
+    {
+      "number": 16,
+      "title": "AI Developer Tools & Coding Systems",
+      "entries": 160,
+      "folder": "16_ai_developer_tools"
+    }
+  ]
+}
