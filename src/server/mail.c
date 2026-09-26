@@ -244,11 +244,9 @@ static int send_contact_mail(const Config *c, const char *id, const char *kind,
     if (valid) recipients = curl_slist_append(NULL, recipient);
     if (valid && recipients) {
         curl = curl_easy_init();
-        if (curl && curl_easy_setopt(curl, CURLOPT_SSLVERSION,
-                                     (long)CURL_SSLVERSION_TLSv1_2) != CURLE_OK) {
-            curl_easy_cleanup(curl);
-            curl = NULL;
-        }
+        if (!curl) goto cleanup;
+        if (curl_easy_setopt(curl, CURLOPT_SSLVERSION,
+                             (long)CURL_SSLVERSION_TLSv1_2) != CURLE_OK) goto cleanup;
     }
     if (curl) mime = curl_mime_init(curl);
     curl_mimepart *part = mime ? curl_mime_addpart(mime) : NULL;
@@ -272,6 +270,7 @@ static int send_contact_mail(const Config *c, const char *id, const char *kind,
 #undef CONTACT_SETOPT
         if (valid) ok = curl_easy_perform(curl) == CURLE_OK;
     }
+cleanup:
     curl_slist_free_all(headers);
     curl_slist_free_all(recipients);
     if (mime) curl_mime_free(mime);
