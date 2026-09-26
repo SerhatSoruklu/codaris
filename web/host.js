@@ -565,6 +565,39 @@ function credentialImageForSide(side) {
   }
   return credentialImageCache.get(side);
 }
+function credentialStageIsCurrent(generation) {
+  return generation === credentialLoadGeneration;
+}
+function updateCredentialPreview(image, stage, status, nextSide, url) {
+  image.src = url;
+  image.hidden = false;
+  stage.dataset.state = 'ready';
+  stage.dataset.side = nextSide;
+  window.codarisCredentialSide = nextSide;
+  if (status) status.textContent = '';
+}
+async function animateCredentialTurn(stage, shouldAnimate, generation) {
+  if (!shouldAnimate) return credentialStageIsCurrent(generation);
+  stage.classList.add('is-turning');
+  await new Promise(resolve => setTimeout(resolve, 130));
+  return credentialStageIsCurrent(generation);
+}
+function credentialPreviewFailed(image, stage, status, alreadyVisible, generation) {
+  if (!credentialStageIsCurrent(generation)) return false;
+  if (!alreadyVisible) {
+    stage.dataset.state = 'error';
+    image.hidden = true;
+    if (status) status.textContent = 'Your credential preview is temporarily unavailable.';
+  }
+  return false;
+}
+function updateCredentialSideLabels(image) {
+  image.alt = 'CODARIS membership credential for ' + (window.codarisCredentialName || 'member') + ', ' + window.codarisCredentialSide + ' side';
+  const label = document.getElementById('credential-side-label');
+  if (label) label.textContent = window.codarisCredentialSide.toUpperCase();
+  const flipLabel = document.querySelector('#credential-flip span');
+  if (flipLabel) flipLabel.textContent = window.codarisCredentialSide === 'back' ? 'View front side' : 'View reverse side';
+}
 window.codarisLoadCredential = async function (side, animate = false) {
   const image = document.getElementById('credential-image');
   const stage = document.getElementById('credential-stage');
@@ -579,36 +612,17 @@ window.codarisLoadCredential = async function (side, animate = false) {
   }
   try {
     const url = await credentialImageForSide(nextSide);
-    if (generation !== credentialLoadGeneration) return false;
-    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (animate && alreadyVisible && !reduceMotion) {
-      stage.classList.add('is-turning');
-      await new Promise(resolve => setTimeout(resolve, 130));
-      if (generation !== credentialLoadGeneration) return false;
-    }
-    image.src = url;
-    image.hidden = false;
-    stage.dataset.state = 'ready';
-    stage.dataset.side = nextSide;
-    window.codarisCredentialSide = nextSide;
-    if (status) status.textContent = '';
+    if (!credentialStageIsCurrent(generation)) return false;
+    const shouldAnimate = animate && alreadyVisible && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!await animateCredentialTurn(stage, shouldAnimate, generation)) return false;
+    updateCredentialPreview(image, stage, status, nextSide, url);
     if (animate) requestAnimationFrame(() => stage.classList.remove('is-turning'));
   } catch {
-    if (generation !== credentialLoadGeneration) return false;
-    if (!alreadyVisible) {
-      stage.dataset.state = 'error';
-      image.hidden = true;
-      if (status) status.textContent = 'Your credential preview is temporarily unavailable.';
-    }
-    return false;
+    return credentialPreviewFailed(image, stage, status, alreadyVisible, generation);
   } finally {
-    if (generation === credentialLoadGeneration) stage.classList.remove('is-turning');
+    if (credentialStageIsCurrent(generation)) stage.classList.remove('is-turning');
   }
-  image.alt = 'CODARIS membership credential for ' + (window.codarisCredentialName || 'member') + ', ' + window.codarisCredentialSide + ' side';
-  const label = document.getElementById('credential-side-label');
-  if (label) label.textContent = window.codarisCredentialSide.toUpperCase();
-  const flipLabel = document.querySelector('#credential-flip span');
-  if (flipLabel) flipLabel.textContent = window.codarisCredentialSide === 'back' ? 'View front side' : 'View reverse side';
+  updateCredentialSideLabels(image);
   return true;
 };
 const flipCredential = document.getElementById('credential-flip');
