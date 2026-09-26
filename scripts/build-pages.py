@@ -19,7 +19,7 @@ OUT = ROOT / 'build/client'
 site = json.loads((WEB / 'site.json').read_text(encoding='utf-8'))
 origin = os.environ.get('CODARIS_SITE_URL', site['origin']).rstrip('/')
 production = os.environ.get('CODARIS_PRODUCTION') == '1'
-if origin:
+if origin and production:
     parsed = urlsplit(origin)
     if not re.fullmatch(r'https://[A-Za-z0-9.-]+(?::[0-9]{1,5})?', origin) or parsed.scheme != 'https' or not parsed.hostname or parsed.path or parsed.query or parsed.fragment or parsed.username or parsed.password:
         raise SystemExit('CODARIS_SITE_URL must be an HTTPS origin, e.g. https://your-domain.example')
@@ -55,22 +55,41 @@ for page in pages:
     seo_title = page['title'] + ' | CODARIS'
     title = html.escape(seo_title, quote=True)
     description = html.escape(page['description'], quote=True)
-    seo = '<meta name="robots" content="noindex, follow">' if page.get('placeholder') or not production or not origin else ''
+    if page.get('indexing') not in {'index', 'noindex'}:
+        raise SystemExit('Every route must declare indexing as index or noindex: ' + route)
+    indexable = page['indexing'] == 'index'
+    seo = '<meta name="robots" content="noindex, follow">' if not indexable or not production or not origin else ''
     if origin:
         url = origin + route
         seo += '\n<link rel="canonical" href="' + html.escape(url, quote=True) + '">'
         seo += '\n<meta property="og:url" content="' + html.escape(url, quote=True) + '">'
-        if not page.get('placeholder'):
+        if indexable and production:
             urls.append(url)
             data = {'@context': 'https://schema.org', '@graph': [
-                {'@type': 'WebSite', '@id': origin + '/#website', 'name': 'CODARIS', 'url': origin + '/'},
-                {'@type': 'Organization', '@id': origin + '/#organization', 'name': 'CODARIS', 'alternateName': 'Coalition Of Developers Advancing Responsible Intelligent Systems', 'url': origin + '/', 'sameAs': ['https://x.com/codarisorg']},
-                {'@type': 'WebPage', 'name': seo_title, 'description': page['description'], 'url': url, 'isPartOf': {'@id': origin + '/#website'}}]}
+                {'@type': 'WebPage', '@id': url + '#webpage', 'name': seo_title, 'description': page['description'], 'url': url, 'isPartOf': {'@id': origin + '/#website'}, 'about': {'@id': origin + '/#organization'}}]}
+            if not slug:
+                data['@graph'][:0] = [
+                    {'@type': 'WebSite', '@id': origin + '/#website', 'name': 'CODARIS', 'url': origin + '/', 'publisher': {'@id': origin + '/#organization'}},
+                    {'@type': 'Organization', '@id': origin + '/#organization', 'name': 'CODARIS', 'alternateName': 'Coalition Of Developers Advancing Responsible Intelligent Systems', 'url': origin + '/', 'sameAs': ['https://x.com/codarisorg']}]
             if slug:
-                data['@graph'].append({'@type': 'BreadcrumbList', 'itemListElement': [
-                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': origin + '/'},
-                    {'@type': 'ListItem', 'position': 2, 'name': page['label'], 'item': url}]})
+                crumb_names = slug.split('/')
+                crumb_items = [{'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': origin + '/'}]
+                for position, name in enumerate(crumb_names, start=2):
+                    crumb_path = '/' + '/'.join(crumb_names[:position - 1]) + '/'
+                    crumb_page = next((item for item in pages if item['slug'] == '/'.join(crumb_names[:position - 1])), None)
+                    crumb_items.append({'@type': 'ListItem', 'position': position, 'name': crumb_page['label'] if crumb_page else page['label'], 'item': origin + crumb_path})
+                data['@graph'].append({'@type': 'BreadcrumbList', 'itemListElement': crumb_items})
             seo += '\n<script type="application/ld+json">' + json.dumps(data).replace('<', '\\u003c') + '</script>'
+    if origin:
+        image_url = origin + '/assets/Codaris_Flag.png'
+        alt = 'CODARIS flag with its member community emblem.'
+        seo += '\n<meta property="og:image" content="' + html.escape(image_url, quote=True) + '">'
+        seo += '\n<meta property="og:image:type" content="image/png">'
+        seo += '\n<meta property="og:image:width" content="1448">'
+        seo += '\n<meta property="og:image:height" content="1086">'
+        seo += '\n<meta property="og:image:alt" content="' + html.escape(alt, quote=True) + '">'
+        seo += '\n<meta name="twitter:image" content="' + html.escape(image_url, quote=True) + '">'
+        seo += '\n<meta name="twitter:image:alt" content="' + html.escape(alt, quote=True) + '">'
     runtime = ''
     legal_css = '<link rel="stylesheet" href="/legal.css">' if slug in {'privacy', 'terms'} else ''
     meaning_css = '<link rel="stylesheet" href="/meaning.css">' if slug in {'', 'mission'} else ''
@@ -94,8 +113,8 @@ for page in pages:
     target = OUT / slug
     target.mkdir(parents=True, exist_ok=True)
     (target / 'index.html').write_text(document, encoding='utf-8')
-robots = 'User-agent: *\nAllow: /\n'
-if origin:
+robots = 'User-agent: *\nAllow: /\nDisallow: /api/\n'
+if origin and production:
     (OUT / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join('<url><loc>' + html.escape(url) + '</loc></url>' for url in urls) + '</urlset>\n', encoding='utf-8')
     robots += 'Sitemap: ' + origin + '/sitemap.xml\n'
 else:
