@@ -1,0 +1,167 @@
+/* CODARIS name and mission sections; intentionally scoped to these components. */
+.meaning-overview {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.7fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 20px 34px;
+  padding: 35px 0 35px 24px;
+  position: relative;
+  margin-bottom: 20px;
+}
+.meaning-overview::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, var(--cyan), transparent);
+  opacity: .72;
+}
+.meaning-overline {
+  color: var(--cyan);
+  font: 10px/1.7 var(--mono);
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+}
+.meaning-overview-copy h2 {
+  margin-bottom: 9px;
+  font-size: clamp(22px, 2.4vw, 31px);
+  letter-spacing: -.8px;
+}
+.meaning-overview-copy > p {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.meaning-overview-copy strong { color: var(--text); font-weight: 600; }
+.meaning-overview-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #29424d;
+  background: linear-gradient(135deg, #10212a, #0a1119);
+  color: var(--text);
+  font-size: 12px;
+  white-space: nowrap;
+  transition: border-color .2s, transform .2s, color .2s;
+}
+.meaning-overview-link span { color: var(--cyan); font-size: 17px; }
+.meaning-overview-link:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+
+.meaning-section {
+  display: grid;
+  grid-template-columns: minmax(230px, .82fr) minmax(0, 1.35fr);
+  align-items: start;
+  gap: clamp(42px, 8vw, 112px);
+  padding-block: clamp(64px, 9vw, 112px);
+  scroll-margin-top: 36px;
+}
+.meaning-intro { position: sticky; top: 36px; }
+.meaning-intro .meaning-overline { margin-bottom: 18px; }
+.meaning-intro h2 {
+  max-width: 480px;
+  margin-bottom: 20px;
+  font-size: clamp(30px, 4vw, 49px);
+  line-height: 1.08;
+  letter-spacing: -1.8px;
+}
+.meaning-intro > p:not(.meaning-overline):not(.meaning-expansion) {
+  max-width: 410px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.meaning-expansion {
+  margin-top: 32px;
+  max-width: 410px;
+  color: #c7d3dc;
+  font: 12px/2 var(--mono);
+  letter-spacing: .15px;
+}
+.meaning-expansion span { color: var(--cyan); font-weight: 700; }
+.meaning-steps {
+  position: relative;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: meaning-step;
+}
+.meaning-steps::before {
+  content: "";
+  position: absolute;
+  top: 28px;
+  bottom: 34px;
+  left: 25px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--cyan), #24404d 14%, #24404d 86%, transparent);
+}
+.meaning-steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+  padding: 15px 16px 22px 0;
+  animation: meaning-step-in .55s both;
+}
+.meaning-steps li:nth-child(2) { animation-delay: .05s; }
+.meaning-steps li:nth-child(3) { animation-delay: .1s; }
+.meaning-steps li:nth-child(4) { animation-delay: .15s; }
+.meaning-steps li:nth-child(5) { animation-delay: .2s; }
+.meaning-steps li:nth-child(6) { animation-delay: .25s; }
+.meaning-steps li:nth-child(7) { animation-delay: .3s; }
+@keyframes meaning-step-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.meaning-letter {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 52px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid #32616a;
+  border-radius: 50%;
+  background: #0b151e;
+  box-shadow: inset 0 0 18px #3edce411, 0 0 0 5px var(--bg);
+  color: var(--cyan);
+  font: 700 21px/1 Arial, sans-serif;
+  transition: background .2s, border-color .2s, box-shadow .2s, transform .2s;
+}
+.meaning-steps li:hover .meaning-letter {
+  transform: scale(1.07);
+  border-color: var(--cyan);
+  background: #10252d;
+  box-shadow: inset 0 0 20px #3edce422, 0 0 22px #3edce422, 0 0 0 5px var(--bg);
+}
+.meaning-steps h3 {
+  margin: 1px 0 5px;
+  color: var(--text);
+  font-size: 19px;
+  letter-spacing: -.3px;
+}
+.meaning-steps p { max-width: 560px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+@media (max-width: 900px) {
+  .meaning-overview { grid-template-columns: minmax(110px, .55fr) minmax(0, 1.5fr); }
+  .meaning-overview-link { grid-column: 2; justify-self: start; }
+  .meaning-section { grid-template-columns: minmax(180px, .75fr) minmax(0, 1.25fr); gap: 40px; }
+}
+@media (max-width: 640px) {
+  .meaning-overview { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 28px 0 28px 24px; }
+  .meaning-overview::before { inset: 8px auto 8px 0; }
+  .meaning-overview-link { grid-column: 1; margin-top: 6px; white-space: normal; }
+  .meaning-section { grid-template-columns: minmax(0, 1fr); gap: 34px; padding-block: 58px; }
+  .meaning-intro { position: static; }
+  .meaning-intro h2 { max-width: 540px; }
+  .meaning-expansion { margin-top: 20px; }
+  .meaning-steps li { gap: 15px; padding-right: 0; }
+  .meaning-steps::before { left: 22px; }
+  .meaning-letter { width: 46px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .meaning-overview-link, .meaning-letter { transition: none; }
+  .meaning-steps li { animation: none; }
+}

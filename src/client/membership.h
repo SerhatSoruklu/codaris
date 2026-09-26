@@ -12,6 +12,8 @@ EM_JS(void, member_ready, (void), {
     if (fields) {
         fields.disabled = false;
         fields.querySelector('button[type="submit"]').disabled = false;
+        const countryTrigger = document.getElementById('join-country-trigger');
+        if (countryTrigger) countryTrigger.disabled = false;
     }
     document.body.dataset.memberReady = 'true';
     document.dispatchEvent(new Event('codaris-member-ready'));
@@ -58,7 +60,7 @@ static int pending_topic=-1;
 EM_JS(void, member_progress_request, (int topic,int read), {
     fetch('/api/progress',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({topic:String(topic),read:String(read)})})
-      .then(response=>Module.ccall('codaris_progress_response',null,['number'],[response.status]))
+      .then(response=>{if(response.status===401)document.dispatchEvent(new Event('codaris-auth-required'));Module.ccall('codaris_progress_response',null,['number'],[response.status]);})
       .catch(()=>Module.ccall('codaris_progress_response',null,['number'],[0]));
 })
 EMSCRIPTEN_KEEPALIVE void codaris_member_topic(int index) {
@@ -86,6 +88,10 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
     const form = document.querySelector('[data-account-form="' + kind + '"]');
     const payload = {};
     if (form) new FormData(form).forEach((value, key) => { payload[key] = value; });
+    if (kind === 'credential') {
+        const enabled = document.getElementById('credential-public-enabled');
+        payload.enabled = String(!!(enabled && enabled.checked));
+    }
     if (form) {
         const canvas=form.querySelector('#avatar-preview');
         if(canvas) {
@@ -107,6 +113,8 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
     }
     if (form) form.querySelectorAll('button').forEach(e => e.disabled = true);
     fetch(path, options).then(async response => {
+        if (response.status === 401 || (response.ok && (kind === 'logout' || kind === 'password')))
+            document.dispatchEvent(new Event('codaris-auth-required'));
         const contentType = response.headers.get('content-type') || "";
         if (!contentType.toLowerCase().includes('application/json')) {
             throw new Error('The account service returned an unexpected response. Please try again later.');
@@ -122,14 +130,26 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
                 else context.clearRect(0,0,100,100);
             });
             document.querySelectorAll('[data-avatar-fallback]').forEach(e=>e.hidden=!!raw);
+            const removePicture=document.getElementById('avatar-remove');
+            if(removePicture)removePicture.hidden=!raw;
             const mapping = {'profile-name':'name','profile-country':'country','profile-role':'role',
                 'profile-linkedin':'linkedin','profile-github':'github','profile-website':'website'};
             Object.entries(mapping).forEach(([id, key]) => {
-                const element = document.getElementById(id); if (element) element.value = data[key] || "";
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = id === 'profile-country' && data[key] === 'Turkey'
+                        ? 'Türkiye' : (data[key] || "");
+                    if (id === 'profile-country') element.dispatchEvent(new Event('change', {bubbles:true}));
+                    if (element.dataset.characterCount) {
+                        const count = document.getElementById(element.dataset.characterCount);
+                        if (count) count.textContent = element.value.length + ' / ' + element.maxLength;
+                    }
+                }
             });
             const text = {'member-display-name':'name','membership-id':'membership_id',
                 'account-email':'email','application-reason':'motivation'};
             Object.entries(text).forEach(([id,key]) => { const e=document.getElementById(id); if(e)e.textContent=data[key] || ""; });
+            document.dispatchEvent(new CustomEvent('codaris-member-profile',{detail:data}));
         }
         Module.ccall('codaris_account_response', null, ['string','number','string','number'],
             [kind, response.status, data.message || "", data.email_verified ? 1 : 0]);
@@ -151,13 +171,20 @@ EM_JS(int, member_form_matches, (const char *kind), {
     const form=document.querySelector('[data-account-form="'+UTF8ToString(kind)+'"]');
     if(!form)return 1;
     const password=form.elements.namedItem('password'), confirm=form.elements.namedItem('confirmation');
-    return !confirm || (password && password.value===confirm.value);
+    if (!confirm) return 1;
+    const matches = password && password.value === confirm.value;
+    confirm.setAttribute('aria-invalid', String(!matches));
+    const error = document.getElementById('application-confirm-error');
+    if (error) error.textContent = matches ? "" : 'Passwords do not match.';
+    if (!matches) confirm.focus();
+    return !!matches;
 })
 EMSCRIPTEN_KEEPALIVE void codaris_account_submit(const char *kind) {
-    static const char *operations[]={"register","login","profile","password","email","recover","verify","reset","resend","logout","me"};
-    if(!member_form_matches(kind)){member_result(kind,"Passwords do not match.",1);return;}
+    static const char *operations[]={"register","login","profile","password","email","recover","verify","reset","resend","logout","me","credential"};
+    if(!member_form_matches(kind)){member_result(kind,"Check the highlighted password confirmation.",1);return;}
     for(size_t i=0;i<sizeof(operations)/sizeof(operations[0]);i++) if(!strcmp(kind,operations[i])) {
-        char path[40];int n=snprintf(path,sizeof(path),"/api/%s",kind);
+        const char *endpoint=!strcmp(kind,"credential")?"/api/credential/public":NULL;
+        char path[40];int n=endpoint?snprintf(path,sizeof(path),"%s",endpoint):snprintf(path,sizeof(path),"/api/%s",kind);
         if(n>0 && (size_t)n<sizeof(path))member_request(kind,path);
         return;
     }
@@ -181,7 +208,21 @@ EM_JS(void, member_verification_view, (int status), {
       : 'The link may have expired or already been used. Sign in to check your verification status or request a new link.';
     document.getElementById('verification-retry').hidden = status !== 0 && status < 500;
 })
+EM_JS(void, member_credential_response, (int status, const char *message), {
+    const toggle = document.getElementById('credential-public-enabled');
+    const output = document.getElementById('credential-consent-status');
+    const link = document.getElementById('credential-verify-link');
+    const ok = status >= 200 && status < 300;
+    if (toggle) {
+        if (!ok) toggle.checked = toggle.dataset.synced === 'true';
+        toggle.dataset.synced = String(toggle.checked);
+        toggle.disabled = false;
+    }
+    if (output) output.textContent = UTF8ToString(message);
+    if (link && toggle) link.hidden = !toggle.checked;
+})
 EMSCRIPTEN_KEEPALIVE void codaris_account_response(const char *kind,int status,const char *message,int verified) {
+    if(!strcmp(kind,"credential")){member_credential_response(status,message);return;}
     if(!strcmp(kind,"me")) {
         if(status==401){member_navigate("/login/");return;}
         if(status==200){member_authenticated(verified);view_text("email-verification",verified?"Email verified · membership active":"Email not verified · check your inbox");}

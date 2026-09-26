@@ -25,7 +25,15 @@ int config_load(Config *c) {
     c->smtp_url = env("CODARIS_SMTP_URL", c->production ? "" : "smtp://127.0.0.1:1025");
     c->smtp_user = env("CODARIS_SMTP_USER", "");
     c->smtp_password = env("CODARIS_SMTP_PASSWORD", "");
-    c->mail_from = env("CODARIS_MAIL_FROM", "no-reply@codaris.org");
+    c->mail_from = env("CODARIS_MAIL_FROM", "admin@coupyn.com");
+    c->credential_font = env("CODARIS_CREDENTIAL_FONT",
+                             c->production ? "/opt/codaris/DejaVuSans.ttf" :
+#ifdef CODARIS_SOURCE_FONT_PATH
+                             CODARIS_SOURCE_FONT_PATH
+#else
+                             "web/assets/fonts/DejaVuSans.ttf"
+#endif
+    );
     if (strlen(c->origin) > 512 || strpbrk(c->origin, "<>\"'&\r\n"))
         return 0;
     CURLU *url = curl_url();

@@ -20,6 +20,20 @@
       "problemMatcher": []
     },
     {
+      "label": "CODARIS: Open production database tunnel",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/db-tunnel.sh",
+      "args": [],
+      "problemMatcher": []
+    },
+    {
+      "label": "CODARIS: Migrate live database (password prompt)",
+      "type": "process",
+      "command": "${workspaceFolder}/scripts/db-live-migrate.sh",
+      "args": [],
+      "problemMatcher": []
+    },
+    {
       "label": "CODARIS: Build backend",
       "type": "process",
       "command": "${workspaceFolder}/scripts/build-server.sh",

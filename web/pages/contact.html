@@ -1,1 +1,56 @@
-<section class="wrap section resource-page" aria-labelledby="contact-title"><p class="eyebrow">CODARIS / CONTACT</p><h1 class="page-title" id="contact-title">Get in touch.</h1><p>For account help and general enquiries, email <a href="mailto:contact@codaris.org">contact@codaris.org</a>.</p><p>For privacy and account-data requests: <a href="mailto:privacy@codaris.org">privacy@codaris.org</a>. For membership terms: <a href="mailto:terms@codaris.org">terms@codaris.org</a>.</p><p>CODARIS is operated by Serhat Soruklu, 3 Culross Close, London, N15 3RH, United Kingdom.</p><p>Never send passwords, verification links or other credentials by email. Our official social account is <a href="https://x.com/codarisorg">@codarisorg on X</a>.</p></section>
+<section class="contact-page wrap" aria-labelledby="contact-title">
+  <header class="contact-heading">
+    <div>
+      <p class="eyebrow">CODARIS / CONTACT</p>
+      <h1 class="page-title" id="contact-title">Start a conversation.</h1>
+      <p class="contact-intro">Tell us what you need and choose a topic. Your message goes to CODARIS support.</p>
+    </div>
+    <div class="contact-response" aria-label="Expected response time">
+      <svg class="icon icon--lg contact-response-mark" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#clock-3"></use></svg>
+      <div><span class="contact-label">RESPONSE TARGET</span><strong>3 working days</strong><small>We aim to reply within this time.</small></div>
+    </div>
+  </header>
+
+  <div class="contact-layout">
+    <div class="contact-panel">
+      <div class="contact-panel-heading">
+        <div><p class="contact-label">MESSAGE THE TEAM / 01</p><h2><svg class="icon" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#message-square"></use></svg> Your message</h2></div>
+        <span class="contact-private"><span aria-hidden="true">●</span> Sent privately</span>
+      </div>
+      <form id="contact-form" class="contact-form" data-contact-form aria-label="Contact CODARIS">
+        <p class="contact-loading" role="status">Activating the form… If it does not load, use the email links beside the form.</p>
+        <fieldset id="contact-fields" disabled>
+          <legend class="sr-only">Your message</legend>
+          <div class="form-grid">
+            <div class="form-field"><label for="contact-name">Name</label><input id="contact-name" name="name" type="text" autocomplete="name" minlength="2" maxlength="120" placeholder="How should we address you?" required></div>
+            <div class="form-field"><label for="contact-email">Email</label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" aria-describedby="contact-email-hint" required><small id="contact-email-hint">We’ll send a receipt here and reply to you.</small></div>
+            <div class="form-field contact-full"><label for="contact-topic">Topic</label><select id="contact-topic" class="form-select" name="topic" required aria-describedby="contact-topic-hint"><option value="">Choose the closest topic</option></select><small id="contact-topic-hint">Pick the subject that best matches your message.</small></div>
+            <div class="form-field contact-full"><label for="contact-message">Message</label><textarea id="contact-message" name="message" rows="7" minlength="20" maxlength="4000" placeholder="Tell us what you need help with…" aria-describedby="contact-message-hint contact-message-count" required></textarea><div class="contact-message-meta"><small id="contact-message-hint">20–4,000 characters. Do not include passwords, reset links or sensitive personal information.</small><span id="contact-message-count" class="contact-count" aria-live="polite" aria-atomic="true">0 / 4,000</span></div></div>
+          </div>
+          <div class="contact-submit-row"><button class="button contact-submit" type="submit"><span>Send message</span><svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#send"></use></svg></button><small>Your details are used to respond to this message.</small></div>
+        </fieldset>
+      </form>
+      <p id="contact-feedback" class="account-notice" role="status" aria-live="polite" aria-atomic="true"></p>
+    </div>
+
+    <aside class="contact-aside" aria-label="Other ways to contact CODARIS">
+      <section class="contact-aside-block">
+        <p class="contact-label"><svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#mail"></use></svg> DIRECT EMAIL / 02</p>
+        <h2>Need another route?</h2>
+        <p>If the form is unavailable, write to <a href="mailto:contact@codaris.org">contact@codaris.org</a>.</p>
+      </section>
+      <section class="contact-aside-block">
+        <p class="contact-label">PRIVACY / 03</p>
+        <h3>Data requests or a privacy concern?</h3>
+        <p>Use <a href="mailto:privacy@codaris.org">privacy@codaris.org</a> for access, correction, deletion or a data-protection complaint.</p>
+      </section>
+      <section class="contact-aside-block">
+        <p class="contact-label">MEMBERSHIP / 04</p>
+        <h3>Questions about the terms?</h3>
+        <p>Read the <a href="/terms/">membership terms</a> or email <a href="mailto:terms@codaris.org">terms@codaris.org</a>.</p>
+      </section>
+      <p class="contact-aside-foot">Official channel: <a href="https://x.com/codarisorg" target="_blank" rel="noopener noreferrer">@codarisorg on X <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#external-link"></use></svg></a></p>
+    </aside>
+  </div>
+  <noscript><p class="contact-noscript">The form needs JavaScript and WebAssembly. Email <a href="mailto:contact@codaris.org">contact@codaris.org</a> instead.</p></noscript>
+</section>

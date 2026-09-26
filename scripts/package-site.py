@@ -16,7 +16,8 @@ target = root / 'build/package' / release
 if target.exists():
     raise SystemExit('Release already packaged; choose a new identifier')
 files = []
-allowed_root = {'index.html', '404.html', 'styles.css', 'host.js', 'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml', 'version.txt'}
+allowed_root = {'index.html', '404.html', 'styles.css', 'meaning.css', 'legal.css', 'contact.css',
+                'host.js', 'auth-nav.js', 'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml', 'version.txt'}
 for file in sorted(source.rglob('*')):
     if file.is_symlink():
         raise SystemExit('Symlinks are not allowed in site output')
@@ -26,8 +27,10 @@ for file in sorted(source.rglob('*')):
         raise SystemExit("Refusing to package a development build. Run python scripts/project.py prod build-client.")
     relative = file.relative_to(source)
     permitted = (len(relative.parts) == 1 and relative.name in allowed_root) or (
-        len(relative.parts) == 2 and relative.name == 'index.html' and re.fullmatch(r'[a-z0-9-]+', relative.parts[0])) or (
-        len(relative.parts) == 2 and relative.parts[0] == 'assets' and file.suffix in {'.svg', '.png', '.webp'})
+        len(relative.parts) >= 2 and relative.name == 'index.html' and
+        all(re.fullmatch(r'[a-z0-9-]+', part) for part in relative.parts[:-1])) or (
+        relative.parts[0] == 'assets' and file.suffix in {'.svg', '.png', '.webp'}) or (
+        relative.as_posix() in {'assets/COUNTRY-FLAGS-LICENSE.txt', 'assets/icons/LICENSE'})
     if not permitted:
         raise SystemExit('Unexpected build artifact: ' + str(relative))
     files.append((file, relative))

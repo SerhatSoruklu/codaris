@@ -12,7 +12,7 @@ static const char *chat_countries[50] = {
  "Czechia", "Denmark", "Egypt", "Finland", "France", "Germany", "Ghana", "Greece", "India", "Indonesia",
  "Ireland", "Israel", "Italy", "Japan", "Kenya", "Malaysia", "Mexico", "Morocco", "Netherlands", "New Zealand",
  "Nigeria", "Norway", "Pakistan", "Philippines", "Poland", "Portugal", "Romania", "Saudi Arabia", "Singapore",
- "Somalia", "South Africa", "South Korea", "Spain", "Sweden", "Switzerland", "Turkey", "Ukraine", "United Arab Emirates", "United Kingdom", "United States"
+ "Somalia", "South Africa", "South Korea", "Spain", "Sweden", "Switzerland", "Türkiye", "Ukraine", "United Arab Emirates", "United Kingdom", "United States"
 };
 typedef struct { int room; char name[481], text[CHAT_TEXT], file[121]; } ChatMessage;
 typedef struct {

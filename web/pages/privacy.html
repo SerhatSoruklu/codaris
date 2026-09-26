@@ -1,12 +1,136 @@
-<section class="wrap section resource-page" aria-labelledby="privacy-title">
-<p class="eyebrow">CODARIS / PRIVACY</p><h1 class="page-title" id="privacy-title">Your data at CODARIS.</h1>
-<p>Last updated: 24 September 2026.</p>
-<h2>Who is responsible</h2><p>CODARIS is operated by Serhat Soruklu, 3 Culross Close, London, N15 3RH, United Kingdom. For privacy questions and requests, email <a href="mailto:privacy@codaris.org">privacy@codaris.org</a>.</p>
-<h2>What we collect and why</h2><p>When you create an account, we collect your name, email, country, role, reason for joining and any optional profile picture, LinkedIn, GitHub or website links you provide. Uploaded pictures are reduced to 100 × 100 pixels; original files and metadata are not stored. We store a password hash, your membership ID, email verification state, session records and learning progress. We use this information to provide the account and membership services you request. Our lawful basis for these core services is performance of our agreement with you, including steps you request before entering it.</p>
-<p>We process limited request and security information to prevent abuse, investigate faults and protect accounts. We rely on our legitimate interests in keeping the service secure. Please do not include sensitive personal information in your joining reason or profile links.</p>
-<h2>Verification and visibility</h2><p>Email verification confirms access to a mailbox. It does not verify your identity, country, role or ownership of external profiles. Changing your email immediately clears email verification until you confirm the new address. Your original joining reason is retained as your application record and cannot be edited through settings; contact us if you need a correction or erasure.</p><p>Your account settings are not a public directory. Public community statistics contain aggregate counts of verified members and self-reported countries. We do not publish your name, email or application response in those statistics.</p>
-<h2>Cookies</h2><p>We use a necessary session cookie, <code>codaris_session</code>, to keep you signed in for up to 12 hours. It is not used for advertising. The application does not place advertising or analytics cookies.</p>
-<h2>Service providers</h2><p>Infrastructure and email providers process information needed to host the service, maintain its database and deliver account emails. Our outbound account emails use Google Workspace, with CODARIS as the sender name and admin@coupyn.com as the sending mailbox. Support mail is routed to the operator’s administrative mailbox. External websites linked from CODARIS have their own privacy practices.</p><p>Providers may process information outside the UK. Before enabling such processing, we assess the transfer arrangements and put the required safeguards in place. Contact us for information about the safeguards applicable to your data.</p>
-<h2>Retention</h2><p>Account details, your application response and learning progress are retained while your account remains open. You can request account deletion by contacting us. We may retain limited information where necessary to meet a legal obligation or resolve a dispute, and will explain the reason where applicable. Verification links expire after 24 hours; password reset links expire after 30 minutes. Expired sessions and tokens are removed by scheduled maintenance. Delivery records are removed after 30 days, and request-limit records after one day. Deleted data may remain in protected backups until those backups rotate out of retention.</p>
-<h2>Your rights</h2><p>You can ask for access, correction or deletion of personal data, restriction of processing, and a portable copy where applicable. These rights depend on the circumstances and lawful basis. We may need to verify your identity before acting on a request.</p><p><strong>You have the right to object to processing based on our legitimate interests.</strong> Contact <a href="mailto:privacy@codaris.org">privacy@codaris.org</a> to exercise that right.</p><p>You can complain to the UK Information Commissioner’s Office at <a href="https://ico.org.uk/make-a-complaint/">ico.org.uk/make-a-complaint</a>. We do not use your account data for advertising profiles or automated decisions with legal or similarly significant effects.</p>
+<section class="legal-document wrap" aria-labelledby="privacy-title">
+  <header class="legal-heading">
+    <p class="eyebrow">CODARIS / GOVERNANCE / 01</p>
+    <h1 id="privacy-title">Privacy notice</h1>
+    <p class="legal-summary">What information CODARIS uses when you visit the site, apply for membership or use an account, and how to ask us about it.</p>
+    <p class="legal-date"><span>LAST REVIEWED</span> <time datetime="2026-09-26">26 September 2026</time></p>
+  </header>
+  <div class="legal-layout">
+    <nav class="legal-toc" aria-label="Privacy notice contents">
+      <p class="legal-toc-title">On this page</p>
+      <ol>
+        <li><a href="#controller">Who is responsible</a></li>
+        <li><a href="#information">Information we use</a></li>
+        <li><a href="#purposes">Why we use it</a></li>
+        <li><a href="#verification">Verification and membership</a></li>
+        <li><a href="#visibility">What others can see</a></li>
+        <li><a href="#cookies">Cookies and browser storage</a></li>
+        <li><a href="#providers">Providers and transfers</a></li>
+        <li><a href="#retention">How long we keep it</a></li>
+        <li><a href="#rights">Your choices and rights</a></li>
+        <li><a href="#security">Security and complaints</a></li>
+      </ol>
+    </nav>
+    <article class="legal-body">
+      <section class="legal-section" id="controller" aria-labelledby="controller-title">
+        <p class="legal-number">01</p><h2 id="controller-title">Who is responsible</h2>
+        <p>CODARIS is operated by Serhat Soruklu. The operator is responsible for deciding how and why personal information is used for this service. Write to <a href="mailto:privacy@codaris.org">privacy@codaris.org</a> about privacy, data requests or a data-protection complaint. General account help is available at <a href="mailto:contact@codaris.org">contact@codaris.org</a>.</p>
+        <p>The operator’s legal status and the contact details appropriate for formal privacy requests are being confirmed for this release. The published email addresses must be monitored and able to receive those requests before this notice is relied on as final controller information.</p>
+      </section>
+
+      <section class="legal-section" id="information" aria-labelledby="information-title">
+        <p class="legal-number">02</p><h2 id="information-title">Information we use</h2>
+        <p>When account registration is available, the account service receives the information below directly from you. The public account service is not currently deployed; this describes the implemented account workflow for when it is enabled.</p>
+        <div class="legal-table-wrap" role="region" aria-label="Information collected by CODARIS" tabindex="0">
+          <table class="legal-table">
+            <caption>Information, source and use</caption>
+            <thead><tr><th scope="col">Information</th><th scope="col">Source and use</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Account and application</th><td>Your name, email address, country, selected role, joining statement and randomly generated membership ID. These are entered during registration; the statement is stored with the account and cannot be edited in account settings.</td></tr>
+              <tr><th scope="row">Profile details</th><td>Optional LinkedIn, GitHub and website URLs, and an optional profile image. URLs are stored as claims; CODARIS does not verify profile ownership. The browser sends a 100 × 100 pixel image representation rather than the selected original file.</td></tr>
+              <tr><th scope="row">Authentication</th><td>Your password is processed to create an Argon2id password hash. The database stores that hash, not the password. Session and one-time action tokens are random; the database stores token hashes for sessions and action links.</td></tr>
+              <tr><th scope="row">Membership credential</th><td>CODARIS creates a randomly assigned public membership number and a separate opaque verification identifier. Neither is your private sign-in membership ID. Your credential status and issue date are maintained with the account. New members see the public-field disclosure at registration; existing members must enable public verification themselves.</td></tr>
+              <tr><th scope="row">Learning progress</th><td>When you mark a topic as read while signed in, the topic and time are associated with your account so progress can be restored.</td></tr>
+              <tr><th scope="row">Account messages</th><td>Your email address receives verification, password recovery, email-change and password-change messages. The service records message recipient, type, timestamps and delivery attempts in its mail queue.</td></tr>
+              <tr><th scope="row">Contact form</th><td>If you use the contact form, we receive your name, email address, selected topic and message. The message is encrypted in the application’s PostgreSQL outbox while awaiting delivery. The form does not accept attachments.</td></tr>
+              <tr><th scope="row">Request and security data</th><td>The service uses request source information, endpoint names and, for some limits, the submitted email address or login identifier to limit repeated registration, sign-in and recovery attempts. Standard web-server logs can also record technical request details. The production log configuration and its retention are not yet confirmed.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Please do not include sensitive personal information in the joining statement or profile links. Do not send us passwords, one-time links or other credentials by email.</p>
+      </section>
+
+      <section class="legal-section" id="purposes" aria-labelledby="purposes-title">
+        <p class="legal-number">03</p><h2 id="purposes-title">Why we use information</h2>
+        <ul>
+          <li><strong>To handle an application and provide an account:</strong> create an account, identify it, save profile settings and learning progress, and provide membership features you request.</li>
+          <li><strong>To verify and protect account access:</strong> confirm access to the email address, authenticate sign-ins, support password recovery and respond to email or password changes.</li>
+          <li><strong>To protect and operate the service:</strong> rate-limit requests, investigate faults and prevent misuse.</li>
+          <li><strong>To show community totals:</strong> calculate the number of email-verified accounts and the number of distinct self-reported countries. The totals do not identify individual members.</li>
+          <li><strong>To answer contact messages:</strong> route your message to the fixed CODARIS support inbox and send a receipt to the email address you supplied.</li>
+        </ul>
+        <h3>Lawful bases</h3>
+        <p>For registration, account administration, membership access, verification messages and saved progress, we use information because it is needed to take steps you request before membership and, once membership is active, to provide the account service under our terms. To respond to a message you send, we use your information to take steps at your request or, where appropriate, for our legitimate interest in handling enquiries. For request limits, fault investigation and service security, we rely on our legitimate interests in operating and protecting CODARIS. We also rely on our legitimate interests in publishing non-identifying community totals. We use these interests only where they are not overridden by your rights and interests. If we need information to meet a legal obligation, we will use it for that obligation.</p>
+      </section>
+
+      <section class="legal-section" id="verification" aria-labelledby="verification-title">
+        <p class="legal-number">04</p><h2 id="verification-title">Email verification and membership</h2>
+        <p>Email verification confirms that you can use the supplied mailbox. It does not establish your identity, country, role or control of a LinkedIn, GitHub or other external profile.</p>
+        <p>In the implemented workflow, confirming the email address activates membership automatically. There is no staff application-review or approval feature. Changing the account email clears its verified state until the new address is confirmed. Password reset and email verification links are single-use; their expiry periods are listed below.</p>
+      </section>
+
+      <section class="legal-section" id="visibility" aria-labelledby="visibility-title">
+        <p class="legal-number">05</p><h2 id="visibility-title">What other people can see</h2>
+        <p>CODARIS does not provide a browsable public member directory. When public verification is enabled for your credential, anyone who has its unique verification link or scans its QR code can see your display name, role, public membership number, current membership status and issue date. New members explicitly accept this disclosure during registration; existing members must enable public verification in their dashboard. You can disable it at any time.</p>
+        <p>The credential is for verification only. Its opaque link identifier is not an account login, password or authorization token. It does not expose your email, country, joining statement, profile image, profile links, internal account identifiers or learning progress. If public verification is disabled, unavailable, or your membership is not active, the page returns a generic unavailable message.</p>
+        <p>Your name, email, role, joining statement, profile image, profile links and learning progress otherwise remain available only to you in your signed-in account; they are not included in public community totals.</p>
+        <p>The public community endpoint returns aggregate counts for verified accounts and distinct country values supplied by members. Country is self-reported; the totals do not verify where anyone lives. Information you choose to publish on an external website is governed by that website’s own rules.</p>
+      </section>
+
+      <section class="legal-section" id="cookies" aria-labelledby="cookies-title">
+        <p class="legal-number">06</p><h2 id="cookies-title">Cookies and browser storage</h2>
+        <p>The signed-in account service uses a first-party cookie named <code>codaris_session</code>. It carries an opaque session token, is marked HttpOnly and SameSite=Strict, and expires after 12 hours. Production is configured to mark it Secure. It is used to keep you signed in and is not an advertising cookie.</p>
+        <p>The site code contains no analytics or advertising scripts and does not use localStorage or sessionStorage for account data. The public site also links to external websites; opening one takes you under that site’s privacy and cookie practices.</p>
+      </section>
+
+      <section class="legal-section" id="providers" aria-labelledby="providers-title">
+        <p class="legal-number">07</p><h2 id="providers-title">Providers and international transfers</h2>
+        <p>The account service is designed to use PostgreSQL for account data and an SMTP email provider for transactional account messages. The contact form routes submissions to the fixed inbox <code>admin@coupyn.com</code> and sends an acknowledgement to the address you supplied, using the configured CODARIS sender address. The release configuration names Google Workspace SMTP, but live production use of that service and mailbox, access to the inbox, and the hosting/database provider have not been verified. The message will also be present in the receiving email provider’s systems and inbox after delivery; their own retention and access controls apply.</p>
+        <p>We do not yet have verified information about the live providers’ locations, subprocessors or international transfer arrangements. We will identify relevant providers and explain applicable safeguards before relying on processing that transfers your information outside the UK.</p>
+      </section>
+
+      <section class="legal-section" id="retention" aria-labelledby="retention-title">
+        <p class="legal-number">08</p><h2 id="retention-title">How long information is kept</h2>
+        <div class="legal-table-wrap" role="region" aria-label="CODARIS retention periods" tabindex="0">
+          <table class="legal-table">
+            <caption>Retention built into the account service</caption>
+            <thead><tr><th scope="col">Record</th><th scope="col">Period in the implementation</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Account, profile, joining statement and learning progress</th><td>While the account remains in the database. There is no self-service deletion feature. How account data is deleted, retained for legal reasons or removed from backups has not been operationally confirmed.</td></tr>
+              <tr><th scope="row">Signed-in sessions</th><td>Expire after 12 hours. The mail worker removes expired session records when it runs.</td></tr>
+              <tr><th scope="row">Email verification links</th><td>Expire after 24 hours and can be used once. Expired action-token records are removed when the mail worker runs.</td></tr>
+              <tr><th scope="row">Password reset links</th><td>Expire after 30 minutes and can be used once. Expired action-token records are removed when the mail worker runs.</td></tr>
+              <tr><th scope="row">Account mail records</th><td>Removed 30 days after creation by the mail worker. The queue clears the encrypted one-time token after successful delivery.</td></tr>
+              <tr><th scope="row">Contact form messages</th><td>The message is encrypted in the outbox until both the admin notification and sender receipt are accepted for delivery, then the outbox record is deleted. If delivery keeps failing, the record is deleted after 30 days. The worker retries each message up to eight times. Copies in email systems and mailboxes follow those providers’ retention practices.</td></tr>
+              <tr><th scope="row">Request-limit records</th><td>Removed when their limit window is more than one day old, by the mail worker.</td></tr>
+              <tr><th scope="row">Web and system logs, backups</th><td>Retention and deletion behavior are not specified by the repository and must be confirmed by the operator.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>These periods describe the code. The production mail worker, deletion process, log rotation and backup retention must be installed and checked before they can be treated as live operational guarantees.</p>
+      </section>
+
+      <section class="legal-section" id="rights" aria-labelledby="rights-title">
+        <p class="legal-number">09</p><h2 id="rights-title">Your choices and rights</h2>
+        <p>You can change your name, country, role, profile links and image in account settings. The original joining statement cannot currently be changed there. You can ask us to correct it or to close your account by emailing <a href="mailto:privacy@codaris.org">privacy@codaris.org</a>; the account interface does not provide a deletion control.</p>
+        <p>Depending on the circumstances and legal basis, UK data-protection law may give you rights to access your information, have inaccurate information corrected, have information erased, restrict or object to some processing, and receive certain information in a portable form. You may also withdraw consent where processing is based on consent; the account processing described here is not based on consent. Some rights are conditional and exceptions can apply. We may ask for information needed to confirm your identity before responding.</p>
+        <p><strong>You can object to processing based on our legitimate interests.</strong> Contact us using the privacy address above and explain what you object to.</p>
+      </section>
+
+      <section class="legal-section" id="security" aria-labelledby="security-title">
+        <p class="legal-number">10</p><h2 id="security-title">Security, age, automation and complaints</h2>
+        <p>The implementation uses password hashing, opaque session tokens, parameterized database queries, request limits and restricted session cookies. These measures reduce specific risks; no online service can promise absolute security. Production controls and operations must be checked separately from the source code.</p>
+        <p>The registration flow does not ask for age or enforce an age threshold. CODARIS’s age-eligibility position has not been set. The account code contains no AI processing or automated decisions about membership; verification activates membership automatically when you confirm mailbox access.</p>
+        <h3>Raise a concern or complain</h3>
+        <p>Email <a href="mailto:privacy@codaris.org">privacy@codaris.org</a> and say that you are making a data-protection complaint. We will acknowledge it within 30 days, investigate it and explain the outcome. You can also complain to the UK Information Commissioner’s Office (ICO) using its <a href="https://ico.org.uk/make-a-complaint/data-protection-complaints/" target="_blank" rel="noopener noreferrer">data-protection complaints service</a>.</p>
+      </section>
+
+      <section class="legal-section" id="changes" aria-labelledby="changes-title">
+        <p class="legal-number">11</p><h2 id="changes-title">Changes and contact</h2>
+        <p>We will update this notice when our data use or service changes. If a change is material, we will bring it to your attention before using your information for a new purpose.</p>
+        <p>Read the <a href="/terms/">Membership terms</a> or visit <a href="/contact/">Contact CODARIS</a>.</p>
+      </section>
+      <p class="legal-endnote">CODARIS / PRIVACY NOTICE / 26 SEP 2026</p>
+    </article>
+  </div>
 </section>

@@ -18,7 +18,7 @@ for mode in ('development', 'production'):
                f'PGHOST={pg_host}\nPGPORT={pg_port}\nPGDATABASE=codaris\nPGUSER=codaris_app\nPGCONNECT_TIMEOUT=5\n'
                f'CODARIS_SMTP_URL={"smtp://smtp.gmail.com:587" if prod else "smtp://127.0.0.1:1025"}\n'
                f'CODARIS_SMTP_USER={"admin@coupyn.com" if prod else ""}\nCODARIS_SMTP_PASSWORD=\n'
-               'CODARIS_MAIL_FROM=no-reply@codaris.org\n'
+               'CODARIS_MAIL_FROM=admin@coupyn.com\n'
                f'CODARIS_MAIL_KEY={secrets.token_hex(32)}\n')
     if prod:
         backend += 'PGPASSFILE=/etc/codaris/pgpass\n'

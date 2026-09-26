@@ -12,8 +12,13 @@
         <a href="/mission/">The mission</a><a href="/global-reach/">Global reach</a
         ><a href="/ecosystem/">Ecosystem</a>
       </nav>
-      <a class="login-link" href="/login/">Log in</a>
-      <a class="button small" href="/join/"
-        >Join the coalition <span aria-hidden="true">↗</span></a
-      >
+      <div class="header-auth" data-auth-nav data-auth-state="loading">
+        <span class="sr-only" role="status" data-auth-status>Checking account status</span>
+        <a class="login-link" href="/login/" data-auth-logged-out hidden>Log in</a>
+        <a class="button small" href="/join/" data-auth-logged-out hidden
+          >Join the coalition <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#arrow-right"></use></svg></a
+        >
+        <a class="button small" href="/dashboard/#overview" data-auth-logged-in hidden><svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#layout-dashboard"></use></svg>Dashboard</a>
+        <noscript><a class="login-link" href="/login/">Log in</a><a class="button small" href="/join/">Join the coalition <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#arrow-right"></use></svg></a></noscript>
+      </div>
     </header>

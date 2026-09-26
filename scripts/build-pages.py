@@ -29,6 +29,10 @@ for asset in (WEB / 'assets').iterdir():
     if asset.suffix not in {'.png', '.webp'}:
         continue
     shutil.copy2(asset, OUT / 'assets' / asset.name)
+runpy.run_path(str(ROOT / 'scripts/build-lucide-sprite.py'))
+icon_out = OUT / 'assets/icons'
+icon_out.mkdir(parents=True, exist_ok=True)
+shutil.copy2(WEB / 'assets/icons/LICENSE', icon_out / 'LICENSE')
 
 pages = json.loads((WEB / 'pages.json').read_text(encoding='utf-8'))
 shell = (WEB / 'index.html').read_text(encoding='utf-8')
@@ -42,7 +46,8 @@ seen_routes = set()
 for page in pages:
     slug = page['slug']
     content_name = page.get('file', slug)
-    if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', content_name) or (slug and not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug)) or slug in seen_routes:
+    route_pattern = r'[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*'
+    if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', content_name) or (slug and not re.fullmatch(route_pattern, slug)) or slug in seen_routes:
         raise SystemExit('Invalid or duplicate page route')
     seen_routes.add(slug)
     route = '/' + slug + '/' if slug else '/'
@@ -67,6 +72,9 @@ for page in pages:
                     {'@type': 'ListItem', 'position': 2, 'name': page['label'], 'item': url}]})
             seo += '\n<script type="application/ld+json">' + json.dumps(data).replace('<', '\\u003c') + '</script>'
     runtime = ''
+    legal_css = '<link rel="stylesheet" href="/legal.css">' if slug in {'privacy', 'terms'} else ''
+    meaning_css = '<link rel="stylesheet" href="/meaning.css">' if slug in {'', 'mission'} else ''
+    contact_css = '<link rel="stylesheet" href="/contact.css">' if slug == 'contact' else ''
     if page.get('interactive'):
         runtime = '''<p id="runtime-status" role="status">Loading interactive features…</p>
 <noscript><p class="runtime-error">Interactive features require JavaScript and WebAssembly. You can still read the pages and navigate the site.</p></noscript>
@@ -79,7 +87,7 @@ for page in pages:
                      lambda match: '' if production else match.group(1), content, flags=re.S)
     if page.get('development_only'):
         content = '<section class="wrap section resource-page"><p class="eyebrow">MEMBERSHIP / COMING SOON</p><h1 class="page-title">' + title + '</h1><p>Staff access is not available yet.</p><a class="button" href="/join/">Explore membership</a></section>'
-    values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'FOOTER': footer, 'RUNTIME': runtime}
+    values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'LEGALCSS': legal_css, 'MEANINGCSS': meaning_css, 'CONTACTCSS': contact_css, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'FOOTER': footer, 'RUNTIME': runtime}
     document = shell
     for key, value in values.items():
         document = document.replace('{{' + key + '}}', value)
@@ -93,6 +101,10 @@ if origin:
 else:
     (OUT / 'sitemap.xml').unlink(missing_ok=True)
 (OUT / 'robots.txt').write_text(robots, encoding='utf-8')
+shutil.copy2(WEB / 'legal.css', OUT / 'legal.css')
+shutil.copy2(WEB / 'meaning.css', OUT / 'meaning.css')
+shutil.copy2(WEB / 'contact.css', OUT / 'contact.css')
+shutil.copy2(WEB / 'auth-nav.js', OUT / 'auth-nav.js')
 print(f'Built {len(pages)} static routes; ' + ('production SEO enabled.' if production and origin else 'preview noindex; set CODARIS_PRODUCTION=1 for production indexing.'))
 
 # Generate the Nginx include outside the public document root.
@@ -102,7 +114,7 @@ deploy_out.mkdir(parents=True, exist_ok=True)
     'add_header ' + name + ' "' + value + '" always;\n' for name, value in headers.items()), encoding='utf-8')
 # A real 404 document prevents static hosts from falling back to the homepage.
 not_found = shell
-values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page could not be found.', 'SEO': '<meta name="robots" content="noindex, follow">', 'HEADER': header, 'BREADCRUMB': '', 'RUNTIME': '', 'CONTENT': '<section class="wrap section resource-page"><h1 class="page-title">Page not found.</h1><p>The page may have moved. <a href="/">Return to the homepage.</a></p></section>'})
+values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page could not be found.', 'SEO': '<meta name="robots" content="noindex, follow">', 'LEGALCSS': '', 'MEANINGCSS': '', 'CONTACTCSS': '', 'HEADER': header, 'BREADCRUMB': '', 'RUNTIME': '', 'CONTENT': '<section class="wrap section resource-page"><h1 class="page-title">Page not found.</h1><p>The page may have moved. <a href="/">Return to the homepage.</a></p></section>'})
 for key, value in values.items():
     not_found = not_found.replace('{{' + key + '}}', value)
 (OUT / '404.html').write_text(not_found, encoding='utf-8')

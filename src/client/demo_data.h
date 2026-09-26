@@ -24,7 +24,7 @@ static const Country countries[] = {
     {"Brazil", "BR", 800000, 620, "Active"},
     {"Canada", "CA", 550000, 510, "Active"},
     {"Australia", "AU", 350000, 280, "Active"},
-    {"Turkey", "TR", 300000, 340, "Active"},
+    {"Türkiye", "TR", 300000, 340, "Active"},
     {"Nigeria", "NG", 150000, 180, "Emerging"},
     {"South Africa", "ZA", 120000, 120, "Emerging"},
     {"Pakistan", "PK", 350000, 240, "Emerging"},
