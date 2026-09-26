@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Validate the deployable site without third-party test dependencies."""
 import json
-import os
 import re
 from html.parser import HTMLParser
 from pathlib import Path
@@ -11,7 +10,7 @@ from xml.etree import ElementTree
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'build/client'
 REGISTRY = json.loads((ROOT / 'web/pages.json').read_text())
-production = os.environ.get('CODARIS_PRODUCTION') == '1'
+production = (OUT / 'sitemap.xml').is_file()
 
 class Document(HTMLParser):
     def __init__(self):
