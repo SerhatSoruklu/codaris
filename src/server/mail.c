@@ -9,6 +9,16 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+static CURL *mail_curl_init(void) {
+    CURL *curl = curl_easy_init();
+    if (!curl) return NULL;
+    if (curl_easy_setopt(curl, CURLOPT_SSLVERSION,
+                        (long)CURL_SSLVERSION_TLSv1_2) != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return NULL;
+    }
+    return curl;
+}
 /* Fixed copy and a validated origin mean user data never enters HTML or headers.
  * Token-containing buffers are wiped; provider errors are not logged. */
 static int send_mail(const Config *c, const char *id, const char *recipient, const char *kind,
@@ -77,7 +87,7 @@ static int send_mail(const Config *c, const char *id, const char *recipient, con
     snprintf(to, sizeof(to), "To: <%s>", recipient);
     snprintf(title, sizeof(title), "Subject: %s", subject);
     snprintf(message_id, sizeof(message_id), "Message-ID: <codaris-%s@codaris.org>", id);
-    CURL *curl = curl_easy_init();
+    CURL *curl = mail_curl_init();
     curl_mime *mime = NULL;
     struct curl_slist *headers = NULL, *recipients = NULL;
     int ok = 0;
@@ -130,7 +140,6 @@ static int send_mail(const Config *c, const char *id, const char *recipient, con
     OPT(CURLOPT_USERNAME, c->smtp_user);
     OPT(CURLOPT_PASSWORD, c->smtp_password);
     OPT(CURLOPT_USE_SSL, c->production ? CURLUSESSL_ALL : CURLUSESSL_NONE);
-    OPT(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
     OPT(CURLOPT_SSL_VERIFYPEER, 1L);
     OPT(CURLOPT_SSL_VERIFYHOST, 2L);
     OPT(CURLOPT_CONNECTTIMEOUT, 10L);
@@ -242,7 +251,7 @@ static int send_contact_mail(const Config *c, const char *id, const char *kind,
         mail_header_add(&headers, date) && mail_header_add(&headers, "MIME-Version: 1.0") &&
         (!is_admin || mail_header_add(&headers, reply));
     if (valid) recipients = curl_slist_append(NULL, recipient);
-    if (valid && recipients) curl = curl_easy_init();
+    if (valid && recipients) curl = mail_curl_init();
     if (curl) mime = curl_mime_init(curl);
     curl_mimepart *part = mime ? curl_mime_addpart(mime) : NULL;
     if (valid && recipients && curl && mime && part && !curl_mime_data(part, text, body_len) &&
@@ -255,7 +264,6 @@ static int send_contact_mail(const Config *c, const char *id, const char *kind,
         CONTACT_SETOPT(CURLOPT_USERNAME, c->smtp_user);
         CONTACT_SETOPT(CURLOPT_PASSWORD, c->smtp_password);
         CONTACT_SETOPT(CURLOPT_USE_SSL, c->production ? CURLUSESSL_ALL : CURLUSESSL_NONE);
-        CONTACT_SETOPT(CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         CONTACT_SETOPT(CURLOPT_SSL_VERIFYPEER, 1L);
         CONTACT_SETOPT(CURLOPT_SSL_VERIFYHOST, 2L);
         CONTACT_SETOPT(CURLOPT_CONNECTTIMEOUT, 10L);
