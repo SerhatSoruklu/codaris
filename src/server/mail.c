@@ -1,10 +1,14 @@
 #include "codaris/service.h"
+#include "../shared/contact_options.h"
+#include "../shared/contact_policy.h"
 #include <curl/curl.h>
 #include <sodium.h>
+#include <json-c/json.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 /* Fixed copy and a validated origin mean user data never enters HTML or headers.
  * Token-containing buffers are wiped; provider errors are not logged. */
 static int send_mail(const Config *c, const char *id, const char *recipient, const char *kind,
@@ -145,6 +149,152 @@ done:
     sodium_memzero(html, sizeof(html));
     return ok;
 }
+static int contact_email_valid(const char *email) {
+    size_t n = strlen(email);
+    const char *at = strchr(email, '@');
+    if (n < 3 || n > 254 || !at || at == email || strchr(at + 1, '@') || !strchr(at + 1, '.') ||
+        at[1] == '.' || email[n - 1] == '.' || email[0] == '.' || at[-1] == '.' ||
+        strstr(email, "..") || strpbrk(email, "\r\n<> ")) return 0;
+    for (const unsigned char *p = (const unsigned char *)email; *p; ++p)
+        if (!(isalnum(*p) && *p < 128) && !strchr(".!#$%&'*+-/=?^_`{|}~@", *p)) return 0;
+    return 1;
+}
+static int mail_header_add(struct curl_slist **headers, const char *value) {
+    struct curl_slist *next = curl_slist_append(*headers, value);
+    if (!next) return 0;
+    *headers = next;
+    return 1;
+}
+static char *contact_payload_decrypt(const Config *c, const char *encoded) {
+    size_t hex_length = strlen(encoded);
+    if (hex_length < 80 || hex_length > 36100 || (hex_length & 1u)) return NULL;
+    size_t blob_capacity = hex_length / 2;
+    unsigned char *blob = malloc(blob_capacity);
+    if (!blob) return NULL;
+    size_t blob_length = 0;
+    int decoded = !sodium_hex2bin(blob, blob_capacity, encoded, hex_length, NULL, &blob_length, NULL);
+    if (!decoded || blob_length < crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES) {
+        sodium_memzero(blob, blob_capacity); free(blob); return NULL;
+    }
+    size_t plain_length = blob_length - crypto_secretbox_NONCEBYTES - crypto_secretbox_MACBYTES;
+    char *plain = malloc(plain_length + 1);
+    int opened = plain && !crypto_secretbox_open_easy((unsigned char *)plain,
+        blob + crypto_secretbox_NONCEBYTES,
+        (unsigned long long)(blob_length - crypto_secretbox_NONCEBYTES), blob, c->mail_key);
+    sodium_memzero(blob, blob_capacity); free(blob);
+    if (!opened) { free(plain); return NULL; }
+    plain[plain_length] = 0;
+    return plain;
+}
+static int send_contact_mail(const Config *c, const char *id, const char *kind,
+                             const char *recipient, const char *reply_to, const char *name,
+                             const char *email, const char *topic, const char *message) {
+    int is_admin = !strcmp(kind, "admin");
+    if ((!is_admin && strcmp(kind, "receipt")) || !contact_email_valid(recipient) ||
+        (is_admin && !contact_email_valid(reply_to)) || !codaris_contact_topic_allowed(topic)) return 0;
+    size_t cap = strlen(message) + 2048;
+    if (cap > 20000) return 0;
+    char *text = malloc(cap);
+    if (!text) return 0;
+    int n = is_admin
+        ? snprintf(text, cap, "New CODARIS contact message\n\nName: %s\nEmail: %s\nTopic: %s\n\nMessage:\n%s\n", name, email, topic, message)
+        : snprintf(text, cap, "Hello,\n\nCODARIS has received your message about: %s.\n\nWe aim to reply within " CODARIS_CONTACT_REPLY_TARGET ". This is an aim, not a guaranteed deadline.\n\nPlease do not reply with passwords, verification links or sensitive personal information.\n\nCODARIS\n", topic);
+    if (n < 0 || (size_t)n >= cap) { sodium_memzero(text, cap); free(text); return 0; }
+    size_t body_len = (size_t)n;
+    char from[320], to[320], subject[128], message_id[160], reply[320], date[80];
+    int valid = (n = snprintf(from, sizeof(from), "From: CODARIS <%s>", c->mail_from)) > 0 && (size_t)n < sizeof(from);
+    valid = valid && (n = snprintf(to, sizeof(to), "To: <%s>", recipient)) > 0 && (size_t)n < sizeof(to);
+    const char *subject_text = is_admin ? "CODARIS contact message" : "We received your message to CODARIS";
+    valid = valid && (n = snprintf(subject, sizeof(subject), "Subject: %s", subject_text)) > 0 && (size_t)n < sizeof(subject);
+    valid = valid && (n = snprintf(message_id, sizeof(message_id), "Message-ID: <codaris-contact-%s-%s@codaris.org>", id, kind)) > 0 && (size_t)n < sizeof(message_id);
+    if (is_admin) valid = valid && (n = snprintf(reply, sizeof(reply), "Reply-To: <%s>", reply_to)) > 0 && (size_t)n < sizeof(reply);
+    time_t now = time(NULL);
+    struct tm *utc = gmtime(&now);
+    valid = valid && now != (time_t)-1 && utc && strftime(date, sizeof(date), "Date: %a, %d %b %Y %H:%M:%S +0000", utc);
+    struct curl_slist *headers = NULL, *recipients = NULL;
+    CURL *curl = NULL;
+    curl_mime *mime = NULL;
+    int ok = 0;
+    if (valid) valid = mail_header_add(&headers, from) && mail_header_add(&headers, to) &&
+        mail_header_add(&headers, subject) && mail_header_add(&headers, message_id) &&
+        mail_header_add(&headers, date) && mail_header_add(&headers, "MIME-Version: 1.0") &&
+        (!is_admin || mail_header_add(&headers, reply));
+    if (valid) recipients = curl_slist_append(NULL, recipient);
+    if (valid && recipients) curl = curl_easy_init();
+    if (curl) mime = curl_mime_init(curl);
+    curl_mimepart *part = mime ? curl_mime_addpart(mime) : NULL;
+    if (valid && recipients && curl && mime && part && !curl_mime_data(part, text, body_len) &&
+        !curl_mime_type(part, "text/plain; charset=utf-8") &&
+        !curl_mime_encoder(part, "quoted-printable")) {
+#define CONTACT_SETOPT(k, v) do { if (curl_easy_setopt(curl, k, v) != CURLE_OK) valid = 0; } while (0)
+        CONTACT_SETOPT(CURLOPT_URL, c->smtp_url);
+        CONTACT_SETOPT(CURLOPT_MAIL_FROM, c->mail_from);
+        CONTACT_SETOPT(CURLOPT_MAIL_RCPT, recipients);
+        CONTACT_SETOPT(CURLOPT_USERNAME, c->smtp_user);
+        CONTACT_SETOPT(CURLOPT_PASSWORD, c->smtp_password);
+        CONTACT_SETOPT(CURLOPT_USE_SSL, c->production ? CURLUSESSL_ALL : CURLUSESSL_NONE);
+        CONTACT_SETOPT(CURLOPT_SSL_VERIFYPEER, 1L);
+        CONTACT_SETOPT(CURLOPT_SSL_VERIFYHOST, 2L);
+        CONTACT_SETOPT(CURLOPT_CONNECTTIMEOUT, 10L);
+        CONTACT_SETOPT(CURLOPT_TIMEOUT, 30L);
+        CONTACT_SETOPT(CURLOPT_NOSIGNAL, 1L);
+        CONTACT_SETOPT(CURLOPT_HTTPHEADER, headers);
+        CONTACT_SETOPT(CURLOPT_MIMEPOST, mime);
+#undef CONTACT_SETOPT
+        if (valid) ok = curl_easy_perform(curl) == CURLE_OK;
+    }
+    curl_slist_free_all(headers);
+    curl_slist_free_all(recipients);
+    if (mime) curl_mime_free(mime);
+    if (curl) curl_easy_cleanup(curl);
+    sodium_memzero(text, cap);
+    free(text);
+    return ok;
+}
+static int deliver_contact(const Config *c, const char *id, const char *cipher, const char *kind) {
+    char *plain = contact_payload_decrypt(c, cipher);
+    if (!plain) return 0;
+    json_tokener *tokener = json_tokener_new_ex(8);
+    json_object *payload = tokener ? json_tokener_parse_ex(tokener, plain, (int)strlen(plain)) : NULL;
+    int valid = payload && tokener && json_object_is_type(payload, json_type_object) &&
+                json_tokener_get_error(tokener) == json_tokener_success;
+    if (tokener) json_tokener_free(tokener);
+    const char *name = "", *email = "", *topic = "", *message = "";
+    json_object *value = NULL;
+#define GET_CONTACT_FIELD(k, dst) do { \
+    if (!payload || !json_object_object_get_ex(payload, k, &value) || \
+        !json_object_is_type(value, json_type_string)) valid = 0; \
+    else dst = json_object_get_string(value); \
+} while (0)
+    if (valid) {
+        GET_CONTACT_FIELD("name", name);
+        GET_CONTACT_FIELD("email", email);
+        GET_CONTACT_FIELD("topic", topic);
+        GET_CONTACT_FIELD("message", message);
+    }
+#undef GET_CONTACT_FIELD
+    int ok = 0;
+    if (valid && strlen(name) <= 512 && contact_email_valid(email) &&
+        codaris_contact_topic_allowed(topic) && strlen(message) <= 16000) {
+        const char *recipient = !strcmp(kind, "admin") ? CODARIS_CONTACT_INBOX : email;
+        ok = send_contact_mail(c, id, kind, recipient, email, name, email, topic, message);
+    }
+    if (payload) {
+        const char *keys[] = {"name", "email", "topic", "message"};
+        for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); ++i) {
+            json_object *field = NULL;
+            if (json_object_object_get_ex(payload, keys[i], &field) &&
+                json_object_is_type(field, json_type_string)) {
+                const char *text = json_object_get_string(field);
+                sodium_memzero((void *)text, (size_t)json_object_get_string_len(field));
+            }
+        }
+        json_object_put(payload);
+    }
+    sodium_memzero(plain, strlen(plain));
+    free(plain);
+    return ok;
+}
 int mail_run(const Config *c) {
     PGconn *db = PQconnectdb(c->database);
     if (!db || PQstatus(db) != CONNECTION_OK) {
@@ -157,6 +307,8 @@ int mail_run(const Config *c) {
             "DELETE FROM app.action_tokens WHERE expires_at<now();"
             "DELETE FROM app.rate_limits WHERE window_start<now()-interval '1 day';"
             "DELETE FROM app.mail_outbox WHERE created_at<now()-interval '30 days';"
+            "DELETE FROM app.contact_outbox WHERE created_at<now()-interval '30 days' OR "
+            "(admin_sent_at IS NOT NULL AND receipt_sent_at IS NOT NULL);"
             "DELETE FROM app.mail_outbox o WHERE sent_at IS NULL AND kind IN ('verify','reset') "
             "AND NOT EXISTS (SELECT 1 FROM app.action_tokens t WHERE t.user_id=o.user_id AND "
             "t.kind=o.kind AND t.email=o.recipient AND t.expires_at>now());");
@@ -230,6 +382,80 @@ int mail_run(const Config *c) {
         PQclear(r);
         if (!sent) {
             fputs("Mail delivery failed; retry scheduled.\n", stderr);
+            ok = 0;
+            break;
+        }
+    }
+    /* Contact bodies remain encrypted in PostgreSQL and are removed once both
+     * fixed-destination messages have been accepted, or after 30 days. */
+    for (int i = 0; i < 20 && ok; i++) {
+        PGresult *r = PQexec(db, "BEGIN");
+        if (!r || PQresultStatus(r) != PGRES_COMMAND_OK) {
+            if (r) PQclear(r);
+            ok = 0;
+            break;
+        }
+        PQclear(r);
+        r = PQexec(db,
+            "SELECT id,encrypted_payload,(admin_sent_at IS NULL AND admin_attempts<8) "
+            "FROM app.contact_outbox WHERE created_at>now()-interval '30 days' "
+            "AND available_at<=now() AND ((admin_sent_at IS NULL AND admin_attempts<8) OR "
+            "(receipt_sent_at IS NULL AND receipt_attempts<8)) ORDER BY id "
+            "FOR UPDATE SKIP LOCKED LIMIT 1");
+        if (!r || PQresultStatus(r) != PGRES_TUPLES_OK) {
+            if (r) PQclear(r);
+            ok = 0;
+            break;
+        }
+        if (!PQntuples(r)) {
+            PQclear(r);
+            r = PQexec(db, "COMMIT");
+            if (!r || PQresultStatus(r) != PGRES_COMMAND_OK) ok = 0;
+            if (r) PQclear(r);
+            break;
+        }
+        const char *id = PQgetvalue(r, 0, 0);
+        const char *cipher = PQgetvalue(r, 0, 1);
+        int is_admin = !strcmp(PQgetvalue(r, 0, 2), "t");
+        int sent = deliver_contact(c, id, cipher, is_admin ? "admin" : "receipt");
+        const char *values[] = {id};
+        const char *sql;
+        if (is_admin)
+            sql = sent
+                ? "UPDATE app.contact_outbox SET admin_sent_at=now(),admin_attempts=admin_attempts+1,available_at=now() WHERE id=$1::bigint"
+                : "UPDATE app.contact_outbox SET admin_attempts=admin_attempts+1,available_at=now()+interval '5 minutes'*(admin_attempts+1) WHERE id=$1::bigint";
+        else
+            sql = sent
+                ? "UPDATE app.contact_outbox SET receipt_sent_at=now(),receipt_attempts=receipt_attempts+1,available_at=now() WHERE id=$1::bigint"
+                : "UPDATE app.contact_outbox SET receipt_attempts=receipt_attempts+1,available_at=now()+interval '5 minutes'*(receipt_attempts+1) WHERE id=$1::bigint";
+        PGresult *updated = PQexecParams(db, sql, 1, NULL, values, NULL, NULL, 0);
+        PQclear(r);
+        if (!updated || PQresultStatus(updated) != PGRES_COMMAND_OK) {
+            if (updated) PQclear(updated);
+            r = PQexec(db, "ROLLBACK");
+            if (r) PQclear(r);
+            ok = 0;
+            break;
+        }
+        PQclear(updated);
+        if (sent) {
+            PGresult *removed = PQexecParams(db,
+                "DELETE FROM app.contact_outbox WHERE id=$1::bigint AND admin_sent_at IS NOT NULL AND receipt_sent_at IS NOT NULL",
+                1, NULL, values, NULL, NULL, 0);
+            if (!removed || PQresultStatus(removed) != PGRES_COMMAND_OK) {
+                if (removed) PQclear(removed);
+                r = PQexec(db, "ROLLBACK");
+                if (r) PQclear(r);
+                ok = 0;
+                break;
+            }
+            PQclear(removed);
+        }
+        r = PQexec(db, "COMMIT");
+        if (!r || PQresultStatus(r) != PGRES_COMMAND_OK) ok = 0;
+        if (r) PQclear(r);
+        if (!sent) {
+            fputs("Contact mail delivery failed; retry scheduled.\n", stderr);
             ok = 0;
             break;
         }

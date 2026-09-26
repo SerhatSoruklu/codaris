@@ -44,7 +44,7 @@
                   <h2 aria-hidden="true">Application details</h2>
                   <p class="form-note">Required unless marked optional.</p>
 
-                  <div class="avatar-picker"><label for="avatar-file">Profile picture (optional)</label><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="avatar-hint avatar-status"><p id="avatar-hint">JPEG, PNG or WebP · up to 5 MiB. Saved as a small profile image.</p><button type="button" id="avatar-remove" class="text-link">Remove picture</button><p id="avatar-status" class="account-notice" role="status" aria-atomic="true"></p></div>
+                  <div class="avatar-picker"><label for="avatar-file">Profile picture (optional)</label><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="avatar-hint avatar-status"><p id="avatar-hint">JPEG, PNG or WebP · up to 5 MiB. Saved as a small profile image.</p><button type="button" id="avatar-remove" class="text-link" hidden>Remove picture</button><p id="avatar-status" class="account-notice" role="status" aria-atomic="true"></p></div>
 
                 </div>
               </div>
@@ -88,14 +88,18 @@
                   ></p>
                 </div>
                 <div class="form-field">
-                  <label for="join-country">Country</label
-                  ><select
+                  <label id="join-country-label" for="join-country-trigger">Country</label
+                  ><div class="select-with-flag" data-country-picker><select
                     id="join-country"
                     name="country"
+                    class="form-select"
                     required
+                    aria-hidden="true"
+                    tabindex="-1"
                     aria-describedby="country-hint country-error"
+                    data-country-picker-select
                   >
-                    <option value="">Select your country</option></select
+                    <option value="">Select your country</option></select><button type="button" id="join-country-trigger" class="country-picker-trigger" data-country-picker-trigger aria-haspopup="listbox" aria-expanded="false" aria-labelledby="join-country-label join-country-value"><img id="join-country-flag" class="country-select-flag" data-country-picker-flag width="20" height="15" alt="" aria-hidden="true" hidden><span id="join-country-value" data-country-picker-value>Select your country</span><img class="country-picker-chevron" src="/assets/select-chevron.svg" width="12" height="7" alt="" aria-hidden="true"></button><div id="join-country-menu" class="country-picker-menu" data-country-picker-menu role="listbox" aria-labelledby="join-country-label" hidden></div></div
                   ><small class="field-hint" id="country-hint"
                     >Choose where you are based.</small
                   >
@@ -110,15 +114,23 @@
                   ><select
                     id="join-role"
                     name="role"
+                    class="form-select"
                     required
                     aria-describedby="role-hint role-error"
                   >
                     <option value="">Select your role</option>
-                    <option>Developer / Engineer</option>
-                    <option>Researcher</option>
-                    <option>Community organiser</option>
-                    <option>Student</option>
-                    <option>Other</option></select
+                    <option value="Developer / Engineer">Developer / Engineer</option>
+                    <option value="AI / ML Engineer">AI / ML Engineer</option>
+                    <option value="Security Engineer / Researcher">Security Engineer / Researcher</option>
+                    <option value="Researcher">Researcher</option>
+                    <option value="Systems / Infrastructure Engineer">Systems / Infrastructure Engineer</option>
+                    <option value="Technical Founder / Entrepreneur">Technical Founder / Entrepreneur</option>
+                    <option value="Open-source Maintainer / Contributor">Open-source Maintainer / Contributor</option>
+                    <option value="Product / UX Designer">Product / UX Designer</option>
+                    <option value="Educator / Technical Writer">Educator / Technical Writer</option>
+                    <option value="Community organiser">Community Organiser</option>
+                    <option value="Student">Student</option>
+                    <option value="Other">Other</option></select
                   ><small class="field-hint" id="role-hint"
                     >Choose the closest match to your work or interests.</small
                   >
@@ -136,7 +148,7 @@
                     aria-describedby="linkedin-hint linkedin-count linkedin-error"
                     pattern="https://.+"
                   /><small class="field-hint" id="linkedin-hint"
-                    >Paste your full HTTPS profile URL. Ownership is not
+                    >Use a LinkedIn profile URL on linkedin.com. Ownership is not
                     verified.</small
                   ><small class="field-count" id="linkedin-count"
                     >0 / 2048</small
@@ -158,7 +170,7 @@
                     aria-describedby="github-hint github-count github-error"
                     pattern="https://.+"
                   /><small class="field-hint" id="github-hint"
-                    >Paste your full HTTPS profile URL. Ownership is not
+                    >Use a GitHub profile URL on github.com. Ownership is not
                     verified.</small
                   ><small class="field-count" id="github-count">0 / 2048</small>
                   <p
@@ -218,11 +230,12 @@
 
               <div class="form-grid">
                 <div class="form-field"><label for="application-password">Password</label><input id="application-password" name="password" type="password" maxlength="512" autocomplete="new-password" required aria-describedby="application-password-hint"><small id="application-password-hint">15–128 characters. Use a unique password.</small></div>
-                <div class="form-field"><label for="application-confirm">Confirm password</label><input id="application-confirm" name="confirmation" type="password" maxlength="512" autocomplete="new-password" required></div>
+                <div class="form-field"><label for="application-confirm">Confirm password</label><input id="application-confirm" name="confirmation" type="password" maxlength="512" autocomplete="new-password" aria-describedby="application-confirm-error" required><p class="field-error" id="application-confirm-error" aria-live="polite"></p></div>
               </div>
 
+              <label class="credential-consent"><input type="checkbox" name="credential_public_consent" value="true" required><span>I understand that my verified CODARIS credential can publicly show my display name, role, public membership number, active status and issue date to anyone with its verification link. CODARIS has no public member directory. I can disable verification in my account.</span></label>
               <button class="button" type="submit" disabled>
-                Create account <span aria-hidden="true">↗</span>
+                <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#arrow-right"></use></svg><span>Create account</span>
               </button>
               <p class="form-note">By creating an account, you agree to the <a href="/terms/">membership terms</a>. Read our <a href="/privacy/">privacy notice</a>. Your email must be verified before membership becomes active.</p>
             </fieldset>

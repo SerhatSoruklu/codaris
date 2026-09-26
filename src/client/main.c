@@ -4,6 +4,7 @@
 #include <string.h>
 #include "demo_data.h"
 #include "globe.h"
+#include "../shared/membership_options.h"
 
 /* The bridge copies strings synchronously into the DOM; C retains ownership.
  * No input values are inserted as HTML. Account requests use separate JSON transport. */
@@ -37,11 +38,29 @@ EM_JS(void, view_row, (const char *name, const char *code, const char *estimate,
     row.append(cell);
     document.getElementById('country-rows').append(row);
 })
-EM_JS(void, view_country_option, (const char *name), {
-    const option = document.createElement('option');
-    option.value = option.textContent = UTF8ToString(name);
-    const select = document.getElementById('join-country');
-    if (select) select.append(option);
+EM_JS(void, view_country_option, (const char *name, const char *code), {
+    const countryName = UTF8ToString(name);
+    const flagCode = UTF8ToString(code);
+    document.querySelectorAll('[data-country-picker-select]').forEach(select => {
+        const option = document.createElement('option');
+        option.value = option.textContent = countryName;
+        option.dataset.flag = flagCode;
+        select.append(option);
+    });
+    document.querySelectorAll('[data-country-picker-menu]').forEach(menu => {
+        const item = document.createElement('button');
+        item.type = 'button'; item.className = 'country-picker-option'; item.setAttribute('role', 'option');
+        item.dataset.value = countryName; item.dataset.flag = flagCode; item.setAttribute('aria-selected', 'false');
+        if (flagCode) {
+            const flag = document.createElement('img'); flag.className = 'country-picker-option-flag';
+            flag.src = "/assets/country-flags/" + flagCode + ".svg"; flag.alt = ""; flag.width = 20; flag.height = 15;
+            flag.setAttribute('aria-hidden', 'true'); item.append(flag);
+        } else {
+            const mark = document.createElement('span'); mark.className = 'country-picker-option-mark'; mark.setAttribute('aria-hidden', 'true'); mark.textContent = '◎'; item.append(mark);
+        }
+        const label = document.createElement('span'); label.textContent = countryName; item.append(label);
+        menu.append(item);
+    });
 })
 EM_JS(void, view_empty, (int empty), {
     document.getElementById('empty-state').hidden = !empty;
@@ -138,6 +157,7 @@ EMSCRIPTEN_KEEPALIVE void codaris_filter(const char *query) {
 }
 
 #include "membership.h"
+#include "contact.h"
 #include "languages.h"
 
 EM_JS(int, view_has_countries, (void), {
@@ -154,9 +174,11 @@ EM_JS(void, view_community_metrics, (void), {
           document.getElementById('countries-metric').textContent='Unavailable';});
 })
 int main(void) {
-    for(size_t i=0;i<country_count;++i)view_country_option(countries[i].name);
-    view_country_option("Other / not listed");
+    for(size_t i=0;i<membership_country_count;++i)
+        view_country_option(membership_countries[i].name, membership_countries[i].code);
+    view_country_option("Other / not listed", "");
     membership_init();
+    contact_init();
     if(catalogue_view_count())codaris_catalogue_filter("");
     view_community_metrics();
     view_ready();

@@ -49,7 +49,7 @@ class Document(HTMLParser):
             self.script = attrs
             self.script_text = ''
             if 'src' in attrs:
-                assert attrs['src'] in ('/host.js', '/codaris.js'), 'Unreviewed executable script'
+                assert attrs['src'] in ('/host.js', '/codaris.js', '/auth-nav.js'), 'Unreviewed executable script'
             else:
                 assert attrs.get('type') == 'application/ld+json', 'Inline executable script'
 
@@ -87,6 +87,11 @@ for path, doc in pages.items():
         target = OUT / unquote(parsed.path).lstrip('/') / 'index.html' if parsed.path else path
         assert target in pages, (path, link)
         if parsed.fragment:
+            if parsed.path == '/dashboard/' and parsed.fragment in {
+                'overview', 'profile', 'security', 'topics', 'community',
+                'working-groups', 'organizational-participation'
+            }:
+                continue  # Dashboard states are selected from the URL by host.js.
             assert parsed.fragment in pages[target].ids, (path, link)
 for entry in REGISTRY:
     doc = pages[OUT / entry['slug'] / 'index.html']

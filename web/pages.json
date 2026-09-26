@@ -27,6 +27,13 @@
     "description": "Understand the platforms, communities, and planned operational relationships around CODARIS, with independence and transparency."
   },
   {
+    "slug": "ecosystem/organizational-participation",
+    "file": "organizational-participation",
+    "title": "Organizational Participation",
+    "label": "Organizational Participation",
+    "description": "CODARIS is developing an open, transparent framework for organizations to contribute engineering, research, interoperability work, infrastructure and support without purchasing control over technical outcomes."
+  },
+  {
     "slug": "join",
     "title": "Join the Coalition",
     "label": "Join the coalition",
@@ -35,9 +42,9 @@
   },
   {
     "slug": "privacy",
-    "title": "Privacy",
+    "title": "Privacy notice",
     "label": "Privacy",
-    "description": "CODARIS privacy and operator contact information."
+    "description": "How CODARIS uses account and service information, what members can control, and how to contact us about privacy."
   },
   {
     "slug": "github",
@@ -47,15 +54,16 @@
   },
   {
     "slug": "terms",
-    "title": "Terms",
+    "title": "Membership terms",
     "label": "Terms",
-    "description": "CODARIS terms and operator contact information."
+    "description": "The rules for CODARIS membership, accounts, conduct, learning resources and account closure."
   },
   {
     "slug": "contact",
     "title": "Contact",
     "label": "Contact",
-    "description": "Contact CODARIS for account support, general enquiries, privacy requests and membership terms."
+    "description": "Contact CODARIS for account support, general enquiries, privacy requests and membership terms.",
+    "interactive": true
   },
   {
     "slug": "login",
@@ -70,6 +78,15 @@
     "title": "Member Dashboard",
     "label": "Member Dashboard",
     "description": "Manage your CODARIS membership and profile.",
+    "placeholder": true,
+    "interactive": true
+  },
+  {
+    "slug": "verify",
+    "file": "verify",
+    "title": "Membership verification",
+    "label": "Membership verification",
+    "description": "Verify a CODARIS membership credential.",
     "placeholder": true,
     "interactive": true
   },

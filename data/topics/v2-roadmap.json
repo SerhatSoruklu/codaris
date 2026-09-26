@@ -1,0 +1,302 @@
+[
+  {
+    "number": 1,
+    "title": "Agent Security & Least-Privilege Execution",
+    "slug": "agent-security",
+    "scope": "Sandboxing, scoped tools, permissions, approval boundaries and blast-radius control."
+  },
+  {
+    "number": 2,
+    "title": "Threat Modeling & Attack Surface Design",
+    "slug": "threat-modeling",
+    "scope": "Assets, trust boundaries, attacker capabilities, abuse cases and mitigations."
+  },
+  {
+    "number": 3,
+    "title": "Secure Software Supply Chains",
+    "slug": "software-supply-chain",
+    "scope": "Dependencies, provenance, SBOMs, signing, CI trust and dependency compromise."
+  },
+  {
+    "number": 4,
+    "title": "Cryptography & Key Management",
+    "slug": "cryptography-key-management",
+    "scope": "Encryption, signatures, hashes, key lifecycle, rotation and secure storage."
+  },
+  {
+    "number": 5,
+    "title": "Identity & Access Control",
+    "slug": "identity-access-control",
+    "scope": "Authentication, authorization, RBAC, ABAC, capabilities and zero-trust models."
+  },
+  {
+    "number": 6,
+    "title": "Secrets Management",
+    "slug": "secrets-management",
+    "scope": "API keys, credentials, rotation, vaults, environment boundaries and leakage prevention."
+  },
+  {
+    "number": 7,
+    "title": "Privacy Engineering & Data Minimization",
+    "slug": "privacy-engineering",
+    "scope": "Collect less data, isolate sensitive state, retention, deletion and privacy architecture."
+  },
+  {
+    "number": 8,
+    "title": "Web & Browser Security",
+    "slug": "web-browser-security",
+    "scope": "CSP, cookies, same-origin policy, XSS, CSRF, browser isolation and modern web defenses."
+  },
+  {
+    "number": 9,
+    "title": "Incident Response & Digital Forensics",
+    "slug": "incident-response",
+    "scope": "Detection, containment, evidence preservation, timelines, recovery and postmortems."
+  },
+  {
+    "number": 10,
+    "title": "Binary Security & Reverse Engineering",
+    "slug": "binary-security",
+    "scope": "Executables, assembly, debugging, exploit analysis and understanding compiled software."
+  },
+  {
+    "number": 11,
+    "title": "Operating Systems & Kernels",
+    "slug": "operating-systems",
+    "scope": "Processes, scheduling, memory, syscalls, privilege boundaries and kernel architecture."
+  },
+  {
+    "number": 12,
+    "title": "Compilers & Language Tooling",
+    "slug": "compilers-language-tooling",
+    "scope": "Parsing, ASTs, optimization, code generation, interpreters and developer tooling."
+  },
+  {
+    "number": 13,
+    "title": "Formal Methods & Program Verification",
+    "slug": "formal-verification",
+    "scope": "Invariants, model checking, proofs, specifications and mathematically checking software."
+  },
+  {
+    "number": 14,
+    "title": "Memory Safety & Systems Programming",
+    "slug": "memory-safety",
+    "scope": "Ownership, allocation, pointers, lifetime bugs and safe low-level design."
+  },
+  {
+    "number": 15,
+    "title": "Concurrency & Parallelism",
+    "slug": "concurrency-parallelism",
+    "scope": "Threads, locks, atomics, races, scheduling and parallel algorithms."
+  },
+  {
+    "number": 16,
+    "title": "Distributed Systems & Consensus",
+    "slug": "distributed-systems",
+    "scope": "Replication, partitions, consensus, coordination and distributed failure."
+  },
+  {
+    "number": 17,
+    "title": "High Availability & Fault Tolerance",
+    "slug": "fault-tolerance",
+    "scope": "Redundancy, failover, graceful degradation, quorum and surviving component failure."
+  },
+  {
+    "number": 18,
+    "title": "Performance Engineering & Profiling",
+    "slug": "performance-engineering",
+    "scope": "Latency, throughput, profiling, benchmarking, bottlenecks and optimization methodology."
+  },
+  {
+    "number": 19,
+    "title": "Caching & Data Locality",
+    "slug": "caching-data-locality",
+    "scope": "Cache layers, invalidation, CPU caches, distributed caches and locality."
+  },
+  {
+    "number": 20,
+    "title": "Filesystems & Storage Internals",
+    "slug": "storage-internals",
+    "scope": "Blocks, filesystems, durability, journaling, WALs and persistent storage behavior."
+  },
+  {
+    "number": 21,
+    "title": "Computer Architecture & Hardware",
+    "slug": "computer-architecture",
+    "scope": "CPUs, memory hierarchies, instruction sets, buses, accelerators and hardware/software boundaries."
+  },
+  {
+    "number": 22,
+    "title": "WebAssembly & Portable Execution",
+    "slug": "webassembly",
+    "scope": "WASM runtimes, sandboxing, browser execution, WASI and portable binaries."
+  },
+  {
+    "number": 23,
+    "title": "Embedded Systems & Firmware",
+    "slug": "embedded-firmware",
+    "scope": "Microcontrollers, real-time constraints, firmware, peripherals and hardware integration."
+  },
+  {
+    "number": 24,
+    "title": "Edge Computing & CDN Architecture",
+    "slug": "edge-computing",
+    "scope": "Distributed execution near users, caching, edge functions and global delivery."
+  },
+  {
+    "number": 25,
+    "title": "Backup, Restore & Disaster Recovery",
+    "slug": "disaster-recovery",
+    "scope": "Recovery objectives, snapshots, replication, restore testing and catastrophic failure planning."
+  },
+  {
+    "number": 26,
+    "title": "Data Engineering & Pipelines",
+    "slug": "data-engineering",
+    "scope": "Ingestion, transformation, storage, lineage, batch processing and data quality."
+  },
+  {
+    "number": 27,
+    "title": "Stream Processing & Real-Time Systems",
+    "slug": "stream-processing",
+    "scope": "Continuous event processing, windows, ordering, backpressure and real-time computation."
+  },
+  {
+    "number": 28,
+    "title": "Search Engines & Information Retrieval",
+    "slug": "information-retrieval",
+    "scope": "Indexing, ranking, tokenization, retrieval, relevance and large-scale search."
+  },
+  {
+    "number": 29,
+    "title": "Data Contracts & Schema Evolution",
+    "slug": "schema-evolution",
+    "scope": "Changing schemas without breaking producers, consumers or historical data."
+  },
+  {
+    "number": 30,
+    "title": "Serialization & Binary Protocols",
+    "slug": "serialization-protocols",
+    "scope": "JSON, Protobuf-style formats, binary encoding, compatibility and wire representations."
+  },
+  {
+    "number": 31,
+    "title": "DNS, TLS & Internet Infrastructure",
+    "slug": "internet-infrastructure",
+    "scope": "Naming, certificates, PKI, routing foundations and how secure internet connections work."
+  },
+  {
+    "number": 32,
+    "title": "Network Protocol Design",
+    "slug": "network-protocol-design",
+    "scope": "Framing, transport, retries, state machines, negotiation and protocol evolution."
+  },
+  {
+    "number": 33,
+    "title": "Time, Clocks & Distributed Coordination",
+    "slug": "distributed-time",
+    "scope": "Clock drift, monotonic time, logical clocks, ordering and distributed timestamps."
+  },
+  {
+    "number": 34,
+    "title": "Event Sourcing & CQRS",
+    "slug": "event-sourcing-cqrs",
+    "scope": "Events as state history, command/query separation, projections and replay."
+  },
+  {
+    "number": 35,
+    "title": "Geospatial Systems & Mapping",
+    "slug": "geospatial-systems",
+    "scope": "Coordinates, spatial indexes, routing, mapping data and geographic computation."
+  },
+  {
+    "number": 36,
+    "title": "Machine Learning Systems Engineering",
+    "slug": "ml-systems",
+    "scope": "Building the infrastructure around training, deployment, data and model operations."
+  },
+  {
+    "number": 37,
+    "title": "Model Evaluation & Benchmarking",
+    "slug": "model-evaluation",
+    "scope": "Measuring capability, reliability, regressions, bias, robustness and benchmark design."
+  },
+  {
+    "number": 38,
+    "title": "AI Red Teaming & Adversarial Testing",
+    "slug": "ai-red-teaming",
+    "scope": "Prompt attacks, misuse cases, adversarial behavior and systematic safety testing."
+  },
+  {
+    "number": 39,
+    "title": "Retrieval-Augmented Generation & Knowledge Systems",
+    "slug": "rag-knowledge-systems",
+    "scope": "Retrieval, grounding, citations, context assembly and knowledge-backed AI."
+  },
+  {
+    "number": 40,
+    "title": "Vector Search & Embedding Infrastructure",
+    "slug": "vector-search",
+    "scope": "Embeddings, ANN indexes, similarity search, retrieval quality and scaling."
+  },
+  {
+    "number": 41,
+    "title": "Agent Architectures & Tool Use",
+    "slug": "agent-architectures",
+    "scope": "Planning, tool invocation, memory, delegation, loops and autonomous execution."
+  },
+  {
+    "number": 42,
+    "title": "Human-in-the-Loop AI Systems",
+    "slug": "human-in-the-loop",
+    "scope": "Approval gates, escalation, supervision, review and human-machine responsibility boundaries."
+  },
+  {
+    "number": 43,
+    "title": "AI Safety Controls & Capability Boundaries",
+    "slug": "ai-safety-controls",
+    "scope": "Sandboxing, rate limits, privilege boundaries, execution limits and containment mechanisms."
+  },
+  {
+    "number": 44,
+    "title": "Model Serving & Inference Infrastructure",
+    "slug": "model-inference",
+    "scope": "GPUs, batching, quantization, inference servers, latency and serving architecture."
+  },
+  {
+    "number": 45,
+    "title": "Reliability Engineering & SLOs",
+    "slug": "reliability-engineering",
+    "scope": "SLIs, SLOs, error budgets, resilience and operating dependable production systems."
+  },
+  {
+    "number": 46,
+    "title": "Release Engineering & Versioning",
+    "slug": "release-engineering",
+    "scope": "Releases, semantic versioning, compatibility, staged rollout and rollback."
+  },
+  {
+    "number": 47,
+    "title": "Reproducible Builds & Hermetic Toolchains",
+    "slug": "reproducible-builds",
+    "scope": "Producing identical artifacts, pinned environments, deterministic builds and trusted pipelines."
+  },
+  {
+    "number": 48,
+    "title": "Developer Experience & Internal Platforms",
+    "slug": "developer-experience",
+    "scope": "Tooling, paved roads, developer portals, environments and reducing engineering friction."
+  },
+  {
+    "number": 49,
+    "title": "Open Source Governance & Maintainer Practice",
+    "slug": "open-source-governance",
+    "scope": "Maintainers, contribution models, security disclosure, project sustainability and community stewardship."
+  },
+  {
+    "number": 50,
+    "title": "Technical Standards, Interoperability & Provenance",
+    "slug": "standards-interoperability",
+    "scope": "Specifications, compatibility, provenance, attestation and systems that can verify each other."
+  }
+]

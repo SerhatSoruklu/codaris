@@ -6,6 +6,7 @@ typedef struct {
     int production;
     unsigned short port;
     const char *database, *origin, *smtp_url, *smtp_user, *smtp_password, *mail_from;
+    const char *credential_font;
     unsigned char mail_key[32];
 } Config;
 int config_load(Config *config);

@@ -1,10 +1,15 @@
 #include "codaris/service.h"
 #include "codaris/version.h"
+#include "../shared/membership_options.h"
+#include "../shared/contact_options.h"
+#include "../shared/contact_policy.h"
+#include "credential_render.h"
 #include <microhttpd.h>
 #include <json-c/json.h>
 #include <curl/curl.h>
 #include <sodium.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -132,8 +137,7 @@ static int password_ok(const char *s) {
     return length_ok(s, 15, 128) && strlen(s) <= 512;
 }
 static int role_ok(const char *s) {
-    return !strcmp(s, "Developer / Engineer") || !strcmp(s, "Researcher") ||
-           !strcmp(s, "Community organiser") || !strcmp(s, "Student") || !strcmp(s, "Other");
+    return membership_role_allowed(s);
 }
 static int url_normalize(const char *input, const char *provider, char out[2049]) {
     out[0] = 0;
@@ -232,6 +236,50 @@ static int queue_mail(PGconn *db, const Config *c, const char *id, const char *e
     sodium_memzero(cipher, sizeof(cipher));
     return ok;
 }
+static int contact_text_ok(const char *s, size_t min, size_t max, int multiline,
+                           size_t max_bytes) {
+    size_t bytes = strlen(s);
+    if (bytes > max_bytes || !length_ok(s, min, max))
+        return 0;
+    int non_space = 0;
+    for (const unsigned char *p = (const unsigned char *)s; *p; ++p) {
+        if (*p < 0x20 && !(multiline && (*p == '\n' || *p == '\r' || *p == '\t')))
+            return 0;
+        if (*p == 0x7f)
+            return 0;
+        if (*p >= 0x80 || !isspace(*p))
+            non_space = 1;
+    }
+    return non_space;
+}
+static char *contact_payload_encrypt(const Config *c, const char *plain) {
+    size_t length = strlen(plain);
+    if (!length || length > 18000 || length > SIZE_MAX - crypto_secretbox_NONCEBYTES -
+                                                    crypto_secretbox_MACBYTES)
+        return NULL;
+    size_t blob_size = crypto_secretbox_NONCEBYTES + crypto_secretbox_MACBYTES + length;
+    unsigned char *blob = malloc(blob_size);
+    char *hex = malloc(blob_size * 2 + 1);
+    if (!blob || !hex) {
+        free(blob);
+        free(hex);
+        return NULL;
+    }
+    randombytes_buf(blob, crypto_secretbox_NONCEBYTES);
+    int ok = !crypto_secretbox_easy(blob + crypto_secretbox_NONCEBYTES,
+                                    (const unsigned char *)plain, (unsigned long long)length, blob,
+                                    c->mail_key);
+    if (ok)
+        sodium_bin2hex(hex, blob_size * 2 + 1, blob, blob_size);
+    sodium_memzero(blob, blob_size);
+    free(blob);
+    if (!ok) {
+        sodium_memzero(hex, blob_size * 2 + 1);
+        free(hex);
+        return NULL;
+    }
+    return hex;
+}
 static int authenticate(PGconn *db, struct MHD_Connection *connection, char id[32],
                         char session_hash[65]) {
     const char *raw = MHD_lookup_connection_value(connection, MHD_COOKIE_KIND, "codaris_session");
@@ -248,23 +296,85 @@ static int authenticate(PGconn *db, struct MHD_Connection *connection, char id[3
         PQclear(r);
     return ok;
 }
+static void credential_random(char public_number[21], char verification_id[37]) {
+    static const char alphabet[] = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+    unsigned char random[16];
+    randombytes_buf(random, sizeof(random));
+    memcpy(public_number, "CDR-", 4);
+    for (size_t i=0;i<16;i++) public_number[4+i]=alphabet[random[i]&31u];
+    public_number[20]=0;
+    randombytes_buf(random, sizeof(random));
+    random[6]=(unsigned char)((random[6]&0x0f)|0x40);
+    random[8]=(unsigned char)((random[8]&0x3f)|0x80);
+    sodium_bin2hex(verification_id,9,random,4);
+    verification_id[8]='-'; sodium_bin2hex(verification_id+9,5,random+4,2);
+    verification_id[13]='-'; sodium_bin2hex(verification_id+14,5,random+6,2);
+    verification_id[18]='-'; sodium_bin2hex(verification_id+19,5,random+8,2);
+    verification_id[23]='-'; sodium_bin2hex(verification_id+24,13,random+10,6);
+    sodium_memzero(random,sizeof(random));
+}
+static int credential_create(PGconn *db, const char *user_id, int active) {
+    for (int attempt=0;attempt<4;attempt++) {
+        char number[21], uuid[37]; credential_random(number,uuid);
+        const char *v[]={user_id,number,uuid,active?"active":"pending"};
+        PGresult *r=query(db,"INSERT INTO app.membership_credentials(user_id,membership_number,verification_id,status,issued_at,public_enabled,consented_at) VALUES($1::bigint,$2,$3::uuid,$4,CASE WHEN $4='active' THEN now() ELSE NULL END,true,now()) ON CONFLICT DO NOTHING RETURNING user_id",4,v);
+        if (!r) return 0;
+        int inserted=PQntuples(r)==1; PQclear(r);
+        if(inserted)return 1;
+    }
+    return 0;
+}
+static int uuid_ok(const char *s) {
+    if(strlen(s)!=36)return 0;
+    for(size_t i=0;i<36;i++) {
+        if(i==8||i==13||i==18||i==23){if(s[i]!='-')return 0;}
+        else if(!((s[i]>='0'&&s[i]<='9')||(s[i]>='a'&&s[i]<='f')||(s[i]>='A'&&s[i]<='F')))return 0;
+    }
+    return 1;
+}
+static enum MHD_Result public_credential(PGconn *db, struct MHD_Connection *conn, const char *raw) {
+    const char *generic="{\"valid\":false,\"message\":\"Credential verification is not publicly available.\"}";
+    if(!uuid_ok(raw))return respond(conn,200,generic,NULL);
+    char bucket[96];
+    const char *peer=MHD_lookup_connection_value(conn,MHD_HEADER_KIND,"X-Real-IP");
+    if(!peer||strlen(peer)>64)peer="local";
+    snprintf(bucket,sizeof(bucket),"credential:%s",peer);
+    if(limited(db,bucket,120))return respond(conn,429,"{\"message\":\"Please try again later.\"}",NULL);
+    const char *v[]={raw};
+    PGresult *r=query(db,"SELECT json_build_object('valid',true,'display_name',u.display_name,'membership_number',c.membership_number,'role',a.role,'status','active','issued_at',to_char(c.issued_at AT TIME ZONE 'UTC','FMMonth YYYY'))::text FROM app.membership_credentials c JOIN app.accounts a ON a.user_id=c.user_id JOIN app.users u ON u.id=c.user_id WHERE c.verification_id=$1::uuid AND c.public_enabled AND c.status='active' AND a.email_verified",1,v);
+    if(r&&PQntuples(r)==1){enum MHD_Result result=respond(conn,200,PQgetvalue(r,0,0),NULL);PQclear(r);return result;}
+    if(r)PQclear(r);
+    return respond(conn,200,generic,NULL);
+}
 static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const char *path,
                              const char *method, Request *req) {
+    char endpoint[128];
+    const char *query_start=strchr(path,'?');
+    size_t endpoint_length=query_start?(size_t)(query_start-path):strlen(path);
+    if(endpoint_length>=sizeof(endpoint))return respond(conn,404,"{\"message\":\"Not found\"}",NULL);
+    memcpy(endpoint,path,endpoint_length);endpoint[endpoint_length]=0;path=endpoint;
     if (!strcmp(path, "/api/health") && !strcmp(method, "GET")) {
         PGconn *health = PQconnectdb(c->database);
         int ok = health && PQstatus(health) == CONNECTION_OK;
         if (ok) {
-            PGresult *ready = PQexec(health, "SELECT avatar_rgba FROM app.accounts LIMIT 0");
+            PGresult *ready = PQexec(health, "SELECT a.avatar_rgba,c.verification_id FROM app.accounts a JOIN app.membership_credentials c ON c.user_id=a.user_id LIMIT 0");
             ok = ready && PQresultStatus(ready) == PGRES_TUPLES_OK;
             if (ready)
                 PQclear(ready);
         }
         if (health)
             PQfinish(health);
-        return respond(conn, ok ? 200 : 503,
-                       ok ? "{\"message\":\"Ready\",\"version\":\"" CODARIS_VERSION_STRING "\"}"
-                          : "{\"message\":\"Unavailable\"}",
-                       NULL);
+        if (ok) {
+            char body[192];
+            int sender_aligned = !*c->smtp_user || !strcmp(c->mail_from, c->smtp_user);
+            int length = snprintf(body, sizeof(body),
+                                  "{\"message\":\"Ready\",\"version\":\"%s\",\"contact_api\":1,\"credential_api\":2,\"mail_sender_aligned\":%s}",
+                                  CODARIS_VERSION_STRING, sender_aligned ? "true" : "false");
+            if (length < 0 || (size_t)length >= sizeof(body))
+                return respond(conn, 503, "{\"message\":\"Unavailable\"}", NULL);
+            return respond(conn, 200, body, NULL);
+        }
+        return respond(conn, 503, "{\"message\":\"Unavailable\"}", NULL);
     }
     int post = !strcmp(method, "POST");
     if (!post && strcmp(method, "GET"))
@@ -302,6 +412,16 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
     int transaction = 0;
     if (!db || PQstatus(db) != CONNECTION_OK)
         goto done;
+    if (!strcmp(path, "/api/session") && !post) {
+        unsigned session_status = authenticate(db, conn, id, session_hash) ? 204u : 401u;
+        enum MHD_Result result = respond(conn, session_status,
+                                         session_status == 204 ? "" : "{\"message\":\"Please sign in.\"}",
+                                         NULL);
+        if (body)
+            json_object_put(body);
+        PQfinish(db);
+        return result;
+    }
     if (post) {
         char bucket[256];
         const char *peer = MHD_lookup_connection_value(conn, MHD_HEADER_KIND, "X-Real-IP");
@@ -327,14 +447,90 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         }
         goto done;
     }
+    if (!strcmp(path,"/api/credential/verify") && !post) {
+        const char *credential=MHD_lookup_connection_value(conn,MHD_GET_ARGUMENT_KIND,"credential");
+        enum MHD_Result result=public_credential(db,conn,credential?credential:"");PQfinish(db);if(body)json_object_put(body);return result;
+    }
+    if (!strcmp(path, "/api/contact") && post) {
+        const char *name = field(body, "name"), *topic = field(body, "topic"),
+                   *message_text = field(body, "message");
+        char email[255];
+        if (!contact_text_ok(name, 2, 120, 0, 512) || !email_normalize(field(body, "email"), email) ||
+            !codaris_contact_topic_allowed(topic) ||
+            !contact_text_ok(message_text, 20, 4000, 1, 16000)) {
+            status = 400;
+            message = "{\"message\":\"Check your name, email, topic and message.\"}";
+            goto done;
+        }
+        const char *peer = MHD_lookup_connection_value(conn, MHD_HEADER_KIND, "X-Real-IP");
+        if (!peer || !*peer || strlen(peer) > 64)
+            peer = "local";
+        char ip_bucket[96], email_bucket[300];
+        int ip_n = snprintf(ip_bucket, sizeof(ip_bucket), "contact-ip:%s", peer);
+        int email_n = snprintf(email_bucket, sizeof(email_bucket), "contact-email:%s", email);
+        if (ip_n < 0 || (size_t)ip_n >= sizeof(ip_bucket) || email_n < 0 ||
+            (size_t)email_n >= sizeof(email_bucket) || limited(db, ip_bucket, 4) ||
+            limited(db, email_bucket, 3)) {
+            status = 429;
+            message = "{\"message\":\"Too many messages. Please try again later.\"}";
+            goto done;
+        }
+        json_object *payload = json_object_new_object();
+        if (!payload) {
+            goto done;
+        }
+        const char *payload_keys[] = {"name", "email", "topic", "message"};
+        const char *payload_values[] = {name, email, topic, message_text};
+        int payload_ok = 1;
+        for (size_t i = 0; i < sizeof(payload_keys) / sizeof(payload_keys[0]); ++i) {
+            json_object *value = json_object_new_string(payload_values[i]);
+            if (!value || json_object_object_add(payload, payload_keys[i], value)) {
+                if (value)
+                    json_object_put(value);
+                payload_ok = 0;
+                break;
+            }
+        }
+        if (!payload_ok) {
+            json_object_put(payload);
+            goto done;
+        }
+        const char *serialized = json_object_to_json_string_ext(payload, JSON_C_TO_STRING_PLAIN);
+        char *encrypted = serialized ? contact_payload_encrypt(c, serialized) : NULL;
+        if (serialized)
+            sodium_memzero((void *)serialized, strlen(serialized));
+        for (size_t i = 0; i < sizeof(payload_keys) / sizeof(payload_keys[0]); ++i) {
+            json_object *value = NULL;
+            if (json_object_object_get_ex(payload, payload_keys[i], &value) &&
+                json_object_is_type(value, json_type_string)) {
+                const char *text = json_object_get_string(value);
+                sodium_memzero((void *)text, (size_t)json_object_get_string_len(value));
+            }
+        }
+        json_object_put(payload);
+        if (!encrypted)
+            goto done;
+        const char *values[] = {encrypted};
+        int queued = command(db, "INSERT INTO app.contact_outbox(encrypted_payload) VALUES($1)", 1,
+                             values);
+        sodium_memzero(encrypted, strlen(encrypted));
+        free(encrypted);
+        if (!queued)
+            goto done;
+        status = 202;
+        message = "{\"message\":\"Thanks, your message is queued. We aim to reply within "
+                  CODARIS_CONTACT_REPLY_TARGET ". This is an aim, not a guaranteed deadline.\"}";
+        goto done;
+    }
     if (!strcmp(path, "/api/register") && post) {
         char email[255], linkedin[2049], github[2049], website[2049], hash[crypto_pwhash_STRBYTES],
             membership[25];
         const char *name = field(body, "name"), *country = field(body, "country"),
                    *role = field(body, "role"), *reason = field(body, "motivation"),
                    *password = field(body, "password");
-        if (!avatar_ok(field(body, "avatar")) || !length_ok(name, 2, 120) ||
-            !length_ok(country, 2, 120) || !role_ok(role) || !length_ok(reason, 20, 2000) ||
+        if (strcmp(field(body,"credential_public_consent"),"true") || !avatar_ok(field(body, "avatar")) || !length_ok(name, 2, 120) ||
+            !length_ok(country, 2, 120) || !membership_country_allowed(country) ||
+            !role_ok(role) || !length_ok(reason, 20, 2000) ||
             !password_ok(password) || !email_normalize(field(body, "email"), email) ||
             !url_normalize(field(body, "linkedin"), "linkedin.com", linkedin) ||
             !url_normalize(field(body, "github"), "github.com", github) ||
@@ -383,6 +579,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
                      "user_id=$1::bigint",
                      2, image_values))
             goto done;
+        if (!credential_create(db,id,0)) goto done;
         if (!queue_mail(db, c, id, email, "verify") || !command(db, "COMMIT", 0, NULL))
             goto done;
         transaction = 0;
@@ -438,7 +635,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             goto done;
         }
         snprintf(cookie, sizeof(cookie),
-                 "codaris_session=%s; Path=/api/; HttpOnly; SameSite=Strict; Max-Age=43200%s", raw,
+                 "codaris_session=%s; Path=/api/; HttpOnly; SameSite=Strict; Max-Age=2419200%s", raw,
                  c->production ? "; Secure" : "");
         sodium_memzero(raw, sizeof(raw));
         status = 200;
@@ -526,8 +723,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
                 goto done;
         } else if (!command(db,
                             "UPDATE app.accounts SET email_verified=true WHERE user_id=$1::bigint",
-                            1, av))
-            goto done;
+                            1, av) || !command(db,"UPDATE app.membership_credentials SET status='active',issued_at=coalesce(issued_at,now()),updated_at=now() WHERE user_id=$1::bigint AND status='pending'",1,av)) goto done;
         if (!command(db, "DELETE FROM app.action_tokens WHERE token_hash=$1", 1, v) ||
             !command(db, "COMMIT", 0, NULL))
             goto done;
@@ -542,6 +738,30 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         message = "{\"message\":\"Please sign in.\"}";
         goto done;
     }
+    if (!strcmp(path,"/api/credential/public") && post) {
+        const char *enabled=field(body,"enabled");
+        if(strcmp(enabled,"true")&&strcmp(enabled,"false"))goto invalid;
+        const char *v[]={id,enabled};
+        if(!command(db,"UPDATE app.membership_credentials SET public_enabled=$2::boolean,consented_at=CASE WHEN $2::boolean THEN coalesce(consented_at,now()) ELSE NULL END,updated_at=now() WHERE user_id=$1::bigint AND status='active'",2,v))goto done;
+        status=200;message=!strcmp(enabled,"true")?"{\"message\":\"Public credential verification enabled.\"}":"{\"message\":\"Public credential verification disabled.\"}";goto done;
+    }
+    if (!strcmp(path,"/api/credential/card") && !strcmp(method,"GET")) {
+        const char *v[]={id};
+        r=query(db,"SELECT u.display_name,a.role,c.membership_number,c.verification_id::text,c.status,to_char(c.issued_at AT TIME ZONE 'UTC','FMMonth YYYY'),replace(encode(a.avatar_rgba,'base64'),E'\\n','') FROM app.membership_credentials c JOIN app.accounts a ON a.user_id=c.user_id JOIN app.users u ON u.id=c.user_id WHERE c.user_id=$1::bigint AND c.status='active' AND a.email_verified",1,v);
+        if(!r||PQntuples(r)!=1)goto done;
+        const char *format=MHD_lookup_connection_value(conn,MHD_GET_ARGUMENT_KIND,"format");
+        const char *side=MHD_lookup_connection_value(conn,MHD_GET_ARGUMENT_KIND,"side");
+        int back=side&&!strcmp(side,"back");
+        char url[640];int n=snprintf(url,sizeof(url),"%s/verify/?credential=%s",c->origin,PQgetvalue(r,0,3));
+        CodarisCredential card={PQgetvalue(r,0,0),PQgetvalue(r,0,1),PQgetvalue(r,0,2),PQgetvalue(r,0,3),PQgetvalue(r,0,4),PQgetvalue(r,0,5),url,NULL,0};
+        unsigned char *avatar=NULL;size_t avatar_size=0;
+        if(*PQgetvalue(r,0,6)){avatar=malloc(40000);if(!avatar||sodium_base642bin(avatar,40000,PQgetvalue(r,0,6),strlen(PQgetvalue(r,0,6)),NULL,&avatar_size,NULL,sodium_base64_VARIANT_ORIGINAL)||avatar_size!=40000){free(avatar);avatar=NULL;goto done;}card.avatar_rgba=avatar;card.avatar_size=avatar_size;}
+        if(n<0||(size_t)n>=sizeof(url)){free(avatar);goto done;}
+        if(format&&!strcmp(format,"pdf")){unsigned char *pdf=NULL;size_t pdf_size=0;if(codaris_credential_pdf(&card,c->credential_font,&pdf,&pdf_size)){struct MHD_Response *response=MHD_create_response_from_buffer(pdf_size,pdf,MHD_RESPMEM_MUST_FREE);if(response){MHD_add_response_header(response,"Content-Type","application/pdf");MHD_add_response_header(response,"Cache-Control","no-store");MHD_add_response_header(response,"Content-Disposition","attachment; filename=codaris-membership.pdf");enum MHD_Result result=MHD_queue_response(conn,200,response);MHD_destroy_response(response);free(avatar);PQclear(r);PQfinish(db);if(body)json_object_put(body);return result;}free(pdf);}}
+        else if(!format||!strcmp(format,"svg")){char *svg=NULL;size_t svg_size=0;if(codaris_credential_svg(&card,back,&svg,&svg_size)){struct MHD_Response *response=MHD_create_response_from_buffer(svg_size,svg,MHD_RESPMEM_MUST_FREE);if(response){MHD_add_response_header(response,"Content-Type","image/svg+xml; charset=utf-8");MHD_add_response_header(response,"Cache-Control","no-store");enum MHD_Result result=MHD_queue_response(conn,200,response);MHD_destroy_response(response);free(avatar);PQclear(r);PQfinish(db);if(body)json_object_put(body);return result;}free(svg);}}
+        free(avatar);PQclear(r);r=NULL;
+        status=400;message="{\"message\":\"Choose SVG or PDF credential output.\"}";goto done;
+    }
     if (!strcmp(path, "/api/me") && !strcmp(method, "GET")) {
         const char *v[] = {id};
         r = query(
@@ -550,10 +770,10 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             "json_build_object('name',u.display_name,'membership_id',u.username,'email',a.email,'"
             "email_verified',a.email_verified,'country',a.country,'role',a.role,'motivation',a."
             "motivation,'linkedin',a.linkedin,'github',a.github,'website',a.website,'avatar',"
-            "encode(a.avatar_rgba,'base64'),'progress',"
+            "encode(a.avatar_rgba,'base64'),'credential',json_build_object('membership_number',c.membership_number,'verification_id',c.verification_id::text,'status',c.status,'issued_at',c.issued_at,'public_enabled',c.public_enabled),'progress',"
             "COALESCE((SELECT sum(1::bigint << topic::integer) FROM app.learning_progress WHERE "
             "user_id=a.user_id),0))::text FROM "
-            "app.accounts a JOIN app.users u ON u.id=a.user_id WHERE a.user_id=$1::bigint",
+            "app.accounts a JOIN app.users u ON u.id=a.user_id JOIN app.membership_credentials c ON c.user_id=a.user_id WHERE a.user_id=$1::bigint",
             1, v);
         if (r && PQntuples(r) == 1) {
             enum MHD_Result result = respond(conn, 200, PQgetvalue(r, 0, 0), NULL);
@@ -731,6 +951,17 @@ done:
         command(db, "ROLLBACK", 0, NULL);
     if (db)
         PQfinish(db);
+    if (body && !strcmp(path, "/api/contact")) {
+        const char *keys[] = {"name", "email", "topic", "message"};
+        for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); ++i) {
+            json_object *value = NULL;
+            if (json_object_object_get_ex(body, keys[i], &value) &&
+                json_object_is_type(value, json_type_string)) {
+                const char *text = json_object_get_string(value);
+                sodium_memzero((void *)text, (size_t)json_object_get_string_len(value));
+            }
+        }
+    }
     if (body)
         json_object_put(body);
     return respond(conn, status, message, *cookie ? cookie : NULL);
@@ -755,7 +986,9 @@ static enum MHD_Result handler(void *cls, struct MHD_Connection *conn, const cha
         *size = 0;
         return MHD_YES;
     }
-    return route(cls, conn, url, method, r);
+    enum MHD_Result result = route(cls, conn, url, method, r);
+    sodium_memzero(r->body, sizeof(r->body));
+    return result;
 }
 static void complete(void *cls, struct MHD_Connection *conn, void **state,
                      enum MHD_RequestTerminationCode code) {

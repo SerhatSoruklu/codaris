@@ -27,6 +27,7 @@ Thumbs.db
 .local/
 output/
 .playwright-cli/
+.playwright-mcp/
 
 # Private SSH/TLS material and local tooling
 *.pem
