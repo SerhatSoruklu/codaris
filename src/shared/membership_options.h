@@ -22,7 +22,7 @@ static const MembershipCountry membership_countries[] = {
     {"Brazil", "br"},
     {"Canada", "ca"},
     {"Australia", "au"},
-    {"Turkey", "tr"},
+    {"Türkiye", "tr"},
     {"Nigeria", "ng"},
     {"South Africa", "za"},
     {"Pakistan", "pk"},
@@ -113,7 +113,8 @@ static const size_t membership_role_count = sizeof(membership_roles) / sizeof(me
 
 static inline int membership_country_allowed(const char *name) {
     if (!name) return 0;
-    if (!strcmp(name, "Other / not listed") || !strcmp(name, "Türkiye")) return 1;
+    /* Keep the former display value valid for existing account records. */
+    if (!strcmp(name, "Other / not listed") || !strcmp(name, "Turkey")) return 1;
     for (size_t i = 0; i < membership_country_count; ++i)
         if (!strcmp(name, membership_countries[i].name)) return 1;
     return 0;

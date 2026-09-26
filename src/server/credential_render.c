@@ -269,18 +269,23 @@ static int avatar_png_data(const CodarisCredential *credential, char **base64) {
     return 1;
 }
 
+static const char *utf8_next_character(const char *p) {
+    ++p;
+    while (*p && ((unsigned char)*p & 0xc0u) == 0x80u) ++p;
+    return p;
+}
+
 static const char *svg_line_end(const char *start, unsigned max_chars, unsigned *count) {
     const char *p = start, *last_space = NULL;
     *count = 0;
     while (*p && *count < max_chars) {
         if (*p == ' ') last_space = p;
-        if (((unsigned char)*p & 0xc0u) != 0x80u) ++*count;
-        ++p;
+        ++*count;
+        p = utf8_next_character(p);
     }
     if (*p && last_space && last_space > start) p = last_space;
     *count = 0;
-    for (const unsigned char *q = (const unsigned char *)start; q < (const unsigned char *)p; ++q)
-        if ((*q & 0xc0u) != 0x80u) ++*count;
+    for (const char *q = start; q < p; q = utf8_next_character(q)) ++*count;
     return p;
 }
 
@@ -630,8 +635,8 @@ static int pdf_svg_name_lines(HPDF_Page page, HPDF_Font font, const char *text,
         unsigned count = 0;
         while (*p && count < max_chars) {
             if (*p == ' ') last_space = p;
-            if (((unsigned char)*p & 0xc0u) != 0x80u) ++count;
-            ++p;
+            ++count;
+            p = utf8_next_character(p);
         }
         if (*p && last_space && last_space > start) p = last_space;
         size_t bytes = (size_t)(p - start);
@@ -664,105 +669,127 @@ static void pdf_svg_emblem(HPDF_Page page, HPDF_Font bold, const char *role) {
     pdf_svg_text(page, bold, 11, 78, 70, PDF_CYAN, credential_role_mark(role), 0, 1);
 }
 
+static void pdf_placeholder_avatar(HPDF_Page page) {
+    const double cx = 167, cy = 329;
+    HPDF_Page_SetRGBStroke(page, PDF_CYAN.r, PDF_CYAN.g, PDF_CYAN.b);
+    HPDF_Page_SetLineWidth(page, credential_pdf_scale() * 3);
+    HPDF_Page_MoveTo(page, credential_pdf_x(cx), credential_pdf_y(cy - 48));
+    HPDF_Page_LineTo(page, credential_pdf_x(cx + 42), credential_pdf_y(cy - 24));
+    HPDF_Page_LineTo(page, credential_pdf_x(cx + 42), credential_pdf_y(cy + 24));
+    HPDF_Page_LineTo(page, credential_pdf_x(cx), credential_pdf_y(cy + 48));
+    HPDF_Page_LineTo(page, credential_pdf_x(cx - 42), credential_pdf_y(cy + 24));
+    HPDF_Page_LineTo(page, credential_pdf_x(cx - 42), credential_pdf_y(cy - 24));
+    HPDF_Page_ClosePathStroke(page);
+    HPDF_Page_SetRGBFill(page, PDF_CYAN.r, PDF_CYAN.g, PDF_CYAN.b);
+    HPDF_Page_Circle(page, credential_pdf_x(cx), credential_pdf_y(cy), credential_pdf_x(13));
+    HPDF_Page_Fill(page);
+}
+
+static void pdf_draw_front_content(HPDF_Page page, HPDF_Font font, HPDF_Font bold,
+                                   const CodarisCredential *c, HPDF_Image avatar) {
+    pdf_svg_label(page, font, "MEMBER CREDENTIAL / VERIFIED IDENTITY", 60, CREDENTIAL_SECTION_LABEL_Y, 1);
+    pdf_svg_rect(page, 51, 182, 232, 293, 16, PDF_PANEL, (HPDF_RGBColor){.22f,.87f,.93f}, 1);
+    if (avatar) pdf_svg_image_crop(page, avatar, 60, 191, 214, 275);
+    else pdf_placeholder_avatar(page);
+
+    unsigned name_count = utf8_count(c->display_name);
+    unsigned chars = name_count > 90 ? 90 : name_count;
+    unsigned lines = (chars + 29) / 30;
+    if (lines < 1) lines = 1;
+    if (lines > 3) lines = 3;
+    int number_label_y = 270 + (int)lines * 34;
+    int detail_y = 321 + (int)lines * 34;
+    pdf_svg_label(page, font, "MEMBER ACCESS CREDENTIAL", 315, 205, 1);
+    unsigned name_size = name_count <= 30 ? 28 : 18;
+    if (!pdf_svg_name_lines(page, bold, c->display_name, 315, 244, 30, name_size, 4, 440)) return;
+    pdf_svg_label(page, font, "PUBLIC MEMBERSHIP NUMBER", 315, number_label_y, 0);
+    pdf_svg_text_fit(page, bold, 22, 440, 315, number_label_y + 31, PDF_INK, c->membership_number);
+    pdf_svg_line(page, 315, detail_y, 315, detail_y + 46, PDF_CYAN, 3);
+    pdf_svg_label(page, font, "ROLE", 331, detail_y + 13, 0);
+    pdf_svg_text_fit(page, font, 15, 320, 331, detail_y + 37, PDF_INK, c->role);
+    pdf_svg_line(page, 674, detail_y, 674, detail_y + 46, PDF_CYAN, 3);
+    pdf_svg_label(page, font, "STATUS", 690, detail_y + 13, 0);
+    HPDF_RGBColor status_color = strcmp(c->status, "active") ? PDF_AMBER : PDF_GREEN;
+    pdf_svg_text(page, bold, 16, 690, detail_y + 37, status_color, c->status, 0, 0);
+    pdf_svg_label(page, font, "SCAN TO VERIFY", 790, 177, 0);
+    pdf_svg_qr(page, c, 790, 192, CREDENTIAL_QR_SIZE);
+    pdf_svg_label(page, font, "ISSUED", 790, 367, 0);
+    pdf_svg_text_fit(page, font, 14, 180, 790, 389, PDF_CYAN, c->issued_at);
+    pdf_svg_rect(page, 60, 488, 884, 109, 10, PDF_PANEL, (HPDF_RGBColor){.13f,.84f,.94f}, 1);
+    pdf_svg_label(page, font, "VERIFICATION BARCODE", 80, 508, 1);
+    pdf_svg_barcode(page, c->verification_id, 76, 520, 658, 64);
+    pdf_svg_text(page, bold, 14, 762, 538, PDF_INK, "Build.", 0, 0);
+    pdf_svg_text(page, bold, 14, 762, 557, PDF_CYAN, "Verify.", 0, 0);
+    pdf_svg_text(page, bold, 12, 762, 576, PDF_INK, "Advance.", 0, 0);
+}
+
+static void pdf_draw_back_content(HPDF_Page page, HPDF_Font font, HPDF_Font bold,
+                                  const CodarisCredential *c) {
+    pdf_svg_label(page, font, "MEMBERSHIP VERIFICATION", 60, CREDENTIAL_SECTION_LABEL_Y, 1);
+    pdf_svg_text_fit(page, bold, 34, 650, 70, 246, PDF_INK, "Build. Verify. Advance.");
+    pdf_svg_line(page, 70, 276, 940, 276, (HPDF_RGBColor){.16f,.27f,.31f}, 1);
+    pdf_svg_label(page, font, "MEMBER", 70, 319, 0);
+    unsigned name_count = utf8_count(c->display_name);
+    unsigned shown = name_count > 96 ? 96 : name_count;
+    unsigned lines = (shown + 31) / 32;
+    if (lines < 1) lines = 1;
+    unsigned size = 14;
+    if (name_count <= 32) size = 22;
+    else if (name_count <= 64) size = 18;
+    else if (name_count <= 96) size = 16;
+    double start = 374.0 - (double)(lines - 1) * (size + 6) / 2.0;
+    if (!pdf_svg_name_lines(page, bold, c->display_name, 70, start, 32, size, 4, 650)) return;
+    pdf_svg_label(page, font, "PUBLIC MEMBERSHIP NUMBER", 70, 437, 0);
+    pdf_svg_text_fit(page, bold, 17, 270, 70, 468, PDF_CYAN, c->membership_number);
+    pdf_svg_label(page, font, "STATUS", 70, 519, 0);
+    HPDF_RGBColor status_color = strcmp(c->status, "active") ? PDF_AMBER : PDF_GREEN;
+    pdf_svg_text(page, bold, 16, 70, 549, status_color, c->status, 0, 0);
+    pdf_svg_label(page, font, "ISSUED", 330, 519, 0);
+    pdf_svg_text_fit(page, font, 16, 280, 370, 549, PDF_INK, c->issued_at);
+    pdf_svg_label(page, font, "VERIFY CURRENT STATUS", 790, 177, 0);
+    pdf_svg_qr(page, c, 790, 192, CREDENTIAL_QR_SIZE);
+    pdf_svg_text(page, font, 12, 790, 367, PDF_MUTED, "codaris.org", 0, 0);
+    pdf_svg_text(page, font, 11, 505, 589, PDF_MUTED,
+        "This digital credential verifies current CODARIS membership. It is not a government ID or physical-access pass.", 0, 1);
+    for (int n = 0; n < 5; n++) {
+        double x = 700.0 + n * 44.0;
+        double px[] = {x, x + 18, x + 36, x + 36, x + 18, x};
+        double py[] = {445, 434, 445, 467, 478, 467};
+        HPDF_Page_SetRGBStroke(page, PDF_CYAN.r, PDF_CYAN.g, PDF_CYAN.b);
+        HPDF_Page_SetLineWidth(page, credential_pdf_scale() * 2);
+        HPDF_Page_MoveTo(page, credential_pdf_x(px[0]), credential_pdf_y(py[0]));
+        for (size_t i = 1; i < 6; i++)
+            HPDF_Page_LineTo(page, credential_pdf_x(px[i]), credential_pdf_y(py[i]));
+        HPDF_Page_ClosePathStroke(page);
+    }
+}
+
 static void pdf_draw_page(HPDF_Doc pdf, HPDF_Font font, HPDF_Font bold,
                           const CodarisCredential *c, int back, HPDF_Image avatar) {
     const HPDF_REAL w = (HPDF_REAL)CREDENTIAL_PRINT_WIDTH;
     const HPDF_REAL h = (HPDF_REAL)CREDENTIAL_PRINT_HEIGHT;
     HPDF_Page page = HPDF_AddPage(pdf);
-    HPDF_Page_SetWidth(page, w); HPDF_Page_SetHeight(page, h);
-    pdf_box(page,0,0,w,h,(HPDF_RGBColor){.027f,.063f,.09f});
-    pdf_svg_rect(page,7,7,996,CREDENTIAL_VIEW_HEIGHT-14,26,
-                 (HPDF_RGBColor){.027f,.063f,.09f},PDF_CYAN,
-                 CREDENTIAL_ACCENT_LINE_WIDTH);
-    pdf_svg_rect(page,19,19,972,CREDENTIAL_VIEW_HEIGHT-38,18,
-                 (HPDF_RGBColor){.043f,.071f,.095f},(HPDF_RGBColor){.21f,.31f,.37f},1);
-    pdf_svg_emblem(page,bold,c->role);
-    pdf_svg_text(page,bold,33,116,76,PDF_INK,"CODARIS",0,0);
-    pdf_svg_text_fit(page,font,12,900,58,118,(HPDF_RGBColor){.76f,.83f,.87f},
+    HPDF_Page_SetWidth(page, w);
+    HPDF_Page_SetHeight(page, h);
+    pdf_box(page, 0, 0, w, h, (HPDF_RGBColor){.027f,.063f,.09f});
+    pdf_svg_rect(page, 7, 7, 996, CREDENTIAL_VIEW_HEIGHT - 14, 26,
+                 (HPDF_RGBColor){.027f,.063f,.09f}, PDF_CYAN, CREDENTIAL_ACCENT_LINE_WIDTH);
+    pdf_svg_rect(page, 19, 19, 972, CREDENTIAL_VIEW_HEIGHT - 38, 18,
+                 (HPDF_RGBColor){.043f,.071f,.095f}, (HPDF_RGBColor){.21f,.31f,.37f}, 1);
+    pdf_svg_emblem(page, bold, c->role);
+    pdf_svg_text(page, bold, 33, 116, 76, PDF_INK, "CODARIS", 0, 0);
+    pdf_svg_text_fit(page, font, 12, 900, 58, 118, (HPDF_RGBColor){.76f,.83f,.87f},
                      "COALITION OF DEVELOPERS ADVANCING RESPONSIBLE");
-    pdf_svg_text(page,font,12,58,138,(HPDF_RGBColor){.76f,.83f,.87f},
-                 "INTELLIGENT SYSTEMS",0,0);
-    pdf_svg_text(page,font,11,959,50,PDF_CYAN,"BUILD. VERIFY. ADVANCE.",1,0);
-    pdf_svg_line(page,20,100,CREDENTIAL_LABEL_LINE_START_X,100,(HPDF_RGBColor){.13f,.84f,.94f},2);
-    pdf_svg_line(page,CREDENTIAL_LABEL_LINE_START_X,100,CREDENTIAL_LABEL_LINE_X,
-                 CREDENTIAL_SECTION_LABEL_Y,(HPDF_RGBColor){.13f,.84f,.94f},2);
-    pdf_svg_line(page,CREDENTIAL_LABEL_LINE_X,CREDENTIAL_SECTION_LABEL_Y,990,
-                 CREDENTIAL_SECTION_LABEL_Y,(HPDF_RGBColor){.13f,.84f,.94f},2);
-    if (!back) {
-        pdf_svg_label(page,font,"MEMBER CREDENTIAL / VERIFIED IDENTITY",60,CREDENTIAL_SECTION_LABEL_Y,1);
-        pdf_svg_rect(page,51,182,232,293,16,PDF_PANEL,(HPDF_RGBColor){.22f,.87f,.93f},1);
-        if (avatar) pdf_svg_image_crop(page,avatar,60,191,214,275);
-        else {
-            const double cy = 329, cx = 167;
-            HPDF_Page_SetRGBStroke(page,PDF_CYAN.r,PDF_CYAN.g,PDF_CYAN.b);
-            HPDF_Page_SetLineWidth(page,credential_pdf_scale()*3);
-            HPDF_Page_MoveTo(page,credential_pdf_x(cx),credential_pdf_y(cy-48));
-            HPDF_Page_LineTo(page,credential_pdf_x(cx+42),credential_pdf_y(cy-24));
-            HPDF_Page_LineTo(page,credential_pdf_x(cx+42),credential_pdf_y(cy+24));
-            HPDF_Page_LineTo(page,credential_pdf_x(cx),credential_pdf_y(cy+48));
-            HPDF_Page_LineTo(page,credential_pdf_x(cx-42),credential_pdf_y(cy+24));
-            HPDF_Page_LineTo(page,credential_pdf_x(cx-42),credential_pdf_y(cy-24));
-            HPDF_Page_ClosePathStroke(page);
-            HPDF_Page_SetRGBFill(page,PDF_CYAN.r,PDF_CYAN.g,PDF_CYAN.b);
-            HPDF_Page_Circle(page,credential_pdf_x(cx),credential_pdf_y(cy),credential_pdf_x(13));
-            HPDF_Page_Fill(page);
-        }
-        unsigned name_count=utf8_count(c->display_name), chars=name_count>90?90:name_count;
-        unsigned lines=(chars+29)/30; if(lines<1)lines=1; if(lines>3)lines=3;
-        int number_label_y=270+(int)lines*34, detail_y=321+(int)lines*34;
-        pdf_svg_label(page,font,"MEMBER ACCESS CREDENTIAL",315,205,1);
-        if (!pdf_svg_name_lines(page,bold,c->display_name,315,244,30,name_count<=30?28:18,4,440)) return;
-        pdf_svg_label(page,font,"PUBLIC MEMBERSHIP NUMBER",315,number_label_y,0);
-        pdf_svg_text_fit(page,bold,22,440,315,number_label_y+31,PDF_INK,c->membership_number);
-        pdf_svg_line(page,315,detail_y,315,detail_y+46,PDF_CYAN,3);
-        pdf_svg_label(page,font,"ROLE",331,detail_y+13,0);
-        pdf_svg_text_fit(page,font,15,320,331,detail_y+37,PDF_INK,c->role);
-        pdf_svg_line(page,674,detail_y,674,detail_y+46,PDF_CYAN,3);
-        pdf_svg_label(page,font,"STATUS",690,detail_y+13,0);
-        pdf_svg_text(page,bold,16,690,detail_y+37,strcmp(c->status,"active")?PDF_AMBER:PDF_GREEN,c->status,0,0);
-        pdf_svg_label(page,font,"SCAN TO VERIFY",790,177,0);
-        pdf_svg_qr(page,c,790,192,CREDENTIAL_QR_SIZE);
-        pdf_svg_label(page,font,"ISSUED",790,367,0);
-        pdf_svg_text_fit(page,font,14,180,790,389,PDF_CYAN,c->issued_at);
-        pdf_svg_rect(page,60,488,884,109,10,PDF_PANEL,(HPDF_RGBColor){.13f,.84f,.94f},1);
-        pdf_svg_label(page,font,"VERIFICATION BARCODE",80,508,1);
-        pdf_svg_barcode(page,c->verification_id,76,520,658,64);
-        pdf_svg_text(page,bold,14,762,538,PDF_INK,"Build.",0,0);
-        pdf_svg_text(page,bold,14,762,557,PDF_CYAN,"Verify.",0,0);
-        pdf_svg_text(page,bold,12,762,576,PDF_INK,"Advance.",0,0);
-    } else {
-        pdf_svg_label(page,font,"MEMBERSHIP VERIFICATION",60,CREDENTIAL_SECTION_LABEL_Y,1);
-        pdf_svg_text_fit(page,bold,34,650,70,246,PDF_INK,"Build. Verify. Advance.");
-        pdf_svg_line(page,70,276,940,276,(HPDF_RGBColor){.16f,.27f,.31f},1);
-        pdf_svg_label(page,font,"MEMBER",70,319,0);
-        unsigned name_count=utf8_count(c->display_name),shown=name_count>96?96:name_count;
-        unsigned lines=(shown+31)/32;if(lines<1)lines=1;
-        unsigned size=name_count<=32?22:name_count<=64?18:name_count<=96?16:14;
-        double start=374.0-(double)(lines-1)*(size+6)/2.0;
-        if (!pdf_svg_name_lines(page,bold,c->display_name,70,start,32,size,4,650)) return;
-        pdf_svg_label(page,font,"PUBLIC MEMBERSHIP NUMBER",70,437,0);
-        pdf_svg_text_fit(page,bold,17,270,70,468,PDF_CYAN,c->membership_number);
-        pdf_svg_label(page,font,"STATUS",70,519,0);
-        pdf_svg_text(page,bold,16,70,549,strcmp(c->status,"active")?PDF_AMBER:PDF_GREEN,c->status,0,0);
-        pdf_svg_label(page,font,"ISSUED",330,519,0);
-        pdf_svg_text_fit(page,font,16,280,370,549,PDF_INK,c->issued_at);
-        pdf_svg_label(page,font,"VERIFY CURRENT STATUS",790,177,0);
-        pdf_svg_qr(page,c,790,192,CREDENTIAL_QR_SIZE);
-        pdf_svg_text(page,font,12,790,367,PDF_MUTED,"codaris.org",0,0);
-        pdf_svg_text(page,font,11,505,589,PDF_MUTED,
-                     "This digital credential verifies current CODARIS membership. It is not a government ID or physical-access pass.",0,1);
-        /* Match the back-side hexagon motif without relying on the SVG renderer. */
-        for(int n=0;n<5;n++) {
-            double x=700.0+n*44.0;
-            double px[]={x,x+18,x+36,x+36,x+18,x};
-            double py[]={445,434,445,467,478,467};
-            HPDF_Page_SetRGBStroke(page,PDF_CYAN.r,PDF_CYAN.g,PDF_CYAN.b);
-            HPDF_Page_SetLineWidth(page,credential_pdf_scale()*2);
-            HPDF_Page_MoveTo(page,credential_pdf_x(px[0]),credential_pdf_y(py[0]));
-            for(size_t i=1;i<6;i++)HPDF_Page_LineTo(page,credential_pdf_x(px[i]),credential_pdf_y(py[i]));
-            HPDF_Page_ClosePathStroke(page);
-        }
-    }
+    pdf_svg_text(page, font, 12, 58, 138, (HPDF_RGBColor){.76f,.83f,.87f},
+                 "INTELLIGENT SYSTEMS", 0, 0);
+    pdf_svg_text(page, font, 11, 959, 50, PDF_CYAN, "BUILD. VERIFY. ADVANCE.", 1, 0);
+    pdf_svg_line(page, 20, 100, CREDENTIAL_LABEL_LINE_START_X, 100, (HPDF_RGBColor){.13f,.84f,.94f}, 2);
+    pdf_svg_line(page, CREDENTIAL_LABEL_LINE_START_X, 100, CREDENTIAL_LABEL_LINE_X,
+                 CREDENTIAL_SECTION_LABEL_Y, (HPDF_RGBColor){.13f,.84f,.94f}, 2);
+    pdf_svg_line(page, CREDENTIAL_LABEL_LINE_X, CREDENTIAL_SECTION_LABEL_Y, 990,
+                 CREDENTIAL_SECTION_LABEL_Y, (HPDF_RGBColor){.13f,.84f,.94f}, 2);
+    if (back) pdf_draw_back_content(page, font, bold, c);
+    else pdf_draw_front_content(page, font, bold, c, avatar);
 }
 
 int codaris_credential_pdf(const CodarisCredential *credential, const char *font_path,

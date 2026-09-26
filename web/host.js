@@ -589,18 +589,7 @@ function updateCredentialSideLabels(image) {
   const flipLabel = document.querySelector('#credential-flip span');
   if (flipLabel) flipLabel.textContent = window.codarisCredentialSide === 'back' ? 'View front side' : 'View reverse side';
 }
-window.codarisLoadCredential = async function (side, animate = false) {
-  const image = document.getElementById('credential-image');
-  const stage = document.getElementById('credential-stage');
-  if (!image || !stage) return false;
-  const status = document.getElementById('credential-stage-status');
-  const generation = ++credentialLoadGeneration;
-  const nextSide = side === 'back' ? 'back' : 'front';
-  const alreadyVisible = stage.dataset.state === 'ready' && !image.hidden;
-  if (!alreadyVisible) {
-    stage.dataset.state = 'loading';
-    if (status) status.textContent = 'Loading your credential preview…';
-  }
+async function performCredentialLoad(image, stage, status, nextSide, animate, alreadyVisible, generation) {
   try {
     const url = await credentialImageForSide(nextSide);
     if (!credentialStageIsCurrent(generation)) return false;
@@ -618,6 +607,21 @@ window.codarisLoadCredential = async function (side, animate = false) {
   } finally {
     if (credentialStageIsCurrent(generation)) stage.classList.remove('is-turning');
   }
+  return true;
+}
+window.codarisLoadCredential = async function (side, animate = false) {
+  const image = document.getElementById('credential-image');
+  const stage = document.getElementById('credential-stage');
+  if (!image || !stage) return false;
+  const status = document.getElementById('credential-stage-status');
+  const generation = ++credentialLoadGeneration;
+  const nextSide = side === 'back' ? 'back' : 'front';
+  const alreadyVisible = stage.dataset.state === 'ready' && !image.hidden;
+  if (!alreadyVisible) {
+    stage.dataset.state = 'loading';
+    if (status) status.textContent = 'Loading your credential preview…';
+  }
+  if (!await performCredentialLoad(image, stage, status, nextSide, animate, alreadyVisible, generation)) return false;
   updateCredentialSideLabels(image);
   return true;
 };

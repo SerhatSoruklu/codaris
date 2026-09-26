@@ -137,7 +137,8 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
             Object.entries(mapping).forEach(([id, key]) => {
                 const element = document.getElementById(id);
                 if (element) {
-                    element.value = data[key] || "";
+                    element.value = id === 'profile-country' && data[key] === 'Turkey'
+                        ? 'Türkiye' : (data[key] || "");
                     if (id === 'profile-country') element.dispatchEvent(new Event('change', {bubbles:true}));
                     if (element.dataset.characterCount) {
                         const count = document.getElementById(element.dataset.characterCount);
