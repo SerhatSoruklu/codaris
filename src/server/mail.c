@@ -246,7 +246,7 @@ static int send_contact_mail(const Config *c, const char *id, const char *kind,
         curl = curl_easy_init();
         if (!curl) goto cleanup;
         if (curl_easy_setopt(curl, CURLOPT_SSLVERSION,
-                             (long)CURL_SSLVERSION_TLSv1_2) != CURLE_OK) goto cleanup;
+                             (long)CURL_SSLVERSION_TLSv1_2) != CURLE_OK) goto cleanup; // NOSONAR: TLS 1.2 is the minimum; the C analyzer misclassifies this supported libcurl setting.
     }
     if (curl) mime = curl_mime_init(curl);
     curl_mimepart *part = mime ? curl_mime_addpart(mime) : NULL;
