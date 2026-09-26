@@ -62,6 +62,10 @@ static int append(TextBuffer *buffer, const char *text) {
     return append_n(buffer, text, strlen(text));
 }
 
+#if defined(__GNUC__) || defined(__clang__)
+static int appendf(TextBuffer *buffer, const char *format, ...)
+    __attribute__((format(printf, 2, 3)));
+#endif
 static int appendf(TextBuffer *buffer, const char *format, ...) {
     va_list args, copy;
     va_start(args, format);
@@ -265,35 +269,36 @@ static int avatar_png_data(const CodarisCredential *credential, char **base64) {
     return 1;
 }
 
+static const char *svg_line_end(const char *start, unsigned max_chars, unsigned *count) {
+    const char *p = start, *last_space = NULL;
+    *count = 0;
+    while (*p && *count < max_chars) {
+        if (*p == ' ') last_space = p;
+        if (((unsigned char)*p & 0xc0u) != 0x80u) ++*count;
+        ++p;
+    }
+    if (*p && last_space && last_space > start) p = last_space;
+    *count = 0;
+    for (const unsigned char *q = (const unsigned char *)start; q < (const unsigned char *)p; ++q)
+        if ((*q & 0xc0u) != 0x80u) ++*count;
+    return p;
+}
+
 static int svg_line(TextBuffer *buffer, const char *text, unsigned max_chars, unsigned size,
                     double x, double y, unsigned max_lines) {
     const char *p = text;
     unsigned line = 0;
     while (*p && line < max_lines) {
-        const char *start = p, *last_space = NULL;
-        unsigned count = 0, chosen = 0;
-        while (*p && count < max_chars) {
-            if (*p == ' ') last_space = p;
-            if (((unsigned char)*p & 0xc0u) != 0x80u) ++count;
-            ++p;
-        }
-        if (*p && last_space && last_space > start) {
-            p = last_space;
-            count = 0;
-            for (const unsigned char *q = (const unsigned char *)start; q < (const unsigned char *)p; ++q)
-                if ((*q & 0xc0u) != 0x80u) ++count;
-        }
-        chosen = count;
-        if (!chosen) break;
+        const char *start = p;
+        unsigned count = 0;
+        p = svg_line_end(start, max_chars, &count);
+        if (!count) break;
         if (!appendf(buffer, "<text class=\"member-name\" x=\"%.1f\" y=\"%.1f\" font-size=\"%u\" fill=\"#f4f7fa\" font-family=\"system-ui,sans-serif\" font-weight=\"650\">", x, y + line * (size + 6), size) ||
             !xml_n(buffer, start, (size_t)(p - start)) || !append(buffer, "</text>")) return 0;
         ++line;
         if (*p == ' ') ++p;
     }
-    if (*p && line) {
-        /* Long unbroken names remain readable and visibly abbreviated on-card. */
-        if (!appendf(buffer, "<text class=\"member-name\" x=\"%.1f\" y=\"%.1f\" font-size=\"%u\" fill=\"#f4f7fa\" font-family=\"system-ui,sans-serif\" font-weight=\"650\">…</text>", x, y + line * (size + 6), size)) return 0;
-    }
+    if (*p && line && !appendf(buffer, "<text class=\"member-name\" x=\"%.1f\" y=\"%.1f\" font-size=\"%u\" fill=\"#f4f7fa\" font-family=\"system-ui,sans-serif\" font-weight=\"650\">…</text>", x, y + line * (size + 6), size)) return 0;
     return 1;
 }
 

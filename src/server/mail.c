@@ -202,15 +202,36 @@ static int send_contact_mail(const Config *c, const char *id, const char *kind,
     if (n < 0 || (size_t)n >= cap) { sodium_memzero(text, cap); free(text); return 0; }
     size_t body_len = (size_t)n;
     char from[320], to[320], subject[128], message_id[160], reply[320], date[80];
-    int valid = (n = snprintf(from, sizeof(from), "From: CODARIS <%s>", c->mail_from)) > 0 && (size_t)n < sizeof(from);
-    valid = valid && (n = snprintf(to, sizeof(to), "To: <%s>", recipient)) > 0 && (size_t)n < sizeof(to);
+    n = snprintf(from, sizeof(from), "From: CODARIS <%s>", c->mail_from);
+    int valid = n > 0 && (size_t)n < sizeof(from);
+    if (valid) {
+        n = snprintf(to, sizeof(to), "To: <%s>", recipient);
+        valid = n > 0 && (size_t)n < sizeof(to);
+    }
     const char *subject_text = is_admin ? "CODARIS contact message" : "We received your message to CODARIS";
-    valid = valid && (n = snprintf(subject, sizeof(subject), "Subject: %s", subject_text)) > 0 && (size_t)n < sizeof(subject);
-    valid = valid && (n = snprintf(message_id, sizeof(message_id), "Message-ID: <codaris-contact-%s-%s@codaris.org>", id, kind)) > 0 && (size_t)n < sizeof(message_id);
-    if (is_admin) valid = valid && (n = snprintf(reply, sizeof(reply), "Reply-To: <%s>", reply_to)) > 0 && (size_t)n < sizeof(reply);
+    if (valid) {
+        n = snprintf(subject, sizeof(subject), "Subject: %s", subject_text);
+        valid = n > 0 && (size_t)n < sizeof(subject);
+    }
+    if (valid) {
+        n = snprintf(message_id, sizeof(message_id), "Message-ID: <codaris-contact-%s-%s@codaris.org>", id, kind);
+        valid = n > 0 && (size_t)n < sizeof(message_id);
+    }
+    if (valid && is_admin) {
+        n = snprintf(reply, sizeof(reply), "Reply-To: <%s>", reply_to);
+        valid = n > 0 && (size_t)n < sizeof(reply);
+    }
     time_t now = time(NULL);
-    struct tm *utc = gmtime(&now);
-    valid = valid && now != (time_t)-1 && utc && strftime(date, sizeof(date), "Date: %a, %d %b %Y %H:%M:%S +0000", utc);
+    struct tm utc_buffer;
+#ifdef _WIN32
+    int time_ok = now != (time_t)-1 && gmtime_s(&utc_buffer, &now) == 0;
+#else
+    int time_ok = now != (time_t)-1 && gmtime_r(&now, &utc_buffer) != NULL;
+#endif
+    if (valid && time_ok)
+        valid = strftime(date, sizeof(date), "Date: %a, %d %b %Y %H:%M:%S +0000", &utc_buffer) != 0;
+    else
+        valid = 0;
     struct curl_slist *headers = NULL, *recipients = NULL;
     CURL *curl = NULL;
     curl_mime *mime = NULL;
@@ -295,6 +316,86 @@ static int deliver_contact(const Config *c, const char *id, const char *cipher, 
     free(plain);
     return ok;
 }
+/* Process one contact queue item. Return 1 after delivery, 0 when empty, -1 on failure. */
+static int contact_outbox_once(PGconn *db, const Config *c) {
+    PGresult *r = PQexec(db, "BEGIN");
+    if (!r || PQresultStatus(r) != PGRES_COMMAND_OK) {
+        if (r) PQclear(r);
+        return -1;
+    }
+    PQclear(r);
+    r = PQexec(db,
+        "SELECT id,encrypted_payload,(admin_sent_at IS NULL AND admin_attempts<8) "
+        "FROM app.contact_outbox WHERE created_at>now()-interval '30 days' "
+        "AND available_at<=now() AND ((admin_sent_at IS NULL AND admin_attempts<8) OR "
+        "(receipt_sent_at IS NULL AND receipt_attempts<8)) ORDER BY id "
+        "FOR UPDATE SKIP LOCKED LIMIT 1");
+    if (!r || PQresultStatus(r) != PGRES_TUPLES_OK) {
+        if (r) PQclear(r);
+        r = PQexec(db, "ROLLBACK");
+        if (r) PQclear(r);
+        return -1;
+    }
+    if (!PQntuples(r)) {
+        PQclear(r);
+        r = PQexec(db, "COMMIT");
+        int committed = r && PQresultStatus(r) == PGRES_COMMAND_OK;
+        if (r) PQclear(r);
+        return committed ? 0 : -1;
+    }
+    char row_id[32];
+    int id_length = snprintf(row_id, sizeof(row_id), "%s", PQgetvalue(r, 0, 0));
+    if (id_length <= 0 || (size_t)id_length >= sizeof(row_id)) {
+        PQclear(r);
+        r = PQexec(db, "ROLLBACK");
+        if (r) PQclear(r);
+        return -1;
+    }
+    const char *cipher = PQgetvalue(r, 0, 1);
+    int is_admin = !strcmp(PQgetvalue(r, 0, 2), "t");
+    int sent = deliver_contact(c, row_id, cipher, is_admin ? "admin" : "receipt");
+    const char *values[] = {row_id};
+    const char *sql;
+    if (is_admin)
+        sql = sent
+            ? "UPDATE app.contact_outbox SET admin_sent_at=now(),admin_attempts=admin_attempts+1,available_at=now() WHERE id=$1::bigint"
+            : "UPDATE app.contact_outbox SET admin_attempts=admin_attempts+1,available_at=now()+interval '5 minutes'*(admin_attempts+1) WHERE id=$1::bigint";
+    else
+        sql = sent
+            ? "UPDATE app.contact_outbox SET receipt_sent_at=now(),receipt_attempts=receipt_attempts+1,available_at=now() WHERE id=$1::bigint"
+            : "UPDATE app.contact_outbox SET receipt_attempts=receipt_attempts+1,available_at=now()+interval '5 minutes'*(receipt_attempts+1) WHERE id=$1::bigint";
+    PGresult *updated = PQexecParams(db, sql, 1, NULL, values, NULL, NULL, 0);
+    PQclear(r);
+    if (!updated || PQresultStatus(updated) != PGRES_COMMAND_OK) {
+        if (updated) PQclear(updated);
+        r = PQexec(db, "ROLLBACK");
+        if (r) PQclear(r);
+        return -1;
+    }
+    PQclear(updated);
+    if (sent) {
+        PGresult *removed = PQexecParams(db,
+            "DELETE FROM app.contact_outbox WHERE id=$1::bigint AND admin_sent_at IS NOT NULL AND receipt_sent_at IS NOT NULL",
+            1, NULL, values, NULL, NULL, 0);
+        int deleted = removed && PQresultStatus(removed) == PGRES_COMMAND_OK;
+        if (removed) PQclear(removed);
+        if (!deleted) {
+            r = PQexec(db, "ROLLBACK");
+            if (r) PQclear(r);
+            return -1;
+        }
+    }
+    r = PQexec(db, "COMMIT");
+    int committed = r && PQresultStatus(r) == PGRES_COMMAND_OK;
+    if (r) PQclear(r);
+    if (!committed) return -1;
+    if (!sent) {
+        fputs("Contact mail delivery failed; retry scheduled.\n", stderr);
+        return -1;
+    }
+    return 1;
+}
+
 int mail_run(const Config *c) {
     PGconn *db = PQconnectdb(c->database);
     if (!db || PQstatus(db) != CONNECTION_OK) {
@@ -386,79 +487,11 @@ int mail_run(const Config *c) {
             break;
         }
     }
-    /* Contact bodies remain encrypted in PostgreSQL and are removed once both
-     * fixed-destination messages have been accepted, or after 30 days. */
+    /* Contact bodies remain encrypted in PostgreSQL until both mail deliveries succeed. */
     for (int i = 0; i < 20 && ok; i++) {
-        PGresult *r = PQexec(db, "BEGIN");
-        if (!r || PQresultStatus(r) != PGRES_COMMAND_OK) {
-            if (r) PQclear(r);
-            ok = 0;
-            break;
-        }
-        PQclear(r);
-        r = PQexec(db,
-            "SELECT id,encrypted_payload,(admin_sent_at IS NULL AND admin_attempts<8) "
-            "FROM app.contact_outbox WHERE created_at>now()-interval '30 days' "
-            "AND available_at<=now() AND ((admin_sent_at IS NULL AND admin_attempts<8) OR "
-            "(receipt_sent_at IS NULL AND receipt_attempts<8)) ORDER BY id "
-            "FOR UPDATE SKIP LOCKED LIMIT 1");
-        if (!r || PQresultStatus(r) != PGRES_TUPLES_OK) {
-            if (r) PQclear(r);
-            ok = 0;
-            break;
-        }
-        if (!PQntuples(r)) {
-            PQclear(r);
-            r = PQexec(db, "COMMIT");
-            if (!r || PQresultStatus(r) != PGRES_COMMAND_OK) ok = 0;
-            if (r) PQclear(r);
-            break;
-        }
-        const char *id = PQgetvalue(r, 0, 0);
-        const char *cipher = PQgetvalue(r, 0, 1);
-        int is_admin = !strcmp(PQgetvalue(r, 0, 2), "t");
-        int sent = deliver_contact(c, id, cipher, is_admin ? "admin" : "receipt");
-        const char *values[] = {id};
-        const char *sql;
-        if (is_admin)
-            sql = sent
-                ? "UPDATE app.contact_outbox SET admin_sent_at=now(),admin_attempts=admin_attempts+1,available_at=now() WHERE id=$1::bigint"
-                : "UPDATE app.contact_outbox SET admin_attempts=admin_attempts+1,available_at=now()+interval '5 minutes'*(admin_attempts+1) WHERE id=$1::bigint";
-        else
-            sql = sent
-                ? "UPDATE app.contact_outbox SET receipt_sent_at=now(),receipt_attempts=receipt_attempts+1,available_at=now() WHERE id=$1::bigint"
-                : "UPDATE app.contact_outbox SET receipt_attempts=receipt_attempts+1,available_at=now()+interval '5 minutes'*(receipt_attempts+1) WHERE id=$1::bigint";
-        PGresult *updated = PQexecParams(db, sql, 1, NULL, values, NULL, NULL, 0);
-        PQclear(r);
-        if (!updated || PQresultStatus(updated) != PGRES_COMMAND_OK) {
-            if (updated) PQclear(updated);
-            r = PQexec(db, "ROLLBACK");
-            if (r) PQclear(r);
-            ok = 0;
-            break;
-        }
-        PQclear(updated);
-        if (sent) {
-            PGresult *removed = PQexecParams(db,
-                "DELETE FROM app.contact_outbox WHERE id=$1::bigint AND admin_sent_at IS NOT NULL AND receipt_sent_at IS NOT NULL",
-                1, NULL, values, NULL, NULL, 0);
-            if (!removed || PQresultStatus(removed) != PGRES_COMMAND_OK) {
-                if (removed) PQclear(removed);
-                r = PQexec(db, "ROLLBACK");
-                if (r) PQclear(r);
-                ok = 0;
-                break;
-            }
-            PQclear(removed);
-        }
-        r = PQexec(db, "COMMIT");
-        if (!r || PQresultStatus(r) != PGRES_COMMAND_OK) ok = 0;
-        if (r) PQclear(r);
-        if (!sent) {
-            fputs("Contact mail delivery failed; retry scheduled.\n", stderr);
-            ok = 0;
-            break;
-        }
+        int processed = contact_outbox_once(db, c);
+        if (processed < 0) ok = 0;
+        if (processed <= 0) break;
     }
     PQfinish(db);
     return ok;

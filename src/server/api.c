@@ -79,6 +79,88 @@ static enum MHD_Result respond(struct MHD_Connection *connection, unsigned statu
     MHD_destroy_response(r);
     return result;
 }
+static enum MHD_Result respond_credential(struct MHD_Connection *connection, const char *type,
+                                         const char *disposition, void *data, size_t length) {
+    struct MHD_Response *response = MHD_create_response_from_buffer(length, data, MHD_RESPMEM_MUST_FREE);
+    if (!response) {
+        free(data);
+        return MHD_NO;
+    }
+    int ok = MHD_add_response_header(response, "Content-Type", type) &&
+             MHD_add_response_header(response, "Cache-Control", "no-store") &&
+             MHD_add_response_header(response, "X-Content-Type-Options", "nosniff");
+    if (disposition) ok = ok && MHD_add_response_header(response, "Content-Disposition", disposition);
+    enum MHD_Result result = ok ? MHD_queue_response(connection, 200, response) : MHD_NO;
+    MHD_destroy_response(response);
+    return result;
+}
+static int credential_card_response(const Config *c, struct MHD_Connection *conn, PGconn *db,
+                                    const char *id, enum MHD_Result *response_result) {
+    const char *values[] = {id};
+    PGresult *row = query(db,
+        "SELECT u.display_name,a.role,c.membership_number,c.verification_id::text,c.status,"
+        "to_char(c.issued_at AT TIME ZONE 'UTC','FMMonth YYYY'),"
+        "replace(encode(a.avatar_rgba,'base64'),E'\\n','') "
+        "FROM app.membership_credentials c JOIN app.accounts a ON a.user_id=c.user_id "
+        "JOIN app.users u ON u.id=c.user_id "
+        "WHERE c.user_id=$1::bigint AND c.status='active' AND a.email_verified", 1, values);
+    if (!row || PQntuples(row) != 1) {
+        if (row) PQclear(row);
+        return 0;
+    }
+    const char *format = MHD_lookup_connection_value(conn, MHD_GET_ARGUMENT_KIND, "format");
+    const char *side = MHD_lookup_connection_value(conn, MHD_GET_ARGUMENT_KIND, "side");
+    int back = side && !strcmp(side, "back");
+    char url[640];
+    int length = snprintf(url, sizeof(url), "%s/verify/?credential=%s", c->origin,
+                          PQgetvalue(row, 0, 3));
+    if (length < 0 || (size_t)length >= sizeof(url)) {
+        PQclear(row);
+        return 0;
+    }
+    CodarisCredential card = {PQgetvalue(row, 0, 0), PQgetvalue(row, 0, 1),
+        PQgetvalue(row, 0, 2), PQgetvalue(row, 0, 3), PQgetvalue(row, 0, 4),
+        PQgetvalue(row, 0, 5), url, NULL, 0};
+    unsigned char *avatar = NULL;
+    size_t avatar_size = 0;
+    const char *encoded_avatar = PQgetvalue(row, 0, 6);
+    if (*encoded_avatar) {
+        avatar = malloc(40000);
+        if (!avatar || sodium_base642bin(avatar, 40000, encoded_avatar,
+                strlen(encoded_avatar), NULL, &avatar_size, NULL,
+                sodium_base64_VARIANT_ORIGINAL) || avatar_size != 40000) {
+            free(avatar);
+            PQclear(row);
+            return 0;
+        }
+        card.avatar_rgba = avatar;
+        card.avatar_size = avatar_size;
+    }
+    if (format && !strcmp(format, "pdf")) {
+        unsigned char *pdf = NULL;
+        size_t pdf_size = 0;
+        if (codaris_credential_pdf(&card, c->credential_font, &pdf, &pdf_size)) {
+            free(avatar);
+            PQclear(row);
+            *response_result = respond_credential(conn, "application/pdf",
+                "attachment; filename=codaris-membership.pdf", pdf, pdf_size);
+            return 1;
+        }
+    } else if (!format || !strcmp(format, "svg")) {
+        char *svg = NULL;
+        size_t svg_size = 0;
+        if (codaris_credential_svg(&card, back, &svg, &svg_size)) {
+            free(avatar);
+            PQclear(row);
+            *response_result = respond_credential(conn, "image/svg+xml; charset=utf-8",
+                                                   NULL, svg, svg_size);
+            return 1;
+        }
+    }
+    free(avatar);
+    PQclear(row);
+    return 0;
+}
 static const char *field(json_object *body, const char *name) {
     json_object *v = NULL;
     if (!body || !json_object_object_get_ex(body, name, &v) ||
@@ -746,20 +828,12 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         status=200;message=!strcmp(enabled,"true")?"{\"message\":\"Public credential verification enabled.\"}":"{\"message\":\"Public credential verification disabled.\"}";goto done;
     }
     if (!strcmp(path,"/api/credential/card") && !strcmp(method,"GET")) {
-        const char *v[]={id};
-        r=query(db,"SELECT u.display_name,a.role,c.membership_number,c.verification_id::text,c.status,to_char(c.issued_at AT TIME ZONE 'UTC','FMMonth YYYY'),replace(encode(a.avatar_rgba,'base64'),E'\\n','') FROM app.membership_credentials c JOIN app.accounts a ON a.user_id=c.user_id JOIN app.users u ON u.id=c.user_id WHERE c.user_id=$1::bigint AND c.status='active' AND a.email_verified",1,v);
-        if(!r||PQntuples(r)!=1)goto done;
-        const char *format=MHD_lookup_connection_value(conn,MHD_GET_ARGUMENT_KIND,"format");
-        const char *side=MHD_lookup_connection_value(conn,MHD_GET_ARGUMENT_KIND,"side");
-        int back=side&&!strcmp(side,"back");
-        char url[640];int n=snprintf(url,sizeof(url),"%s/verify/?credential=%s",c->origin,PQgetvalue(r,0,3));
-        CodarisCredential card={PQgetvalue(r,0,0),PQgetvalue(r,0,1),PQgetvalue(r,0,2),PQgetvalue(r,0,3),PQgetvalue(r,0,4),PQgetvalue(r,0,5),url,NULL,0};
-        unsigned char *avatar=NULL;size_t avatar_size=0;
-        if(*PQgetvalue(r,0,6)){avatar=malloc(40000);if(!avatar||sodium_base642bin(avatar,40000,PQgetvalue(r,0,6),strlen(PQgetvalue(r,0,6)),NULL,&avatar_size,NULL,sodium_base64_VARIANT_ORIGINAL)||avatar_size!=40000){free(avatar);avatar=NULL;goto done;}card.avatar_rgba=avatar;card.avatar_size=avatar_size;}
-        if(n<0||(size_t)n>=sizeof(url)){free(avatar);goto done;}
-        if(format&&!strcmp(format,"pdf")){unsigned char *pdf=NULL;size_t pdf_size=0;if(codaris_credential_pdf(&card,c->credential_font,&pdf,&pdf_size)){struct MHD_Response *response=MHD_create_response_from_buffer(pdf_size,pdf,MHD_RESPMEM_MUST_FREE);if(response){MHD_add_response_header(response,"Content-Type","application/pdf");MHD_add_response_header(response,"Cache-Control","no-store");MHD_add_response_header(response,"Content-Disposition","attachment; filename=codaris-membership.pdf");enum MHD_Result result=MHD_queue_response(conn,200,response);MHD_destroy_response(response);free(avatar);PQclear(r);PQfinish(db);if(body)json_object_put(body);return result;}free(pdf);}}
-        else if(!format||!strcmp(format,"svg")){char *svg=NULL;size_t svg_size=0;if(codaris_credential_svg(&card,back,&svg,&svg_size)){struct MHD_Response *response=MHD_create_response_from_buffer(svg_size,svg,MHD_RESPMEM_MUST_FREE);if(response){MHD_add_response_header(response,"Content-Type","image/svg+xml; charset=utf-8");MHD_add_response_header(response,"Cache-Control","no-store");enum MHD_Result result=MHD_queue_response(conn,200,response);MHD_destroy_response(response);free(avatar);PQclear(r);PQfinish(db);if(body)json_object_put(body);return result;}free(svg);}}
-        free(avatar);PQclear(r);r=NULL;
+        enum MHD_Result credential_result = MHD_NO;
+        if (credential_card_response(c, conn, db, id, &credential_result)) {
+            PQfinish(db);
+            if (body) json_object_put(body);
+            return credential_result;
+        }
         status=400;message="{\"message\":\"Choose SVG or PDF credential output.\"}";goto done;
     }
     if (!strcmp(path, "/api/me") && !strcmp(method, "GET")) {

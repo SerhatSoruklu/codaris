@@ -582,15 +582,6 @@ async function animateCredentialTurn(stage, shouldAnimate, generation) {
   await new Promise(resolve => setTimeout(resolve, 130));
   return credentialStageIsCurrent(generation);
 }
-function credentialPreviewFailed(image, stage, status, alreadyVisible, generation) {
-  if (!credentialStageIsCurrent(generation)) return false;
-  if (!alreadyVisible) {
-    stage.dataset.state = 'error';
-    image.hidden = true;
-    if (status) status.textContent = 'Your credential preview is temporarily unavailable.';
-  }
-  return false;
-}
 function updateCredentialSideLabels(image) {
   image.alt = 'CODARIS membership credential for ' + (window.codarisCredentialName || 'member') + ', ' + window.codarisCredentialSide + ' side';
   const label = document.getElementById('credential-side-label');
@@ -618,7 +609,12 @@ window.codarisLoadCredential = async function (side, animate = false) {
     updateCredentialPreview(image, stage, status, nextSide, url);
     if (animate) requestAnimationFrame(() => stage.classList.remove('is-turning'));
   } catch {
-    return credentialPreviewFailed(image, stage, status, alreadyVisible, generation);
+    if (credentialStageIsCurrent(generation) && !alreadyVisible) {
+      stage.dataset.state = 'error';
+      image.hidden = true;
+      if (status) status.textContent = 'Your credential preview is temporarily unavailable.';
+    }
+    return false;
   } finally {
     if (credentialStageIsCurrent(generation)) stage.classList.remove('is-turning');
   }
@@ -679,31 +675,53 @@ publicToggle?.addEventListener('change',()=>{
   publicToggle.disabled=true;
   Module.ccall('codaris_account_submit',null,['string'],['credential']);
 });
+function updateCredentialAccessibleFields(data, credential) {
+  const accessible={'credential-accessible-name':data.name,'credential-accessible-number':credential.membership_number,'credential-accessible-role':data.role,'credential-accessible-status':credential.status,'credential-accessible-date':credential.issued_at};
+  Object.entries(accessible).forEach(([id,value])=>{const element=document.getElementById(id);if(element)element.textContent=value||'';});
+}
+function updateCredentialControls(data, credential) {
+  const publicControl=document.getElementById('credential-public-control');if(publicControl)publicControl.hidden=credential.status!=='active';
+  const publicToggle=document.getElementById('credential-public-enabled');if(publicToggle){publicToggle.disabled=credential.status!=='active'||!data.email_verified;publicToggle.checked=!!credential.public_enabled;publicToggle.dataset.synced=String(publicToggle.checked);}
+  document.querySelectorAll('#credential-flip,#credential-download,#credential-download-pdf,#credential-download-png').forEach(button=>button.disabled=!data.email_verified||credential.status!=='active');
+  const verifyLink=document.getElementById('credential-verify-link');
+  if(verifyLink&&credential.verification_id){verifyLink.href='/verify/?credential='+encodeURIComponent(credential.verification_id);verifyLink.hidden=!credential.public_enabled;}
+}
+function updateCredentialMessages(data, credential) {
+  const live=document.getElementById('credential-live-status');
+  if(live)live.textContent=!data.email_verified?'Email verification required':credential.status==='active'?'Active · issued '+(credential.issued_at||''):'Credential pending verification';
+  const summary=document.getElementById('credential-summary');
+  if(summary)summary.textContent=!data.email_verified?'Verify your email to activate and download your membership credential.':credential.status==='active'?'Your credential reflects your current CODARIS membership. The QR code checks its live status.':'Your credential is being prepared.';
+}
+function syncCredentialStage(data, credential) {
+  const stage=document.getElementById('credential-stage');
+  const image=document.getElementById('credential-image');
+  const stageStatus=document.getElementById('credential-stage-status');
+  if(credential.status==='active'&&data.email_verified){
+    window.codarisCredentialSide='front';
+    if(window.codarisLoadCredential)window.codarisLoadCredential('front');
+    return;
+  }
+  if(!stage)return;
+  credentialLoadGeneration++;
+  stage.dataset.state='pending';
+  if(image){image.hidden=true;image.removeAttribute('src');}
+  if(stageStatus)stageStatus.textContent=!data.email_verified?'Your credential preview will appear here after email verification.':'Your credential is being prepared.';
+}
 document.addEventListener('codaris-member-profile',event=>{
   const data=event.detail||{},credential=data.credential||{};
   credentialImageCache.clear();
-  const accessible={'credential-accessible-name':data.name,'credential-accessible-number':credential.membership_number,'credential-accessible-role':data.role,'credential-accessible-status':credential.status,'credential-accessible-date':credential.issued_at};
-  Object.entries(accessible).forEach(([id,value])=>{const element=document.getElementById(id);if(element)element.textContent=value||'';});
+  updateCredentialAccessibleFields(data,credential);
   window.codarisCredentialName=data.name||'member';
-  const publicControl=document.getElementById('credential-public-control');if(publicControl)publicControl.hidden=credential.status!=='active';
-  const publicToggle=document.getElementById('credential-public-enabled');if(publicToggle){publicToggle.disabled=credential.status!=='active'||!data.email_verified;publicToggle.checked=!!credential.public_enabled;publicToggle.dataset.synced=String(publicToggle.checked);}
-  const live=document.getElementById('credential-live-status');if(live)live.textContent=!data.email_verified?'Email verification required':credential.status==='active'?'Active · issued '+(credential.issued_at||''):'Credential pending verification';
-  const summary=document.getElementById('credential-summary');if(summary)summary.textContent=!data.email_verified?'Verify your email to activate and download your membership credential.':credential.status==='active'?'Your credential reflects your current CODARIS membership. The QR code checks its live status.':'Your credential is being prepared.';
-  document.querySelectorAll('#credential-flip,#credential-download,#credential-download-pdf,#credential-download-png').forEach(button=>button.disabled=!data.email_verified||credential.status!=='active');
-  const verifyLink=document.getElementById('credential-verify-link');if(verifyLink&&credential.verification_id){verifyLink.href='/verify/?credential='+encodeURIComponent(credential.verification_id);verifyLink.hidden=!credential.public_enabled;}
-  const stage=document.getElementById('credential-stage'),image=document.getElementById('credential-image'),stageStatus=document.getElementById('credential-stage-status');
-  if(credential.status==='active'&&data.email_verified){window.codarisCredentialSide='front';if(window.codarisLoadCredential)window.codarisLoadCredential('front');}
-  else if(stage){
-    credentialLoadGeneration++;
-    stage.dataset.state='pending';
-    if(image){image.hidden=true;image.removeAttribute('src');}
-    if(stageStatus)stageStatus.textContent=!data.email_verified?'Your credential preview will appear here after email verification.':'Your credential is being prepared.';
-  }
+  updateCredentialControls(data,credential);
+  updateCredentialMessages(data,credential);
+  syncCredentialStage(data,credential);
 });
 function loadPublicCredential(){
   const status=document.getElementById('credential-verify-status');if(!status)return;
   const params=new URLSearchParams(location.search),credential=params.get('credential')||'';
-  fetch('/api/credential/verify?credential='+encodeURIComponent(credential),{credentials:'omit',cache:'no-store'})
+  const endpoint=new URL('/api/credential/verify',window.location.origin);
+  endpoint.searchParams.set('credential',credential);
+  fetch(endpoint.href,{credentials:'omit',cache:'no-store'})
     .then(response=>response.json()).then(data=>{
       if(!data.valid){status.textContent=data.message||'Credential verification is not publicly available.';document.getElementById('credential-verify-description').textContent='This credential is unavailable, disabled or no longer active.';return;}
       for(const [id,value] of Object.entries({'credential-verify-name':data.display_name,'credential-verify-role':data.role,'credential-verify-number':data.membership_number,'credential-verify-member-status':data.status,'credential-verify-date':data.issued_at}))document.getElementById(id).textContent=value||'';
