@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Validate the deployable site without third-party test dependencies."""
 import json
+import os
 import re
 from html.parser import HTMLParser
 from pathlib import Path
@@ -11,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'build/client'
 REGISTRY = json.loads((ROOT / 'web/pages.json').read_text())
 production = (OUT / 'sitemap.xml').is_file()
+SITE = json.loads((ROOT / 'web/site.json').read_text())
+ORIGIN = os.environ.get('CODARIS_SITE_URL', SITE['origin']).rstrip('/')
 
 class Document(HTMLParser):
     def __init__(self):
@@ -109,9 +112,9 @@ for path, doc in pages.items():
 for entry in REGISTRY:
     doc = pages[OUT / entry['slug'] / 'index.html']
     assert doc.noindex == (entry['indexing'] == 'noindex' or not production), entry['slug']
-    expected_url = 'https://codaris.org/' + entry['slug'] + ('/' if entry['slug'] else '')
+    expected_url = ORIGIN + '/' + entry['slug'] + ('/' if entry['slug'] else '')
     assert doc.canonical == expected_url, (entry['slug'], doc.canonical)
-    assert doc.og_image == 'https://codaris.org/assets/Codaris_Flag.png', entry['slug']
+    assert doc.og_image == ORIGIN + '/assets/Codaris_Flag.png', entry['slug']
     assert doc.twitter_card == 'summary_large_image', entry['slug']
     if production and entry['indexing'] == 'index':
         assert 'WebPage' in doc.jsonld_types, entry['slug']
@@ -124,7 +127,7 @@ else:
     assert not (OUT / 'sitemap.xml').exists(), 'Preview builds must omit the sitemap'
     urls = []
 assert len(urls) == expected
-expected_urls = {'https://codaris.org/' + entry['slug'] + ('/' if entry['slug'] else '') for entry in REGISTRY if entry['indexing'] == 'index'} if production else set()
+expected_urls = {ORIGIN + '/' + entry['slug'] + ('/' if entry['slug'] else '') for entry in REGISTRY if entry['indexing'] == 'index'} if production else set()
 assert {node.text for node in urls} == expected_urls
 host = (ROOT / 'web/host.js').read_text()
 assert not re.search(r'innerHTML|outerHTML|document\.write|\beval\s*\(|new\s+Function', host)
