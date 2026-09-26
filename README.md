@@ -1,244 +1,182 @@
 # CODARIS
 
-Coalition Of Developers Advancing Responsible Intelligent Systems.
+**Coalition Of Developers Advancing Responsible Intelligent Systems**
 
-C17 application code, WebAssembly in the browser, and a native PostgreSQL-backed account API. See the [account design](docs/ACCOUNT-SERVICE.md) and [release runbook](docs/RELEASE.md) for current setup and release requirements.
+**Build. Verify. Advance. Trust is engineered.**
 
-## Current architecture
+CODARIS is an early-stage, developer-focused coalition and a growing technical platform. Its purpose is to bring developers together around the engineering of responsible intelligent systems: practical work, careful verification, security, safety, interoperability and clear evidence about what systems do.
+
+The intended progression is:
+
+> Coalition → meaningful membership → real activity → governance → ecosystem → identify problems → build mechanisms that solve them
+
+That progression is a direction, not a claim that every stage or institution is already in place. CODARIS should earn its structure by doing useful technical work. Branding, membership counts and empty governance structures are not substitutes for work that others can inspect and use.
+
+## What CODARIS is
+
+CODARIS is an independent developer coalition operated by Serhat Soruklu. It is intended for developers and other technical contributors who want to work on responsible intelligent systems and the software, infrastructure and practices around them.
+
+The public site currently provides information about the mission, membership approach, organizational participation plans, legal terms and privacy, plus a substantial developer learning library. The repository contains the C/WebAssembly web client, native C account and contact API, PostgreSQL schema, build tooling and deployment documentation.
+
+## Why CODARIS exists
+
+Intelligent systems affect people through more than model behavior. Their surrounding software, data, interfaces, infrastructure, integrations and operational decisions also matter. CODARIS exists to create a place where developers can examine those systems together and turn concerns into specific engineering questions and useful work.
+
+The coalition’s stated principles are progress, safety, developer leadership, a global perspective, accountability and transparency about the difference between current capabilities and future plans. Technical credibility should come from documented reasoning, reproducible evidence and review, not from broad claims of authority.
+
+## Why join
+
+Joining is for people who want to contribute expertise, questions and effort to a developer-led coalition. The current membership flow is intentionally modest: it establishes an account and membership after email confirmation. It does not promise employment, certification, professional accreditation, a public directory listing, access to an active working group, or influence over a formal governance process.
+
+When the account service is deployed and available, members can maintain their account, control whether their membership credential is publicly verifiable, and keep progress through the learning topics. The public learning library itself can be read without an account. Membership is not required to use its guides or catalogues.
+
+## Who CODARIS is for
+
+CODARIS is for developers and technically engaged people interested in building, evaluating or operating responsible intelligent systems. The site also invites technical, research, open-source and organizational conversations. The proposed organizational participation framework is still in development; a conversation or platform reference does not mean an organization is participating, sponsoring or endorsing CODARIS.
+
+## Current platform
+
+The public site is marked Beta V1. It currently includes:
+
+- Mission, global perspective, ecosystem and organizational participation pages. The organizational framework, directories, working groups and safeguards described there are proposals or marked as coming soon, not active programs.
+- A public developer library: 16 research catalogues and six foundational guides, with source notes, technical chapters and exercises. Catalogue material includes dated snapshots and source limitations; it should not be read as live market data or a ranking.
+- An implemented account service in the codebase: registration, email verification, login, password recovery and change, editable profile settings, membership credentials, optional public credential verification, and saved topic progress.
+- A member dashboard in the codebase for profile and security settings, credential controls, and topic progress. Community/chat is a preview, not a live discussion service.
+- A contact form implementation, with messages queued by the native service for delivery.
+
+**Deployment status matters:** the account and contact workflows exist in the repository and can be run locally, but the repository does not establish whether the public API, database, mail delivery and operational checks are currently available on the live host. The release runbook requires those checks before public registration is advertised. The production client build intentionally disables the Join form; development builds can expose an interactive preview. A repository feature is not evidence that the corresponding production service is live.
+
+Membership activates automatically after email verification; there is no staff application-review or approval workflow. Email confirmation proves access to a mailbox, not a person’s identity, qualifications, country or ownership of external profile links. A member may choose to enable a credential verification link. Anyone with that link can see the limited fields disclosed in the terms and privacy notice. CODARIS does not currently provide a browsable member directory.
+
+The ecosystem page names Microsoft, LinkedIn and Coupyn as platform or operational context. It explicitly does not claim partnerships, endorsement or an active Coupyn integration. The organization participation page currently has no organization, representative, supporter or working-group listings. CODARIS has no paid membership feature.
+
+## Direction: what comes next
+
+The next meaningful step is real activity: find problems worth solving, bring people together around clear technical questions, and produce work that can be reviewed. Depending on the problem and what contributors decide to pursue, useful outputs could include:
+
+- threat models and security research;
+- specifications and interoperability work;
+- reference implementations and tests;
+- red-team findings and evaluations; and
+- deployment guidance with documented assumptions and limitations.
+
+These are examples of possible future work, not a committed release plan or claims about existing CODARIS publications. Governance and organizational participation should grow from sustained contributions, transparent process and demonstrated need. No active standards program, research group, organizational membership scheme or formal governance body is represented as operating today.
+
+## Technical stack
+
+The project keeps application logic in C. The browser application is C17 compiled to WebAssembly with Emscripten; semantic HTML and CSS provide document structure and presentation, while a small JavaScript host forwards browser events. Static routes are generated at build time by standard-library Python. The native backend is C17, uses libmicrohttpd for HTTP, libpq for PostgreSQL, libsodium for password hashing and token protection, libcurl for SMTP, json-c for JSON, and vendored libHaru/Nayuki QR code generation for membership credentials.
 
 ```text
-Browser
-  -> C compiled to WebAssembly (Emscripten + semantic DOM host)
-  -> same-origin HTTPS /api/
-Native C backend
-  -> libpq
-PostgreSQL
+Browser: semantic HTML/CSS + C17 → WebAssembly
+                    │ same-origin HTTPS /api/
+                    ▼
+Native C API ── libpq ── PostgreSQL
+       └── SMTP delivery worker
 ```
 
-The v1 landing page uses a responsive HTML/CSS shell, original SVG artwork, and C/Wasm account interactions. The native API uses libmicrohttpd, libpq, libsodium, libcurl and json-c.
+PostgreSQL is authoritative for account and progress data. Database credentials and mail secrets are backend-only; they must never enter the browser or Wasm build. See [architecture](docs/ARCHITECTURE.md), [account service design](docs/ACCOUNT-SERVICE.md), and [security notes](SECURITY.md).
 
-## Environment selection
+## Local development
 
-Real dev/prod configuration lives in four Git-ignored `.env` files under `config/`. Use `python3 scripts/project.py dev build` or `python3 scripts/project.py prod build`; run commands select the corresponding environment the same way. On Windows use `python`. A fresh checkout creates missing files with `python scripts/init-env.py`. See [configuration instructions](config/README.md). Production and development backend binaries are separate, and backend credentials never enter frontend builds.
+### Prerequisites
 
-## Linux / WSL quick start
-
-The working Linux copy is `/home/serhat/code/codaris`. The Desktop source is retained as a backup; edit the Linux copy going forward.
-
-On Ubuntu 24.04, install the build tools once:
+Linux/WSL development uses Bash, Python 3, CMake 3.27+, a C17 compiler, Emscripten, PostgreSQL/libpq, libmicrohttpd, libsodium, libcurl and json-c. On Ubuntu 24.04, install the system packages with:
 
 ```bash
 sudo apt-get update
 sudo apt-get install build-essential cmake emscripten libpq-dev libmicrohttpd-dev libsodium-dev libcurl4-openssl-dev libjson-c-dev postgresql-16 postgresql-client-16 python3
 ```
 
-Start the full local app with one command:
+Windows 11 development is supported with PowerShell, Git, Python, CMake 3.27+, Emscripten, MSVC and the Windows SDK, PostgreSQL, and native dependencies installed through vcpkg. See [account service dependencies](docs/ACCOUNT-SERVICE.md) and the scripts for toolchain details. Defaults such as `C:\emsdk` and the PostgreSQL install path are configurable.
+
+### Start the development app
+
+From the repository root:
 
 ```bash
-cd /home/serhat/code/codaris
 ./scripts/dev.sh
 ```
 
-This starts the project-private PostgreSQL database, applies pending migrations, builds and starts the C account API, builds and serves the browser client, runs the configured development mail worker once per minute, and opens the browser when available. Keep this terminal running while developing; press Ctrl+C to stop the API, mail worker, and browser server. The database remains available for the next run. Check <http://127.0.0.1:8081/api/health>; registration needs `"message":"Ready"`. The development mail worker uses only `config/backend.development.env`; delivery failures and retries are logged to `.local/log/mail-worker.log`. `python3 scripts/project.py dev mail` still runs one manual drain.
+The launcher checks the selected development configuration, starts the project-private PostgreSQL cluster, applies pending migrations, builds and starts the native API, builds and serves the client, and runs the local mail worker when configured. The default frontend is `http://127.0.0.1:8081`; the API defaults to `127.0.0.1:8080`. Check `http://127.0.0.1:8081/api/health` for local service readiness. Press Ctrl+C to stop processes started by the launcher; the local database data remains available for the next run.
 
-For DBeaver access to the separate live database, run `./scripts/db-tunnel.sh` in another WSL terminal and keep it open. It forwards only `127.0.0.1:15432` to PostgreSQL on CoupynRBX; stop it with Ctrl+C. Apply this checkout's migrations with `./scripts/db-live-migrate.sh`; it prompts for the migration password without echoing it or keeping it after the command ends, then grants DBeaver read access to selected non-credential tables. In DBeaver, use host `127.0.0.1`, port `15432`, database `codaris`, and the read-only database login. VS Code provides separate tasks for opening the tunnel and applying live migrations. These production database tools are separate from `dev.sh`, which always uses the isolated local development database.
-
-### Desktop and VS Code
-
-Windows Desktop shortcuts:
-
-- **Codaris - VS Code (WSL)** opens this folder in VS Code's Ubuntu environment.
-- **Codaris - Run Browser** starts the local database, account API and browser client, then opens the browser.
-- **Codaris - Browser** opens the local URL when the server is already running.
-
-Linux application-menu entries for VS Code and Run Browser are also installed for this user. In VS Code, use **Terminal → Run Task → CODARIS: …** for build, run, database and tool checks. **Ctrl+Shift+B** builds the browser client. Run tasks use Bash in Linux/WSL; the original `.ps1` commands below remain available in Windows.
-
-### Isolated local database
+The scripts use a local SMTP capture service by default, so development mail is not sent to real recipients. To run the parts separately, use:
 
 ```bash
-./scripts/db-local.sh start
-./scripts/db-migrate.sh
+python3 scripts/project.py dev check-env
+python3 scripts/project.py dev migrate
+python3 scripts/project.py dev build
+python3 scripts/project.py dev run-server
+# In separate terminals:
+python3 scripts/project.py dev run-client
+python3 scripts/project.py dev mail
+```
+
+Use `python` instead of `python3` on Windows. `dev`/`prod` and `development`/`production` are accepted mode names. The `build` action builds both client and server; use `build-client` or `build-server` for one component.
+
+### Build and run components directly
+
+```bash
+./scripts/build-client.sh
+./scripts/run-client.sh
+./scripts/build-server.sh
 ./scripts/run-server.sh
-./scripts/db-local.sh stop
 ```
 
-This creates a project-private PostgreSQL cluster under ignored `.local/postgres`, with database `codaris` and development role `codaris_app`. It listens only on a Unix socket in a directory accessible to your Linux user; it has no TCP listener. Local trust authentication is for this private development cluster only, never production. The role owns the local cluster and is not a production least-privilege role. Data survives stop/start. The migration runner applies sequential migrations and skips recorded versions.
+The client output is written to `build/client`. For a production-indexed static site, use `python3 scripts/project.py prod build-client`; the package workflow is documented in [deployment](docs/DEPLOYMENT.md). The native server build uses CMake. On Windows, corresponding `.ps1` scripts are provided. For a manual local database lifecycle, use `scripts/db-local.sh start`, `scripts/db-migrate.sh`, and `scripts/db-local.sh stop`; the private Linux cluster lives under ignored `.local/postgres` and listens on a local Unix socket. The development role owns that local cluster and is not a production least-privilege role.
 
-To target another database, explicitly provide `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER` and a libpq password file. The backend also supports `CODARIS_DATABASE_URL`; do not store credentials in source control. No existing external database is needed for browser testing.
+## Configuration
 
-## Initial local target
+`python3 scripts/init-env.py` creates missing local configuration files without overwriting existing ones. The four Git-ignored files are:
 
-The current Windows development setup assumes:
+- `config/frontend.development.env`
+- `config/frontend.production.env`
+- `config/backend.development.env`
+- `config/backend.production.env`
 
-- Windows 11
-- PowerShell
-- VS Code
-- Git
-- Emscripten SDK at `C:\emsdk`
-- PostgreSQL 18 at `C:\Program Files\PostgreSQL\18`
-- CMake 3.27+
-- Microsoft C/C++ build tools (MSVC + Windows SDK)
+Select the environment explicitly with `python3 scripts/project.py dev ACTION` or `prod ACTION`. The selected file takes precedence over inherited shell settings. Frontend configuration rejects backend-only values. Frontend API calls use same-origin `/api/`; `CODARIS_SITE_URL` configures the canonical public site URL, not the API destination. See [configuration documentation](config/README.md) for supported variables and platform-specific defaults.
 
-Paths are defaults, not architectural requirements. Override `PostgreSQL_ROOT` or `EMSDK` when needed.
+For a separate database, configure PostgreSQL using `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, and a protected libpq password file, or use backend-only `CODARIS_DATABASE_URL`. Do not commit credentials. `CODARIS_MAIL_KEY` is a private, environment-specific 32-byte key used to protect queued action tokens. Never put database credentials, SMTP passwords or this key in frontend configuration or generated browser output.
 
-## VS Code extensions
-
-This repo recommends:
-
-- OpenAI Codex (`openai.chatgpt`)
-- Microsoft C/C++ (`ms-vscode.cpptools`)
-- Microsoft CMake Tools (`ms-vscode.cmake-tools`)
-- Microsoft PostgreSQL (`ms-ossdata.vscode-pgsql`)
-- EditorConfig (`editorconfig.editorconfig`)
-
-VS Code can offer to install these automatically from `.vscode/extensions.json`.
-
-## 1. Check your machine
-
-```powershell
-.\scripts\doctor.ps1
-```
-
-## 2. Apply the initial database migration
-
-The database and role are expected to already exist:
-
-- database: `codaris`
-- role: `codaris_app`
-
-Run:
-
-```powershell
-.\scripts\db-migrate.ps1
-```
-
-`psql` will request the password unless your libpq/PostgreSQL credential mechanism already supplies it.
-
-## 3. Build the browser client
-
-```powershell
-.\scripts\build-client.ps1
-```
-
-The script compiles `src/client/main.c` into WebAssembly and places browser output in `build/client`.
-
-Run it in Chrome:
-
-```powershell
-.\scripts\run-client.ps1
-```
-
-The client renders an accessible multi-page experience. Search and form preview require the compiled Wasm module.
-
-## 4. Build the native account API
-
-```powershell
-.\scripts\build-server.ps1
-```
-
-The CMake build uses the native dependencies listed in [ACCOUNT-SERVICE.md](docs/ACCOUNT-SERVICE.md). On Windows supply the vcpkg CMake toolchain.
-
-For a development shell, one option is to provide libpq connection values through environment variables:
-
-```powershell
-$env:PGHOST = "localhost"
-$env:PGPORT = "5432"
-$env:PGDATABASE = "codaris"
-$env:PGUSER = "codaris_app"
-$env:PGPASSWORD = "<development-password>"
-```
-
-Do not commit the password. Prefer a proper local secret/password mechanism as the project matures.
-
-Run:
-
-```powershell
-.\scripts\run-server.ps1
-```
-
-The API remains running on loopback. Provide backend configuration and a mail encryption key before launch; `/api/health` checks database readiness. See [RELEASE.md](docs/RELEASE.md).
-
-## Repository layout
+## Project structure
 
 ```text
-.
-├── AGENTS.md
-├── CMakeLists.txt
-├── include/codaris/
-├── src/
-│   ├── client/
-│   └── server/
-├── db/migrations/
-├── docs/
-├── scripts/
-└── web/
+include/codaris/       Public C service/database interfaces
+src/client/            C17 browser application compiled to WebAssembly
+src/server/            Native C API, PostgreSQL access, mail and credentials
+src/shared/            Shared C definitions
+web/                   Static page sources, assets, styles and browser host glue
+web/pages.json         Static route metadata and indexability policy
+data/                  Source catalogues and topic content
+db/migrations/         Sequential PostgreSQL schema migrations
+scripts/               Cross-platform build, run, import and deployment tooling
+deploy/                Nginx/systemd examples and deployment configuration
+docs/                  Architecture, account, operations and content documentation
+tests/                 Site, data-generation and account checks
 ```
 
-## Account architecture
+Static pages are authored in `web/pages/` and assembled from `web/index.html`, shared partials and `web/pages.json` by `scripts/build-pages.py`. Generated topic pages and catalogues have source data and editing guidance in their relevant `docs/` files. Do not edit generated build output as the source of truth.
 
-The account lifecycle, dependencies, transactions, verification, SMTP queue and security boundaries are documented in [ACCOUNT-SERVICE.md](docs/ACCOUNT-SERVICE.md). Production infrastructure and delivered-email checks remain separate from local integration testing.
+## Current status
 
-## Landing page v1
+CODARIS is an early-stage Beta V1 project. The public site and developer learning library are available as static content. Account, credential, contact and mail functionality is implemented in the repository and has local development/test workflows. The production client build disables the Join form; development builds can expose the preview form. The repository does not establish whether the public account API and its production operations are currently available. Verify the API, database, mail delivery and operational checks before treating registration as live or enabling the form.
 
-- `web/index.html`: shared semantic document template.
-- `web/pages/*.html`: dedicated homepage, mission, global reach, ecosystem, and resource content.
-- `web/partials/`: shared header and footer; `web/pages.json`: route metadata.
-- `web/styles.css`: responsive navy/cyan visual system, including reduced-motion support.
-- `web/assets/`: original CODARIS emblem and decorative network globe; no external assets or fonts.
-- `web/host.js`: browser event transport and runtime failure messaging only.
-- `src/client/main.c`: C-owned account interactions and browser transport.
-- `src/client/demo_data.h`: legacy country fixtures; only country labels remain in the registration selector. Published membership totals come from PostgreSQL.
+The repository includes production build and deployment tooling, Nginx and systemd examples, an allowlisted static-site package, and a release runbook. These files describe how to deploy; their presence alone does not establish that the live backend, mail worker, monitoring, backups or privacy operations are deployed and verified. Read [release readiness](docs/RELEASE.md) and [deployment](docs/DEPLOYMENT.md) before operating a public service.
 
-The join form activates after Wasm loads and submits to the account API. Accounts require email verification; settings and learning progress persist in PostgreSQL.
+The codebase does not currently provide active chat, staff administration UI, public member directory, organization directory, working-group service, payment flow, MFA or automated moderation. Future participation and governance concepts on public pages are marked as in development or coming soon.
 
-Microsoft, LinkedIn, and Coupyn have local SVG symbols beside their names in the ecosystem section. Coupyn is a vector adaptation of the supplied reference artwork; replace it with the original production asset when available. No endorsement or active integration is claimed. Footer links open their dedicated pages; privacy and terms include the supplied operator details.
+## Contributing and participation
 
-## Official social channel
+The repository publishes its source at [github.com/SerhatSoruklu/codaris](https://github.com/SerhatSoruklu/codaris). For code changes, first read [AGENTS.md](AGENTS.md), the relevant architecture or feature documentation, and [SECURITY.md](SECURITY.md). Keep changes small, preserve the C17/WebAssembly and native C boundaries, use parameterized SQL, and never commit secrets. The project has no root `CONTRIBUTING.md`; use the contact page for general technical or collaboration enquiries. Do not assume that a GitHub contribution creates coalition membership or an organizational participation relationship.
 
-Per the repository owner, CODARIS uses only [X / @codarisorg](https://x.com/codarisorg) for social communications. Accounts claiming to represent CODARIS on Instagram, YouTube, Facebook, or other social platforms are fake and unaffiliated. The footer displays the official link and this notice; ecosystem platform references do not identify CODARIS social accounts.
+Membership interest is expressed through the Join page when applications are enabled. The public topic library does not require membership. Organizational participation is not yet an active program; see [/ecosystem/organizational-participation/](https://codaris.org/ecosystem/organizational-participation/) for its current status.
 
-## Static routes and production SEO
+## Further documentation
 
-The homepage `/` keeps the hero and coalition metrics, with the member flag and technology sections below the metrics. Section 04 / Join the Coalition now lives at `/join/`. Mission, Global Reach, and Ecosystem live at `/mission/`, `/global-reach/`, and `/ecosystem/`; Organizational Participation is public at `/ecosystem/organizational-participation/`. Its Coming Soon framework and anchor sections are informational only: no participant, representative, sponsor, funding or working-group records are fabricated or stored. Dashboard navigation links to this public source of truth. Privacy, GitHub, Terms, and Contact have dedicated routes. Every page retains the shared footer. Directory routes support direct visits and refreshes on a static host without SPA fallback rules, including nested paths. Deploy `build/client` at the origin root, serve directory `index.html` files, and return 404 for unknown paths.
-
-Both build scripts run `scripts/build-pages.py` using standard-library Python (Python 3.9+; `python3` on Linux, `python` on Windows). This is build tooling, not application logic. Interactive account, globe and catalogue pages load the optimized C/Wasm runtime. Editorial pages remain readable without JavaScript. Edit content in `web/pages/`, shared navigation/footer in `web/partials/`, and titles/descriptions/routes in `web/pages.json`. Page titles in the registry contain only the page name; the builder appends ` | CODARIS` consistently to HTML, Open Graph, Twitter, and WebPage structured-data titles. Add future editorial or service pages using the same registry and a content file. Account services are implemented; payments and billing are not.
-
-The configured production origin is `https://codaris.org` in `web/site.json`. An optional `CODARIS_SITE_URL` overrides it. Local builds use `noindex`; production builds enable indexing for substantive pages:
-
-```bash
-CODARIS_PRODUCTION=1 ./scripts/build-client.sh
-```
-
-```powershell
-$env:CODARIS_PRODUCTION = "1"
-.\scripts\build-client.ps1
-Remove-Item Env:CODARIS_PRODUCTION
-```
-
-The build emits canonical URLs, social metadata, WebSite/Organization/WebPage and breadcrumb structured data, `robots.txt`, and a sitemap containing the substantive pages (including the published GitHub resource). Placeholder pages remain `noindex, follow`. After deploying, submit `https://codaris.org/sitemap.xml` to Search Console. Titles, headings, and crawlable links support discovery; Google decides whether to display sitelinks. Enable Brotli/gzip and appropriate asset caching at the production host, serve `.wasm` as `application/wasm`, and redirect alternate hosts/HTTP to the canonical HTTPS origin. Compression and hosting headers are not provided by the local preview server.
-
-## Homepage membership feature
-
-The homepage displays the owner-supplied `web/assets/Codaris_Flag.png` in a framed “Proud CODARIS member” section. The original artwork is preserved, loaded lazily, and copied by the shared page builder on both Linux and Windows. Its C++ emblem is part of the supplied artwork; the implementation remains C17. The membership feature links to registration and does not certify the visitor’s membership.
-
-## Security and deployment
-
-See [SECURITY.md](SECURITY.md) and the [isolated SSH deployment guide](docs/DEPLOYMENT.md). The browser build disables JavaScript string evaluation, generates a strict CSP, and includes a real 404 page. `python3 tests/check-site.py` checks the site before the allowlisted public artifact can be packaged. The GitHub page now points to [SerhatSoruklu/codaris](https://github.com/SerhatSoruklu/codaris).
-
-The repository intentionally has no project license file. Existing third-party asset attribution remains in place.
-
-The home hero uses a full-width background, confined to hero height, with a local SVG code-rain tile in the cyan/navy palette. Two CSS transform layers provide motion (one on small screens), with no animation library or frame-by-frame JavaScript. Browser visibility events pause it outside the viewport or in a hidden tab; “Pause background” freezes it manually. Reduced-motion preferences keep the decoration static.
-
-Mission, Global Reach, and Ecosystem share photographic-style concept-image heroes, fixed image framing, localized screen/server activity, a pause control, and reduced-motion support. Current images are 1672 × 941 (not native 4K), exported at WebP quality 95, with actual file sizes documented by the asset files. The shared page builder copies them on both platforms and the deployment packager accepts them. Hero presentation requires no JavaScript; Global Reach shows verified membership aggregates. See [artwork prompts and resolution notes](docs/PHOTOGRAPHIC-ART.md).
-
-## Membership and email
-
-Registration, login, recovery, editable profile and security settings use the native account API in both build modes. Email changes immediately clear verification; the original joining reason is read-only. Profile pictures store fixed 100×100 pixel data, not original files. Topic progress persists across visits. Staff tools and chat are explicitly unavailable.
-
-Production bundles require `CODARIS_PRODUCTION=1`. Run `python3 tests/check-membership-build.py` for both UI build modes and `python3 tests/check-accounts.py` against an isolated local test database. Google Workspace SMTP matches the Serhat app’s `admin@coupyn.com` setup. See [RELEASE.md](docs/RELEASE.md) for private configuration and deployment. SMTP authentication alone is not proof of delivered mail or a completed release.
-
-The [programming languages library](docs/PROGRAMMING-LANGUAGES.md) adds `/programming-languages/` to the learning workspace: all 674 supplied catalogue entries, research snapshots and 15 technical guides, with native disclosure navigation and C/Wasm search.
-The [web frameworks and technologies library](docs/WEB-FRAMEWORKS.md) adds `/web-frameworks/`: 631 source-pack entries, 12 technical guides, all workbook research tables and shared C/Wasm catalogue search.
-The [databases and data platforms library](docs/DATABASES.md) adds `/databases/`: 643 catalogue entries, 12 technical guides, 24 platform profiles and all supplied usage, popularity and demographic-context tables.
-
-The [complete developer topic library](docs/TOPIC-LIBRARY.md) now provides 22 populated topics at `/topics/` and in the dashboard: 16 research directories with 4,621 catalogue rows (including overlaps), plus six foundational guides with examples and practice projects. The 13 additional research packs retain all supplied tables and source notes, with six editorial technical chapters each. Dashboard cards have clear **View topic** links and separate persistent **Mark as read** controls in the signed-in dashboard. Run `python3 tests/check-topic-library.py` to check source integrity and complete rendering.
+- [Account service and security design](docs/ACCOUNT-SERVICE.md)
+- [Configuration](config/README.md)
+- [Release runbook and operational limits](docs/RELEASE.md)
+- [Deployment guide](docs/DEPLOYMENT.md)
+- [Database and migrations](docs/DATABASES.md)
+- [Developer topic library](docs/TOPIC-LIBRARY.md)
+- [Security policy](SECURITY.md)
+- [Privacy notice](https://codaris.org/privacy/) and [membership terms](https://codaris.org/terms/)

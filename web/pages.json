@@ -2,287 +2,327 @@
   {
     "slug": "",
     "file": "home",
-    "title": "Build. Verify. Advance.",
+    "title": "CODARIS: Developer Coalition for Responsible AI",
     "label": "Home",
-    "description": "Coalition Of Developers Advancing Responsible Intelligent Systems. Developer-led progress, verification, and trust engineered in.",
+    "description": "CODARIS is a developer coalition advancing responsible intelligent systems through practical engineering, verification, shared standards and trust.",
+    "indexing": "index",
     "interactive": true
   },
   {
     "slug": "mission",
     "title": "The Mission",
     "label": "The mission",
-    "description": "Our mission: advance responsible intelligent systems through progress, safety, developer leadership, and a global perspective."
+    "description": "Our mission: advance responsible intelligent systems through progress, safety, developer leadership, and a global perspective.",
+    "indexing": "index"
   },
   {
     "slug": "global-reach",
     "title": "Global Reach",
     "label": "Global reach",
-    "description": "Explore CODARIS membership and the global perspective behind the coalition.",
-    "interactive": true
+    "description": "See CODARIS membership aggregates and the coalition’s international developer perspective.",
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "ecosystem",
     "title": "Ecosystem and Trust",
     "label": "Ecosystem",
-    "description": "Understand the platforms, communities, and planned operational relationships around CODARIS, with independence and transparency."
+    "description": "Understand the platforms, communities, and planned operational relationships around CODARIS, with independence and transparency.",
+    "indexing": "index"
   },
   {
     "slug": "ecosystem/organizational-participation",
     "file": "organizational-participation",
     "title": "Organizational Participation",
     "label": "Organizational Participation",
-    "description": "CODARIS is developing an open, transparent framework for organizations to contribute engineering, research, interoperability work, infrastructure and support without purchasing control over technical outcomes."
+    "description": "CODARIS is developing a transparent framework for organizations to contribute engineering, research, interoperability work, infrastructure and support without purchasing control over technical outcomes.",
+    "indexing": "index"
   },
   {
     "slug": "join",
     "title": "Join the Coalition",
     "label": "Join the coalition",
-    "description": "Create your CODARIS account and verify your email to join the coalition.",
-    "interactive": true
+    "description": "Learn about CODARIS membership and apply to join a developer coalition advancing responsible intelligent systems.",
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "privacy",
     "title": "Privacy notice",
     "label": "Privacy",
-    "description": "How CODARIS uses account and service information, what members can control, and how to contact us about privacy."
+    "description": "How CODARIS uses account and service information, what members can control, and how to contact us about privacy.",
+    "indexing": "index"
   },
   {
     "slug": "github",
     "title": "GitHub",
     "label": "GitHub",
-    "description": "Explore the CODARIS source code, development history, and engineering documentation on GitHub."
+    "description": "Read the CODARIS source code, engineering documentation and development history in the public GitHub repository.",
+    "indexing": "index"
   },
   {
     "slug": "terms",
     "title": "Membership terms",
     "label": "Terms",
-    "description": "The rules for CODARIS membership, accounts, conduct, learning resources and account closure."
+    "description": "The rules for CODARIS membership, accounts, conduct, learning resources and account closure.",
+    "indexing": "index"
   },
   {
     "slug": "contact",
     "title": "Contact",
     "label": "Contact",
     "description": "Contact CODARIS for account support, general enquiries, privacy requests and membership terms.",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "login",
     "title": "Member Login",
     "label": "Member Login",
-    "description": "Sign in to your CODARIS account.",
+    "description": "Sign in to your CODARIS account to manage your membership and learning progress.",
     "placeholder": true,
-    "interactive": true
+    "interactive": true,
+    "indexing": "noindex"
   },
   {
     "slug": "dashboard",
     "title": "Member Dashboard",
     "label": "Member Dashboard",
-    "description": "Manage your CODARIS membership and profile.",
+    "description": "Manage your CODARIS profile, account security and learning progress in the member workspace.",
     "placeholder": true,
-    "interactive": true
+    "interactive": true,
+    "indexing": "noindex"
   },
   {
     "slug": "verify",
     "file": "verify",
     "title": "Membership verification",
     "label": "Membership verification",
-    "description": "Verify a CODARIS membership credential.",
+    "description": "Check whether a CODARIS membership credential is current and valid.",
     "placeholder": true,
-    "interactive": true
+    "interactive": true,
+    "indexing": "noindex"
   },
   {
     "slug": "staff-login",
     "title": "Staff Login",
     "label": "Staff Login",
-    "description": "CODARIS staff access. Administration tools are under development.",
+    "description": "Staff sign-in for CODARIS administration.",
     "placeholder": true,
     "development_only": true,
-    "development_interactive": true
+    "development_interactive": true,
+    "indexing": "noindex"
   },
   {
     "slug": "staff-dashboard",
     "title": "Staff Dashboard",
     "label": "Staff Dashboard",
-    "description": "CODARIS staff access. Administration tools are under development.",
+    "description": "Private CODARIS staff workspace.",
     "placeholder": true,
     "development_only": true,
-    "development_interactive": true
+    "development_interactive": true,
+    "indexing": "noindex"
   },
   {
     "slug": "programming-languages",
     "title": "Programming Languages | Developer Field Guide",
     "label": "Programming Languages",
     "description": "Explore 674 programming languages, technical guides, research snapshots, geography and source methodology in the CODARIS developer library.",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "web-frameworks",
     "title": "Web Frameworks & Technologies",
     "label": "Web Frameworks",
     "description": "Explore 631 web technologies, technical guides, architecture, usage research and demographic methodology in the CODARIS developer library.",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "databases",
     "title": "Databases & Data Platforms",
     "label": "Databases",
     "description": "Explore 643 databases and data platforms, technical guides, data models, usage research and source methodology in the CODARIS developer library.",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "runtimes",
     "title": "Runtimes & Execution Platforms",
     "label": "Runtimes & Execution Platforms",
     "description": "A runtime turns executable code into work inside a host environment. Distinguish language implementation, virtual machine, engine, host APIs and managed service before comparing products. The pack spans all of these layers, including histor",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "package-build-tools",
     "title": "Package Managers, Build Tools & Bundlers",
     "label": "Package Managers, Build Tools & Bundlers",
     "description": "Dependency resolution, package distribution, compilation and bundling are different stages of producing software. A reproducible release requires the inputs and transformations to be understood, not merely a build command that succeeds once",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "developer-environments",
     "title": "IDEs, Editors & Developer Environments",
     "label": "IDEs, Editors & Developer Environments",
     "description": "An editor is one part of the development environment. Language servers, debuggers, toolchains, extensions, terminals and remote workspaces determine how code is understood and executed. Choose configurations that remain understandable to th",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "version-control",
     "title": "Version Control & Code Hosting",
     "label": "Version Control & Code Hosting",
     "description": "Version control records changes and relationships between revisions. Hosting services add collaboration, review and automation around that history. A sound workflow makes it possible to explain, review and recover a change.",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "testing-qa",
     "title": "Testing & QA",
     "label": "Testing & QA",
     "description": "Testing collects evidence about behavior under selected conditions. Quality work combines focused tests, boundary checks, realistic integration paths and useful failure diagnosis. A tool catalogue is not a test strategy by itself.",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "cloud-hosting",
     "title": "Cloud, Hosting & Serverless",
     "label": "Cloud, Hosting & Serverless",
     "description": "Cloud architecture distributes responsibility between your team and a provider. Virtual machines, managed platforms, functions, object storage and edge networks expose different control surfaces. Choose from explicit requirements rather tha",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "containers-infrastructure",
     "title": "Containers, Orchestration & Infrastructure",
     "label": "Containers, Orchestration & Infrastructure",
     "description": "Containers package processes and dependencies; orchestrators schedule and reconcile workloads; infrastructure tools manage external resources. These layers interact but have different state and failure models. Keep application health separa",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "cicd-automation",
     "title": "CI/CD & DevOps Automation",
     "label": "CI/CD & DevOps Automation",
     "description": "Continuous integration checks changes together; delivery prepares deployable releases; deployment changes running systems. A pipeline is executable code with access to artifacts and often sensitive credentials, so its trust boundary deserve",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "servers-networking",
     "title": "Web Servers, Proxies & Networking",
     "label": "Web Servers, Proxies & Networking",
     "description": "A request may pass through DNS, transport security, proxies, load balancers and an application server before reaching business logic. Each hop can change routing, headers, buffering and timeout behavior. Trace the full path when diagnosing ",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "messaging-streaming",
     "title": "Messaging, Queues & Event Streaming",
     "label": "Messaging, Queues & Event Streaming",
     "description": "Messaging separates the time and location of producing work from consuming it. Queues, retained event logs, publish/subscribe brokers and stream processors solve different coordination problems. Start by specifying delivery, ordering, reten",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "observability",
     "title": "Observability, Logging & Monitoring",
     "label": "Observability, Logging & Monitoring",
     "description": "Observability uses evidence from a running system to investigate behavior. Metrics, logs, traces and profiles answer different questions. Instrumentation and collection are separate from storage, querying and visualization; a dashboard alon",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "apis-auth-integration",
     "title": "APIs, Protocols, Auth & Integration",
     "label": "APIs, Protocols, Auth & Integration",
     "description": "An API defines a contract across a boundary. Protocols transport messages; schemas describe shapes; identity standards establish authentication or authorization flows; products implement parts of those systems. Keeping these layers separate",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "ai-developer-tools",
     "title": "AI Developer Tools & Coding Systems",
     "label": "AI Developer Tools & Coding Systems",
     "description": "AI coding tools combine models, interfaces, repository context and sometimes executable tools. Completion, chat, code review and autonomous task execution have different capabilities and risk boundaries. Evaluate the actual workflow and its",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "software-development",
     "title": "Software Development",
     "label": "Software Development",
     "description": "Build software as a sequence of explicit decisions: define behavior, model the problem, implement a small change, verify it and maintain it. This guide follows one feature from requirement to release instead of treating coding as the entire",
-    "interactive": false
+    "interactive": false,
+    "indexing": "index"
   },
   {
     "slug": "system-design",
     "title": "System Design",
     "label": "System Design",
     "description": "System design connects requirements to components, state and failure behavior. Begin with the workload and invariants, then introduce distribution only where it solves a concrete problem. A diagram is useful when every arrow has a contract ",
-    "interactive": false
+    "interactive": false,
+    "indexing": "index"
   },
   {
     "slug": "python",
     "title": "Python",
     "label": "Python",
     "description": "Learn Python through small, testable programs with explicit inputs and errors. The focus here is developer fundamentals: collections, functions, modules, file handling, exceptions and reproducible environments, rather than a catalogue of th",
-    "interactive": false
+    "interactive": false,
+    "indexing": "index"
   },
   {
     "slug": "angular",
     "title": "Angular",
     "label": "Angular",
     "description": "Angular organizes browser applications through components, templates, services and framework tooling. This guide focuses on data flow, forms, routing and observable behavior. It is educational content; CODARIS itself continues to use C/WebA",
-    "interactive": false
+    "interactive": false,
+    "indexing": "index"
   },
   {
     "slug": "web-foundations",
     "title": "Web Foundations",
     "label": "Web Foundations",
     "description": "The web combines semantic documents, styling, browser behavior and a request/response protocol. Start with accessible HTML and understand the network and trust boundaries before adding complex interaction. A page should remain understandabl",
-    "interactive": false
+    "interactive": false,
+    "indexing": "index"
   },
   {
     "slug": "sql-postgresql",
     "title": "SQL & PostgreSQL",
     "label": "SQL & PostgreSQL",
-    "description": "Learn relational modelling and SQL by protecting a small application\u2019s invariants. This guide complements the database catalogue with practical schema, query, transaction and execution-plan work. Examples are educational and should be run i",
-    "interactive": false
+    "description": "Learn relational modelling and SQL by protecting a small application’s invariants. This guide complements the database catalogue with practical schema, query, transaction and execution-plan work. Examples are educational and should be run i",
+    "interactive": false,
+    "indexing": "index"
   },
   {
     "slug": "topics",
     "title": "Developer Topics",
     "label": "Explore Topics",
     "description": "Explore 22 populated developer topics: 16 research directories and six practical guides with technical explanations, exercises and source documentation.",
-    "interactive": true
+    "interactive": true,
+    "indexing": "index"
   },
   {
     "slug": "verify-email",
     "title": "Verify Email",
     "label": "Verify Email",
-    "description": "Verify Email for your CODARIS account.",
+    "description": "Confirm the email address for your CODARIS account.",
     "interactive": true,
-    "placeholder": true
+    "placeholder": true,
+    "indexing": "noindex"
   },
   {
     "slug": "reset-password",
     "title": "Reset Password",
     "label": "Reset Password",
-    "description": "Reset Password for your CODARIS account.",
+    "description": "Set a new password for your CODARIS account using a secure recovery link.",
     "interactive": true,
-    "placeholder": true
+    "placeholder": true,
+    "indexing": "noindex"
   }
 ]

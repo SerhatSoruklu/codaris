@@ -29,7 +29,7 @@ for file in sorted(source.rglob('*')):
     permitted = (len(relative.parts) == 1 and relative.name in allowed_root) or (
         len(relative.parts) >= 2 and relative.name == 'index.html' and
         all(re.fullmatch(r'[a-z0-9-]+', part) for part in relative.parts[:-1])) or (
-        relative.parts[0] == 'assets' and file.suffix in {'.svg', '.png', '.webp'}) or (
+                relative.parts[0] == 'assets' and file.suffix in {'.svg', '.png', '.webp'}) or (
         relative.as_posix() in {'assets/COUNTRY-FLAGS-LICENSE.txt', 'assets/icons/LICENSE'})
     if not permitted:
         raise SystemExit('Unexpected build artifact: ' + str(relative))
