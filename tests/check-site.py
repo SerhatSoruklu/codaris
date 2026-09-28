@@ -137,6 +137,10 @@ assert 'auth_request /api/page-access;' in route_guard
 assert 'dashboard' not in route_guard  # Browser fragment must survive the sign-in redirect.
 for slug in member_routes - {'dashboard'}:
     assert slug in route_guard
+route_visibility = (ROOT / 'web/styles.css').read_text()
+auth_nav = (ROOT / 'web/auth-nav.js').read_text()
+assert 'data-member-route-authenticated="true"' in route_visibility
+assert 'dataset.memberRouteAuthenticated = \'true\'' in auth_nav
 host = (ROOT / 'web/host.js').read_text()
 assert not re.search(r'innerHTML|outerHTML|document\.write|\beval\s*\(|new\s+Function', host)
 assert 'onerror=' not in (ROOT / 'scripts/build-pages.py').read_text()

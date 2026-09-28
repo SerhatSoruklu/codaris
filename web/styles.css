@@ -2221,8 +2221,8 @@ body[data-development="true"] .join-development .join-overlay { display: none; }
 .account-notice:empty { display: none; }
 .field-error:not(:empty) { color: #ffb4b4; font-size: 12px; padding: 8px 12px; border-left: 3px solid #ff7777; background: #341a23; border-radius: 4px; }
 .account-page input[aria-invalid="true"] { border-color: #ff7777; }
-body[data-member-route="true"]:not([data-member-route-ready="true"]) main,
-body[data-member-route="true"]:not([data-member-route-ready="true"]) footer { visibility: hidden; }
+body[data-member-route="true"]:not([data-member-route-authenticated="true"]) main,
+body[data-member-route="true"]:not([data-member-route-authenticated="true"]) footer { visibility: hidden; }
 
 /* Registration feedback sits outside the padded fieldset. */
 #register-feedback:not(:empty) { margin: 0 clamp(20px, 4vw, 40px) 28px; }
