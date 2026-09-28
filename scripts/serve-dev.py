@@ -5,7 +5,7 @@ from http.client import HTTPConnection
 from pathlib import Path
 import json
 import argparse
-from urllib.parse import quote, urlencode, urlsplit
+from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
 parser.add_argument('--port', type=int, default=8081)
@@ -47,15 +47,17 @@ class Handler(SimpleHTTPRequestHandler):
         except OSError:
             self.send_error(503, 'Account service unavailable')
             return False
-        return_target = self.path.replace('\r', '').replace('\n', '')
-        location = '/login/?' + urlencode({'return_to': return_target}, quote_via=quote)
-        # Keep an explicit response-header boundary check after encoding too.
-        if '\r' in location or '\n' in location:
-            self.send_error(400, 'Invalid redirect target')
-            return False
-        self.send_response(302)
-        self.send_header('Location', location)
+        body = (b'<!doctype html><html lang="en"><meta charset="utf-8">'
+                b'<meta name="viewport" content="width=device-width,initial-scale=1">'
+                b'<title>Sign in required | CODARIS</title>'
+                b'<p>Sign in to continue. <a href="/login/">Continue to sign in</a>.</p>'
+                b'<script src="/auth-redirect.js" defer></script></html>')
+        self.send_response(401)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Security-Policy', "default-src 'none'; script-src 'self'; base-uri 'none'; frame-ancestors 'none'")
+        self.send_header('Content-Length', str(len(body)))
         self.end_headers()
+        self.wfile.write(body)
         return False
     def proxy(self):
         try:

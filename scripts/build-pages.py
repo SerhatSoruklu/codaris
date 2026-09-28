@@ -133,6 +133,7 @@ shutil.copy2(WEB / 'legal.css', OUT / 'legal.css')
 shutil.copy2(WEB / 'meaning.css', OUT / 'meaning.css')
 shutil.copy2(WEB / 'contact.css', OUT / 'contact.css')
 shutil.copy2(WEB / 'auth-nav.js', OUT / 'auth-nav.js')
+shutil.copy2(WEB / 'auth-redirect.js', OUT / 'auth-redirect.js')
 shutil.copy2(WEB / 'home-intro.js', OUT / 'home-intro.js')
 print(f'Built {len(pages)} static routes; ' + ('production SEO enabled.' if production and origin else 'preview noindex; set CODARIS_PRODUCTION=1 for production indexing.'))
 

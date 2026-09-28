@@ -141,9 +141,14 @@ route_visibility = (ROOT / 'web/styles.css').read_text()
 auth_nav = (ROOT / 'web/auth-nav.js').read_text()
 assert 'data-member-route-authenticated="true"' in route_visibility
 assert 'dataset.memberRouteAuthenticated = \'true\'' in auth_nav
+assert 'response.status === 204' in auth_nav
 dev_server = (ROOT / 'scripts/serve-dev.py').read_text()
-assert "if '\\r' in location or '\\n' in location:" in dev_server
-assert "self.path.replace('\\r', '').replace('\\n', '')" in dev_server and 'quote_via=quote' in dev_server
+assert "send_header('Location'" not in dev_server
+assert '/auth-redirect.js' in dev_server
+auth_redirect = (ROOT / 'web/auth-redirect.js').read_text()
+assert 'location.pathname + location.search + location.hash' in auth_redirect
+assert "searchParams.set('return_to', destination)" in auth_redirect
+assert "'auth-redirect.js'" in (ROOT / 'scripts/package-site.py').read_text()
 assert 'crypto.getRandomValues' in auth_nav and 'Math.random' not in auth_nav
 host = (ROOT / 'web/host.js').read_text()
 assert not re.search(r'innerHTML|outerHTML|document\.write|\beval\s*\(|new\s+Function', host)

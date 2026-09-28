@@ -322,6 +322,10 @@ window.codarisLoader = codarisLoader;
           signal: controller.signal,
         });
         if (requestVersion !== stateVersion) return;
+        if (response.status === 204) {
+          renderAuthState('unauthenticated');
+          return;
+        }
         if (!response.ok) {
           renderAuthState('unknown');
           return;
