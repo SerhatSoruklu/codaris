@@ -1,6 +1,6 @@
 # Developer topic library
 
-The library has 22 populated topics: 16 research directories and six foundational guides. Open `/topics/` directly, or use **Explore topics** in the development member dashboard. Each card has a prominent **View topic** link; **Mark as read** is a separate, page-visit-only action on both the dashboard and public library. Reading the public library does not require a member account. Production membership routes remain gated.
+The member library has 22 populated topics: 16 research directories and six foundational guides. The topic hub and each linked topic route require a signed-in account. Unauthenticated requests are checked by the development server locally and by Nginx `auth_request` in production before static HTML is served. The session probe used by the shared header returns a normal JSON response for signed-out visitors, so public pages do not produce expected 401 console noise. Each card has a prominent **View topic** link; **Mark as read** is a separate, page-visit-only action on the hub and member dashboard.
 
 ## Content and provenance
 
@@ -52,9 +52,9 @@ Review imported differences and checksums before accepting new research. The imp
 
 ## Runtime and accessibility
 
-Pages use static semantic HTML, a documentation sidebar, native disclosure sections and keyboard-scrollable tables. Content remains readable without JavaScript. C/Wasm owns catalogue matching and the dashboard's 22-topic progress bitmask; JavaScript supplies DOM/event glue. Search enables after the runtime loads. Existing deep-link handling opens a targeted catalogue entry and its enclosing sections, and clears a conflicting search. Foundations need no Wasm runtime.
+Pages use static semantic HTML, a documentation sidebar, native disclosure sections and keyboard-scrollable tables. After sign-in, content remains readable without JavaScript. C/Wasm owns catalogue matching and the dashboard's 22-topic progress bitmask; JavaScript supplies DOM/event glue. Search enables after the runtime loads. Existing deep-link handling opens a targeted catalogue entry and its enclosing sections, and clears a conflicting search. Foundations need no Wasm runtime.
 
-Cards stack on mobile. The primary topic link remains visually distinct from the progress toggle. Production SEO, canonical metadata and sitemap entries use the normal page registry; dashboard content is still excluded from indexing.
+Cards stack on mobile. The primary topic link remains visually distinct from the progress toggle. Member routes are excluded from indexing and the sitemap. Their route policy comes from `access: "member"` in `web/pages.json`; the page builder generates the Nginx snippet at `build/deploy/member-routes.conf`.
 
 ## Verification
 

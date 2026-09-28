@@ -166,9 +166,22 @@ applicationConfirm?.addEventListener('input', updateApplicationConfirmation);
 const globe = document.querySelector('.network-globe');
 let globePointer = null;
 let globeLastX = 0, globeLastY = 0;
+let globePendingPoint = null;
+let globeRotationFrame = 0;
+function applyGlobePointerMove() {
+  globeRotationFrame = 0;
+  if (globePointer === null || globePendingPoint === null) return;
+  const point = globePendingPoint;
+  globePendingPoint = null;
+  const scale = globe.viewBox.baseVal.width / globe.getBoundingClientRect().width;
+  Module.ccall('codaris_globe_rotate', null, ['number', 'number', 'number'],
+    [(point.x-globeLastX)*scale, (point.y-globeLastY)*scale, 0]);
+  globeLastX = point.x; globeLastY = point.y;
+}
 globe?.addEventListener('pointerdown', function (event) {
   if (globe.dataset.ready !== 'true' || !event.isPrimary || event.button !== 0) return;
   globePointer = event.pointerId;
+  globePendingPoint = null;
   globeLastX = event.clientX; globeLastY = event.clientY;
   globe.setPointerCapture(event.pointerId);
   globe.focus({preventScroll: true});
@@ -177,12 +190,16 @@ globe?.addEventListener('pointerdown', function (event) {
 });
 globe?.addEventListener('pointermove', function (event) {
   if (event.pointerId !== globePointer) return;
-  const scale = globe.viewBox.baseVal.width / globe.getBoundingClientRect().width;
-  Module.ccall('codaris_globe_rotate', null, ['number', 'number', 'number'],
-    [(event.clientX-globeLastX)*scale, (event.clientY-globeLastY)*scale, 0]);
-  globeLastX = event.clientX; globeLastY = event.clientY;
+  globePendingPoint = {x: event.clientX, y: event.clientY};
+  if (!globeRotationFrame) globeRotationFrame = requestAnimationFrame(applyGlobePointerMove);
 });
-function releaseGlobe(event) { if (event.pointerId === globePointer) globePointer = null; }
+function releaseGlobe(event) {
+  if (event.pointerId !== globePointer) return;
+  if (globeRotationFrame) cancelAnimationFrame(globeRotationFrame);
+  applyGlobePointerMove();
+  globePointer = null;
+  globePendingPoint = null;
+}
 globe?.addEventListener('pointerup', releaseGlobe);
 globe?.addEventListener('pointercancel', releaseGlobe);
 globe?.addEventListener('lostpointercapture', releaseGlobe);
@@ -252,6 +269,62 @@ if (rainHero && 'IntersectionObserver' in window) {
 
 // Membership preview: browser events and image decoding only; outcomes live in C.
 function membershipReady() { return document.body.dataset.memberReady === 'true'; }
+
+window.codarisAccountRequest = (path, options, kind) => {
+  const dashboardProfile = kind === 'me' && window.codarisLoader?.isActive('dashboard');
+  const showLoader = kind === 'login' || kind === 'register' || kind === 'logout' || dashboardProfile;
+  if (!showLoader) return fetch(path, options);
+  window.codarisLoader?.start(kind);
+  return new Promise((resolve, reject) => {
+  const xhr = new XMLHttpRequest();
+  xhr.open(options.method || 'GET', path, true);
+  xhr.withCredentials = true;
+  xhr.timeout = 30000;
+  Object.entries(options.headers || {}).forEach(([key, value]) => xhr.setRequestHeader(key, value));
+  xhr.upload.addEventListener('progress', event => {
+    if (event.lengthComputable && event.total > 0 && window.codarisLoader)
+      window.codarisLoader.update(40 * event.loaded / event.total, 'Sending your request to the account service…');
+  });
+  xhr.upload.addEventListener('load', () => window.codarisLoader?.working('Request sent. Waiting for the account service…'));
+  xhr.addEventListener('loadstart', () => window.codarisLoader?.working('Connecting to the account service…'));
+  xhr.addEventListener('readystatechange', () => {
+    if (xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED)
+      window.codarisLoader?.update(40, 'Account service responded. Receiving its result…');
+  });
+  xhr.addEventListener('progress', event => {
+    if (event.lengthComputable && event.total > 0 && window.codarisLoader)
+      window.codarisLoader.update(40 + 60 * event.loaded / event.total, 'Receiving the account service response…');
+    else window.codarisLoader?.working('Receiving the account service response…');
+  });
+  xhr.addEventListener('load', () => {
+    if (xhr.status === 0) {
+      window.codarisLoader?.complete(kind, false);
+      reject(new TypeError('Network request failed'));
+      return;
+    }
+    const ok = xhr.status >= 200 && xhr.status < 300;
+    const contentType = xhr.getResponseHeader('content-type') || '';
+    if (!contentType.toLowerCase().includes('application/json')) window.codarisLoader?.complete(kind, false);
+    resolve({status: xhr.status, ok, headers: {get: name => xhr.getResponseHeader(name)}, json: async () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        window.codarisLoader?.complete(kind, ok);
+        return data;
+      } catch (error) {
+        window.codarisLoader?.complete(kind, false);
+        throw error;
+      }
+    }});
+  });
+  ['error', 'timeout', 'abort'].forEach(eventName => xhr.addEventListener(eventName, () => {
+    window.codarisLoader?.complete(kind, false);
+    reject(eventName === 'error' || eventName === 'abort'
+      ? new TypeError(eventName === 'error' ? 'Network request failed' : 'Request aborted')
+      : new Error('The account service took too long to respond.'));
+  }));
+  xhr.send(options.body || null);
+  });
+};
 const dashboardTabs = [...document.querySelectorAll('.account-tabs [role="tab"][data-member-tab]')];
 const participationDisclosure = document.getElementById('dashboard-participation-menu');
 if (participationDisclosure) {

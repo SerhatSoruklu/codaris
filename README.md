@@ -1,8 +1,8 @@
 # CODARIS
 
-**Coalition Of Developers Advancing Responsible Intelligent Systems**
+Coalition Of Developers Advancing Responsible Intelligent Systems
 
-**Build. Verify. Advance. Trust is engineered.**
+Build. Verify. Advance. Trust is engineered.
 
 CODARIS is an early-stage, developer-focused coalition and a growing technical platform. Its purpose is to bring developers together around the engineering of responsible intelligent systems: practical work, careful verification, security, safety, interoperability and clear evidence about what systems do.
 
@@ -16,7 +16,7 @@ That progression is a direction, not a claim that every stage or institution is 
 
 CODARIS is an independent developer coalition operated by Serhat Soruklu. It is intended for developers and other technical contributors who want to work on responsible intelligent systems and the software, infrastructure and practices around them.
 
-The public site currently provides information about the mission, membership approach, organizational participation plans, legal terms and privacy, plus a substantial developer learning library. The repository contains the C/WebAssembly web client, native C account and contact API, PostgreSQL schema, build tooling and deployment documentation.
+The public site currently provides information about the mission, membership approach, organizational participation plans, legal terms and privacy. The member learning library contains substantial developer research and guides. The repository contains the C/WebAssembly web client, native C account and contact API, PostgreSQL schema, build tooling and deployment documentation.
 
 ## Why CODARIS exists
 
@@ -28,7 +28,7 @@ The coalition’s stated principles are progress, safety, developer leadership, 
 
 Joining is for people who want to contribute expertise, questions and effort to a developer-led coalition. The current membership flow is intentionally modest: it establishes an account and membership after email confirmation. It does not promise employment, certification, professional accreditation, a public directory listing, access to an active working group, or influence over a formal governance process.
 
-When the account service is deployed and available, members can maintain their account, control whether their membership credential is publicly verifiable, and keep progress through the learning topics. The public learning library itself can be read without an account. Membership is not required to use its guides or catalogues.
+When the account service is deployed and available, members can maintain their account, control whether their membership credential is publicly verifiable, and keep progress through the learning topics. The topic hub and all 22 learning routes require a signed-in account. Terms, mission, and other public pages remain readable without signing in.
 
 ## Who CODARIS is for
 
@@ -39,7 +39,7 @@ CODARIS is for developers and technically engaged people interested in building,
 The public site is marked Beta V1. It currently includes:
 
 - Mission, global perspective, ecosystem and organizational participation pages. The organizational framework, directories, working groups and safeguards described there are proposals or marked as coming soon, not active programs.
-- A public developer library: 16 research catalogues and six foundational guides, with source notes, technical chapters and exercises. Catalogue material includes dated snapshots and source limitations; it should not be read as live market data or a ranking.
+- A member-gated developer library: 16 research catalogues and six foundational guides, with source notes, technical chapters and exercises. Catalogue material includes dated snapshots and source limitations; it should not be read as live market data or a ranking.
 - An implemented account service in the codebase: registration, email verification, login, password recovery and change, editable profile settings, membership credentials, optional public credential verification, and saved topic progress.
 - A member dashboard in the codebase for profile and security settings, credential controls, and topic progress. Community/chat is a preview, not a live discussion service.
 - A contact form implementation, with messages queued by the native service for delivery.
@@ -158,7 +158,7 @@ Static pages are authored in `web/pages/` and assembled from `web/index.html`, s
 
 ## Current status
 
-CODARIS is an early-stage Beta V1 project. The public site and developer learning library are available as static content. Account, credential, contact and mail functionality is implemented in the repository and has local development/test workflows. The production client build disables the Join form; development builds can expose the preview form. The repository does not establish whether the public account API and its production operations are currently available. Verify the API, database, mail delivery and operational checks before treating registration as live or enabling the form.
+CODARIS is an early-stage Beta V1 project. Public pages and member learning pages are generated as static content; the learning routes require a session check in the development server and production Nginx. Account, credential, contact and mail functionality is implemented in the repository and has local development/test workflows. The production client build disables the Join form; development builds can expose the preview form. The repository does not establish whether the public account API and its production operations are currently available. Verify the API, database, mail delivery and operational checks before treating registration as live or enabling the form.
 
 The repository includes production build and deployment tooling, Nginx and systemd examples, an allowlisted static-site package, and a release runbook. These files describe how to deploy; their presence alone does not establish that the live backend, mail worker, monitoring, backups or privacy operations are deployed and verified. Read [release readiness](docs/RELEASE.md) and [deployment](docs/DEPLOYMENT.md) before operating a public service.
 
@@ -168,7 +168,7 @@ The codebase does not currently provide active chat, staff administration UI, pu
 
 The repository publishes its source at [github.com/SerhatSoruklu/codaris](https://github.com/SerhatSoruklu/codaris). For code changes, first read [AGENTS.md](AGENTS.md), the relevant architecture or feature documentation, and [SECURITY.md](SECURITY.md). Keep changes small, preserve the C17/WebAssembly and native C boundaries, use parameterized SQL, and never commit secrets. The project has no root `CONTRIBUTING.md`; use the contact page for general technical or collaboration enquiries. Do not assume that a GitHub contribution creates coalition membership or an organizational participation relationship.
 
-Membership interest is expressed through the Join page when applications are enabled. The public topic library does not require membership. Organizational participation is not yet an active program; see [/ecosystem/organizational-participation/](https://codaris.org/ecosystem/organizational-participation/) for its current status.
+Membership interest is expressed through the Join page when applications are enabled. The topic hub and its 22 learning routes require a signed-in account. Organizational participation is not yet an active program; see [/ecosystem/organizational-participation/](https://codaris.org/ecosystem/organizational-participation/) for its current status.
 
 ## Further documentation
 

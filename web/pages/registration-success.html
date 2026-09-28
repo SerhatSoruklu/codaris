@@ -1,0 +1,15 @@
+<section class="wrap section registration-success" aria-labelledby="registration-success-title">
+  <article class="registration-success-card">
+    <div class="registration-success-mark" aria-hidden="true">
+      <svg class="icon" focusable="false"><use href="/assets/icons/lucide.svg#mail-check"></use></svg>
+    </div>
+    <p class="eyebrow">CODARIS / ACCOUNT CREATED</p>
+    <h1 class="page-title" id="registration-success-title">You’re on your way.</h1>
+    <p class="registration-success-lead">Your account has been created and a verification email has been queued. Verify your email address before signing in to your member workspace.</p>
+    <p class="registration-success-timing">When the mail worker is running, messages are usually picked up within about a minute. Check your spam or junk folder if it hasn’t arrived after a few minutes.</p>
+    <a class="button registration-success-login" href="/login/">Continue to sign in <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#arrow-right"></use></svg></a>
+    <!-- DEVELOPMENT START -->
+    <aside class="registration-success-development" aria-label="Local development email delivery"><strong>Local development:</strong> email is not sent by the page. Check the <code>./scripts/dev.sh</code> output: if the mail worker is paused, this message stays queued until backend SMTP is configured. The worker checks the queue about once a minute when running.</aside>
+    <!-- DEVELOPMENT END -->
+  </article>
+</section>

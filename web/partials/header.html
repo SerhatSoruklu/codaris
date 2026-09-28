@@ -19,6 +19,25 @@
           >Join the coalition <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#arrow-right"></use></svg></a
         >
         <a class="button small" href="/dashboard/#overview" data-auth-logged-in hidden><svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#layout-dashboard"></use></svg>Dashboard</a>
+        <div class="member-menu" data-auth-logged-in data-member-menu hidden>
+          <button class="button small member-menu-trigger" type="button" aria-expanded="false" aria-controls="member-menu-panel" data-member-menu-trigger>
+            <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#panels-top-left"></use></svg>
+            <span>Menu</span>
+            <svg class="icon icon--sm member-menu-chevron" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#arrow-down"></use></svg>
+          </button>
+          <div class="member-menu-panel" id="member-menu-panel" data-member-menu-panel hidden>
+            <p class="member-menu-heading">MEMBER WORKSPACE</p>
+            <a href="/dashboard/#overview">Overview</a>
+            <a href="/dashboard/#profile">Profile</a>
+            <a href="/dashboard/#security">Security</a>
+            <a href="/dashboard/#topics">Explore topics</a>
+            <a href="/dashboard/#community">Community</a>
+            <span class="member-menu-divider" aria-hidden="true"></span>
+            <a href="/ecosystem/organizational-participation/working-groups/">Working groups</a>
+            <a href="/ecosystem/organizational-participation/">Organizational participation</a>
+            <a class="member-menu-logout" href="/logout/"><svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#log-out"></use></svg>Log out</a>
+          </div>
+        </div>
         <noscript><a class="login-link" href="/login/">Log in</a><a class="button small" href="/join/">Join the coalition <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#arrow-right"></use></svg></a></noscript>
       </div>
     </header>

@@ -27,7 +27,7 @@ import urllib.request
 try:
     with urllib.request.urlopen(sys.argv[1], timeout=2) as response:
         data = json.loads(response.read())
-        raise SystemExit(0 if response.status == 200 and data.get('contact_api') == 1 and data.get('credential_api') == 2 and data.get('mail_sender_aligned') is True else 1)
+        raise SystemExit(0 if response.status == 200 and data.get('contact_api') == 1 and data.get('credential_api') == 2 and data.get('page_access_api') == 1 and data.get('mail_sender_aligned') is True else 1)
 except Exception:
     raise SystemExit(1)
 PY
@@ -135,14 +135,14 @@ else
     echo 'Development mail worker is paused; configure backend.development.env SMTP credentials.'
 fi
 FRONTEND_URL="http://127.0.0.1:${FRONTEND_PORT}"
-if python3 - "$FRONTEND_URL/api/health" <<'PY'
+if python3 - "$FRONTEND_URL/__codaris_dev_health" <<'PY'
 import json
 import sys
 import urllib.request
 try:
     with urllib.request.urlopen(sys.argv[1], timeout=2) as response:
         data = json.loads(response.read())
-        raise SystemExit(0 if response.status == 200 and data.get('contact_api') == 1 and data.get('credential_api') == 2 else 1)
+        raise SystemExit(0 if response.status == 200 and data.get('member_route_guard') == 1 else 1)
 except Exception:
     raise SystemExit(1)
 PY
@@ -154,6 +154,26 @@ then
     else echo 'Development servers are already running.'
     fi
     exit 0
+fi
+
+FRONTEND_PID="$(ss -ltnp "sport = :${FRONTEND_PORT}" 2>/dev/null | sed -n 's/.*pid=\([0-9][0-9]*\).*/\1/p' | head -n 1)"
+if [[ -n "$FRONTEND_PID" ]]; then
+    FRONTEND_COMMAND="$(tr '\0' ' ' <"/proc/${FRONTEND_PID}/cmdline" 2>/dev/null || true)"
+    case "$FRONTEND_COMMAND" in
+        *"$ROOT/scripts/serve-dev.py"*)
+            echo 'Refreshing the local static server to load the current route guard.'
+            kill -TERM "$FRONTEND_PID"
+            for _ in {1..30}; do
+                if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then break; fi
+                sleep 0.1
+            done
+            ;;
+        *)
+            echo "A different process is already listening on the development site port: ${FRONTEND_COMMAND:-unknown process}" >&2
+            echo "Stop it, then run ./scripts/dev.sh again." >&2
+            exit 1
+            ;;
+    esac
 fi
 
 "$ROOT/scripts/open-browser.sh" &

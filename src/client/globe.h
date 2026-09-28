@@ -1,13 +1,17 @@
 #ifndef CODARIS_GLOBE_H
 #define CODARIS_GLOBE_H
 #include <math.h>
-#include <stdarg.h>
 #include "globe_data.h"
 
 /* Projection and rotation state are C-owned. DOM bridge only copies geometry. */
 typedef struct { double x, y, z; } GlobePoint;
+typedef struct { double lon, sin_lat, cos_lat; } GlobeTrig;
 static double globe_lon = -35, globe_lat = 30;
 static double globe_zoom = 1;
+static const size_t globe_point_count = sizeof(globe_points) / sizeof(globe_points[0]);
+static GlobeTrig globe_point_trig[sizeof(globe_points) / sizeof(globe_points[0])];
+static int globe_point_trig_ready;
+static double globe_sin_lat, globe_cos_lat;
 static char globe_path[1048576];
 static size_t globe_used;
 static int globe_failed;
@@ -38,11 +42,24 @@ EMSCRIPTEN_KEEPALIVE void codaris_globe_highlight(int country) {
     globe_country_view(country);
 }
 EM_JS(void, globe_country_visibility, (void), {
-    document.querySelectorAll('.globe-country').forEach(function (country) {
-        const visible = Array.from(country.querySelectorAll('.country-surface path'))
-            .some(function (path) { return !!path.getAttribute('d'); });
-        country.setAttribute('tabindex', visible ? '0' : '-1');
-    });
+    const svg = document.querySelector('.network-globe');
+    if (!svg) return;
+    let countries = svg.__codarisCountryPaths;
+    if (!countries) {
+        countries = Array.from(svg.querySelectorAll('.globe-country'), country =>
+            [country, country.querySelectorAll('.country-surface path')]);
+        svg.__codarisCountryPaths = countries;
+    }
+    for (let i = 0; i < countries.length; ++i) {
+        const country = countries[i][0];
+        const paths = countries[i][1];
+        let visible = false;
+        for (const path of paths) {
+            if (path.getAttribute('d')) { visible = true; break; }
+        }
+        const tabindex = visible ? '0' : '-1';
+        if (country.getAttribute('tabindex') !== tabindex) country.setAttribute('tabindex', tabindex);
+    }
 })
 
 /* Zoom the SVG camera without changing geographic coordinates or orientation. */
@@ -62,7 +79,25 @@ EMSCRIPTEN_KEEPALIVE void codaris_globe_zoom(double delta, int mode) {
 }
 
 EM_JS(void, globe_set_path, (const char *id, const char *path), {
-    document.getElementById(UTF8ToString(id)).setAttribute('d', UTF8ToString(path));
+    const svg = document.querySelector('.network-globe');
+    if (!svg) return;
+    let paths = svg.__codarisPathNodes;
+    if (!paths) {
+        paths = new Map();
+        svg.querySelectorAll('[id]').forEach(node => {
+            paths.set(node.id, node);
+            if (node.hasAttribute('d')) node.__codarisPathData = node.getAttribute('d');
+        });
+        svg.__codarisPathNodes = paths;
+    }
+    const node = paths.get(UTF8ToString(id));
+    if (node) {
+        const data = UTF8ToString(path);
+        if (node.__codarisPathData !== data) {
+            node.setAttribute('d', data);
+            node.__codarisPathData = data;
+        }
+    }
 })
 EM_JS(void, globe_node, (int i, double x, double y, int visible), {
     const node = document.getElementById('node-' + i);
@@ -72,52 +107,105 @@ EM_JS(void, globe_node, (int i, double x, double y, int visible), {
     }
     if (i < 2) document.getElementById('label-' + i).style.display = visible ? "" : 'none';
 })
+static void globe_prepare_projection(void) {
+    const double rad = 0.017453292519943295;
+    double lat = globe_lat * rad;
+    globe_sin_lat = sin(lat); globe_cos_lat = cos(lat);
+    if (globe_point_trig_ready) return;
+    for (size_t i = 0; i < globe_point_count; ++i) {
+        double point_lat = globe_points[i][1] * rad;
+        globe_point_trig[i] = (GlobeTrig){globe_points[i][0], sin(point_lat), cos(point_lat)};
+    }
+    globe_point_trig_ready = 1;
+}
+static GlobePoint globe_project_trig(GlobeTrig point) {
+    const double rad = 0.017453292519943295;
+    double delta_lon = (point.lon - globe_lon) * rad;
+    double sin_delta = sin(delta_lon), cos_delta = cos(delta_lon);
+    return (GlobePoint){point.cos_lat * sin_delta,
+                        globe_cos_lat * point.sin_lat - globe_sin_lat * point.cos_lat * cos_delta,
+                        globe_sin_lat * point.sin_lat + globe_cos_lat * point.cos_lat * cos_delta};
+}
 static GlobePoint globe_project(double lon, double lat) {
     const double rad = 0.017453292519943295;
-    double l=(lon-globe_lon)*rad, p=lat*rad, c=globe_lat*rad;
-    return (GlobePoint){cos(p)*sin(l), cos(c)*sin(p)-sin(c)*cos(p)*cos(l),
-                        sin(c)*sin(p)+cos(c)*cos(p)*cos(l)};
+    double longitude = (lon - globe_lon) * rad, point_lat = lat * rad;
+    double sin_delta = sin(longitude), cos_delta = cos(longitude);
+    double sin_lat = sin(point_lat), cos_lat = cos(point_lat);
+    return (GlobePoint){cos_lat * sin_delta,
+                        globe_cos_lat * sin_lat - globe_sin_lat * cos_lat * cos_delta,
+                        globe_sin_lat * sin_lat + globe_cos_lat * cos_lat * cos_delta};
 }
-static void globe_append(const char *format, ...) {
+static void globe_append_char(char value) {
     if (globe_failed) return;
-    va_list args; va_start(args, format);
-    int n=vsnprintf(globe_path+globe_used,sizeof(globe_path)-globe_used,format,args);
-    va_end(args);
-    if(n<0 || (size_t)n>=sizeof(globe_path)-globe_used) { globe_failed=1; return; }
-    globe_used+=(size_t)n;
+    if (globe_used + 1 >= sizeof(globe_path)) { globe_failed = 1; return; }
+    globe_path[globe_used++] = value;
+}
+static void globe_append_text(const char *text) {
+    while (*text && !globe_failed) globe_append_char(*text++);
+}
+static void globe_append_uint(unsigned long long value) {
+    char digits[24]; size_t count = 0;
+    do { digits[count++] = (char)('0' + value % 10); value /= 10; } while (value && count < sizeof(digits));
+    while (count) globe_append_char(digits[--count]);
+}
+static void globe_append_fixed(double value, unsigned decimals) {
+    const unsigned long long scale = decimals == 2 ? 100 : 10;
+    unsigned long long scaled = (unsigned long long)nearbyint(fabs(value) * (double)scale);
+    if (signbit(value)) globe_append_char('-');
+    globe_append_uint(scaled / scale);
+    globe_append_char('.');
+    unsigned long long fraction = scaled % scale;
+    if (decimals == 2 && fraction < 10) globe_append_char('0');
+    globe_append_uint(fraction);
+}
+static void globe_append_xy(char command, double x, double y, unsigned decimals) {
+    globe_append_char(command);
+    globe_append_fixed(x, decimals);
+    globe_append_char(',');
+    globe_append_fixed(y, decimals);
+}
+static void globe_append_arc(int sweep, double x, double y) {
+    globe_append_text("A246,246 0 0,");
+    globe_append_char(sweep ? '1' : '0');
+    globe_append_char(' ');
+    globe_append_fixed(x, 2);
+    globe_append_char(',');
+    globe_append_fixed(y, 2);
 }
 static void globe_begin(void) { globe_used=0; globe_failed=0; globe_path[0]='\0'; }
 static void globe_publish(const char *id) {
-    if (!globe_failed) globe_set_path(id,globe_path);
+    if (!globe_failed) { globe_path[globe_used]='\0'; globe_set_path(id,globe_path); }
 }
 static void globe_ring(unsigned first, unsigned count) {
     size_t n=0;
+    GlobePoint a=globe_project_trig(globe_point_trig[first]);
     for(unsigned i=0;i<count;i++) {
         unsigned j=first+(i+1)%count;
-        GlobePoint a=globe_project(globe_points[first+i][0],globe_points[first+i][1]);
-        GlobePoint b=globe_project(globe_points[j][0],globe_points[j][1]);
+        GlobePoint b=globe_project_trig(globe_point_trig[j]);
         if(n+2>=sizeof(clipped)/sizeof(clipped[0])) {globe_failed=1;return;}
         if(a.z>=0) clipped[n++]=a;
         if((a.z>=0)!=(b.z>=0)) {
             double t=a.z/(a.z-b.z), x=a.x+t*(b.x-a.x), y=a.y+t*(b.y-a.y), norm=hypot(x,y);
             if(norm>0) clipped[n++]=(GlobePoint){x/norm,y/norm,0};
         }
+        a=b;
     }
     if(n<3)return;
-    globe_append("M%.2f,%.2f",330+246*clipped[0].x,326-246*clipped[0].y);
+    globe_append_xy('M',330+246*clipped[0].x,326-246*clipped[0].y,2);
     for(size_t i=0;i<n;i++) {
         GlobePoint a=clipped[i],b=clipped[(i+1)%n];
         if(fabs(a.z)<1e-9 && fabs(b.z)<1e-9)
-            globe_append("A246,246 0 0,%d %.2f,%.2f",a.x*b.y-a.y*b.x<0,330+246*b.x,326-246*b.y);
-        else globe_append("L%.2f,%.2f",330+246*b.x,326-246*b.y);
+            globe_append_arc(a.x*b.y-a.y*b.x<0,330+246*b.x,326-246*b.y);
+        else globe_append_xy('L',330+246*b.x,326-246*b.y,2);
     }
-    globe_append("Z");
+    globe_append_char('Z');
 }
 EMSCRIPTEN_KEEPALIVE void codaris_globe_rotate(double dx, double dy, int reset) {
     if(!isfinite(dx)||!isfinite(dy))return;
     codaris_globe_highlight(-1);
     if(reset) {globe_lon=-35;globe_lat=30;globe_zoom=1;globe_camera(globe_zoom);}
     else { globe_lon=fmod(globe_lon-dx*.3+540,360)-180; globe_lat=fmax(-80,fmin(80,globe_lat+dy*.3)); }
+    globe_prepare_projection();
     char id[48];
     for(size_t i=0;i<sizeof(globe_polys)/sizeof(globe_polys[0]);i++) {
         globe_begin();
@@ -132,7 +220,7 @@ EMSCRIPTEN_KEEPALIVE void codaris_globe_rotate(double dx, double dy, int reset) 
         for(int v=axis?-180:-90;v<=(axis?180:90);v+=2) {
             GlobePoint p=axis?globe_project(v,fixed):globe_project(fixed,v);
             if(p.z<0){active=0;continue;}
-            globe_append("%c%.1f,%.1f",active?'L':'M',330+246*p.x,326-246*p.y);active=1;
+            globe_append_xy(active?'L':'M',330+246*p.x,326-246*p.y,1);active=1;
         }
         int n=snprintf(id,sizeof(id),"grid-%d-%d",axis,fixed);
         if(n>0 && (size_t)n<sizeof(id))globe_publish(id);
@@ -147,13 +235,18 @@ EMSCRIPTEN_KEEPALIVE void codaris_globe_rotate(double dx, double dy, int reset) 
         globe_begin();
         if(nodes[0].z>=0 && nodes[i].z>=0) {
             double ax=330+246*nodes[0].x,ay=326-246*nodes[0].y,bx=330+246*nodes[i].x,by=326-246*nodes[i].y;
-            globe_append("M%.1f,%.1fQ%.1f,%.1f %.1f,%.1f",ax,ay,(ax+bx)/2,(ay+by)/2-65,bx,by);
+            globe_append_xy('M',ax,ay,1);
+            globe_append_char('Q');
+            globe_append_fixed((ax+bx)/2,1); globe_append_char(',');
+            globe_append_fixed((ay+by)/2-65,1); globe_append_char(' ');
+            globe_append_fixed(bx,1); globe_append_char(','); globe_append_fixed(by,1);
         }
         int n=snprintf(id,sizeof(id),"route-%d",i);if(n>0&&(size_t)n<sizeof(id))globe_publish(id);
         n=snprintf(id,sizeof(id),"route-base-%d",i);if(n>0&&(size_t)n<sizeof(id))globe_publish(id);
     }
     for(int i=0;i<2;i++) {
-        globe_begin();globe_append("M%.1f,%.1f%s",330+246*nodes[i].x,326-246*nodes[i].y,i?"L164 302H65":"L467 137H602");
+        globe_begin();globe_append_xy('M',330+246*nodes[i].x,326-246*nodes[i].y,1);
+        globe_append_text(i?"L164 302H65":"L467 137H602");
         globe_publish(i?"leader-1":"leader-0");
     }
     globe_country_visibility();

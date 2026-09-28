@@ -16,20 +16,37 @@
 <meta name="twitter:title" content="{{TITLE}}">
 <meta name="twitter:description" content="{{DESCRIPTION}}">
 {{SEO}}
+{{HOMEINTRO}}
 <link rel="icon" href="/assets/emblem.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
+<noscript><style>body:not([data-auth-state-ready="true"]) main a[href="/join/"], body:not([data-auth-state-ready="true"]) footer a[href="/join/"] { visibility: visible; }</style></noscript>
 {{LEGALCSS}}
 {{MEANINGCSS}}
 {{CONTACTCSS}}
 </head>
-<body data-development="{{DEVELOPMENT}}">
+<body data-development="{{DEVELOPMENT}}" data-member-route="{{MEMBER_ROUTE}}">
 {{HEADER}}
+<div class="codaris-loader" data-codaris-loader hidden aria-hidden="true">
+<div class="codaris-loader__card">
+<svg class="codaris-loader__mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+<defs><linearGradient id="codaris-loader-fill" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#19d7ff"/><stop offset="1" stop-color="#74efb2"/></linearGradient><clipPath id="codaris-loader-clip"><rect data-codaris-loader-fill x="0" y="40" width="40" height="0"/></clipPath></defs>
+<path class="codaris-loader__hex" d="M20 2 36 11v18L20 38 4 29V11Z"/>
+<path class="codaris-loader__c" d="m26 12-6-3-10 6v11l10 6 6-3v-5l-6 3-5-3v-6l5-3 6 3Z"/>
+<path class="codaris-loader__c codaris-loader__c--fill" d="m26 12-6-3-10 6v11l10 6 6-3v-5l-6 3-5-3v-6l5-3 6 3Z" clip-path="url(#codaris-loader-clip)"/>
+</svg>
+<p class="codaris-loader__eyebrow">CODARIS / TRUST IN MOTION</p>
+<h2 data-codaris-loader-title>Working on your request</h2>
+<p class="codaris-loader__phase" data-codaris-loader-phase role="status" aria-live="polite" aria-atomic="true">Preparing your request…</p>
+<div class="codaris-loader__track" data-codaris-loader-progress role="progressbar" aria-label="Request progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span data-codaris-loader-bar></span></div>
+<p class="codaris-loader__percent"><span data-codaris-loader-percent>0</span><span aria-hidden="true">%</span></p>
+</div>
+</div>
 <main id="main">
 {{BREADCRUMB}}
 {{CONTENT}}
 </main>
 {{FOOTER}}
-<script src="/auth-nav.js" defer></script>
+<script src="/auth-nav.js?v=4" defer></script>
 {{RUNTIME}}
 </body>
 </html>

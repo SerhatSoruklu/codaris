@@ -1,6 +1,6 @@
 # Databases and data platforms
 
-The public `/databases/` topic is linked from the member learning panel. It shares the documentation layout, native disclosure navigation and C/Wasm catalogue search. All content remains readable without JavaScript or a member account.
+The member-only `/databases/` topic is linked from the member learning panel. It shares the documentation layout, native disclosure navigation and C/Wasm catalogue search. After authentication, all content remains readable without JavaScript.
 
 ## Research coverage
 

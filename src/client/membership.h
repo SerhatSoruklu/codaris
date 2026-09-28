@@ -84,42 +84,43 @@ EMSCRIPTEN_KEEPALIVE void codaris_progress_response(int status) {
 /* DOM access and JSON serialization are browser transport; C chooses operations
  * and owns navigation / success handling. Passwords are never persisted. */
 EM_JS(void, member_request, (const char *operation, const char *endpoint), {
-    const kind = UTF8ToString(operation), path = UTF8ToString(endpoint);
-    const form = document.querySelector('[data-account-form="' + kind + '"]');
-    const payload = {};
-    if (form) new FormData(form).forEach((value, key) => { payload[key] = value; });
-    if (kind === 'credential') {
-        const enabled = document.getElementById('credential-public-enabled');
-        payload.enabled = String(!!(enabled && enabled.checked));
+    const kind=UTF8ToString(operation), path=UTF8ToString(endpoint);
+    const form=document.querySelector('[data-account-form="'+kind+'"]');
+    const payload={};
+    if(form)new FormData(form).forEach((value,key)=>{payload[key]=value;});
+    if(kind==='credential'){
+        const enabled=document.getElementById('credential-public-enabled');
+        payload.enabled=String(!!(enabled&&enabled.checked));
     }
-    if (form) {
+    if(form){
         const canvas=form.querySelector('#avatar-preview');
         if(canvas) {
             payload.avatar="";
             if(!canvas.hidden) {
                 const context=canvas.getContext('2d');
-                if(!context) { Module.ccall('codaris_account_response',null,['string','number','string','number'],[kind,0,'Unable to read the profile picture.',0]);return; }
+                if(!context){Module.ccall('codaris_account_response',null,['string','number','string','number'],[kind,0,'Unable to read the profile picture.',0]);return;}
                 const pixels=context.getImageData(0,0,100,100).data;
-                let raw=""; for(let i=0;i<pixels.length;i++)raw+=String.fromCharCode(pixels[i]);
+                let raw="";for(let i=0;i<pixels.length;i++)raw+=String.fromCharCode(pixels[i]);
                 payload.avatar=btoa(raw);
             }
         }
     }
-    if (kind === 'verify' || kind === 'reset') payload.token = window.codarisActionToken || "";
-    const options = {credentials: 'same-origin', cache: 'no-store'};
-    if (kind !== 'me') {
-        options.method = 'POST'; options.headers = {'Content-Type': 'application/json'};
-        options.body = JSON.stringify(payload);
+    if(kind==='verify'||kind==='reset')payload.token=window.codarisActionToken||"";
+    const options={credentials:'same-origin',cache:'no-store'};
+    if(kind!=='me'){
+        options.method='POST';options.headers={'Content-Type':'application/json'};
+        options.body=JSON.stringify(payload);
     }
-    if (form) form.querySelectorAll('button').forEach(e => e.disabled = true);
-    fetch(path, options).then(async response => {
-        if (response.status === 401 || (response.ok && (kind === 'logout' || kind === 'password')))
+    if(form)form.querySelectorAll('button').forEach(e=>e.disabled=true);
+    const request=window.codarisAccountRequest(path,options,kind);
+    request.then(async response => {
+        if(response.status===401||(response.ok&&kind==='password'))
             document.dispatchEvent(new Event('codaris-auth-required'));
-        const contentType = response.headers.get('content-type') || "";
-        if (!contentType.toLowerCase().includes('application/json')) {
+        const contentType=response.headers.get('content-type')||"";
+        if(!contentType.toLowerCase().includes('application/json')) {
             throw new Error('The account service returned an unexpected response. Please try again later.');
         }
-        const data = await response.json();
+        const data=await response.json();
         if (kind === 'me' && response.ok) {
             Module.ccall('codaris_progress_loaded', null, ['number'], [data.progress || 0]);
             const raw=atob(data.avatar || "");
@@ -153,19 +154,42 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
         }
         Module.ccall('codaris_account_response', null, ['string','number','string','number'],
             [kind, response.status, data.message || "", data.email_verified ? 1 : 0]);
-    }).catch(error => Module.ccall('codaris_account_response', null,
+    }).catch(error => {
+        Module.ccall('codaris_account_response', null,
         ['string','number','string','number'], [kind,0,
             error instanceof TypeError ? 'Unable to reach the account service. Please try again.' :
-            (error.message || 'The account service returned an unexpected response. Please try again later.'),0]))
+            (error.message || 'The account service returned an unexpected response. Please try again later.'),0]);
+    })
       .finally(() => {
         if (form) { form.querySelectorAll('button').forEach(e => e.disabled = false);
             form.querySelectorAll('input[type="password"]').forEach(e => e.value = ""); }
       });
 })
-EM_JS(void, member_navigate, (const char *path), { location.assign(UTF8ToString(path)); })
+EM_JS(void, member_navigate, (const char *path), {
+    let destination=UTF8ToString(path);
+    const signedOut=destination==='/login/?signed_out=1';
+    if(signedOut)destination='/login/';
+    if(destination==='/login/' && !signedOut && (location.pathname==='/dashboard' || location.pathname.startsWith('/dashboard/'))) {
+        const returnTo=location.pathname+location.search+location.hash;
+        destination='/login/?return_to='+encodeURIComponent(returnTo);
+    }
+    if(destination==='/dashboard/' && location.pathname==='/login/') {
+        const requested=new URLSearchParams(location.search).get('return_to');
+        if(requested && requested.startsWith('/') && !requested.startsWith('//') && !requested.includes(String.fromCharCode(92))) {
+            const target=new URL(requested,location.origin);
+            if(target.origin===location.origin && target.pathname!=='/login/' && !target.pathname.startsWith('/api/'))
+                destination=target.pathname+target.search+target.hash;
+        }
+    }
+    location.assign(destination);
+})
+EM_JS(void, member_route_ready, (void), {
+    if(document.body.dataset.memberRoute==='true')document.body.dataset.memberRouteReady='true';
+})
 EM_JS(void, member_authenticated, (int verified), {
     const panel = document.getElementById('account-content'); if(panel) panel.hidden=false;
     const resend = document.getElementById('resend-verification'); if(resend)resend.hidden=!!verified;
+    if(document.body.dataset.memberRoute==='true')document.body.dataset.memberRouteReady='true';
 })
 EM_JS(int, member_form_matches, (const char *kind), {
     const form=document.querySelector('[data-account-form="'+UTF8ToString(kind)+'"]');
@@ -226,15 +250,17 @@ EMSCRIPTEN_KEEPALIVE void codaris_account_response(const char *kind,int status,c
     if(!strcmp(kind,"me")) {
         if(status==401){member_navigate("/login/");return;}
         if(status==200){member_authenticated(verified);view_text("email-verification",verified?"Email verified · membership active":"Email not verified · check your inbox");}
-        else member_result("account",message,1);
+        else {member_result("account",message,1);member_route_ready();}
         return;
     }
     member_result(kind,message,status < 200 || status >= 300);
     if (!strcmp(kind,"verify")) member_verification_view(status);
     if (!strcmp(kind,"recover") && status == 400) member_recovery_invalid(message);
     if(status<200 || status>=300)return;
-    if(!strcmp(kind,"login"))member_navigate("/dashboard/");
-    else if(!strcmp(kind,"logout") || !strcmp(kind,"password"))member_navigate("/login/");
+    if(!strcmp(kind,"register"))member_navigate("/join/success/");
+    else if(!strcmp(kind,"login"))member_navigate("/dashboard/");
+    else if(!strcmp(kind,"logout"))member_navigate("/login/?signed_out=1");
+    else if(!strcmp(kind,"password"))member_navigate("/login/");
     else if(!strcmp(kind,"profile") || !strcmp(kind,"email"))codaris_account_submit("me");
 }
 /* Browser file metadata limits decoding; server storage accepts only an exact
@@ -257,9 +283,11 @@ EMSCRIPTEN_KEEPALIVE void codaris_member_photo_removed(void) {
 }
 EM_JS(int, member_is_account_page, (void), { return !!document.querySelector('[data-account-form], #account-content'); })
 EM_JS(int, member_is_dashboard, (void), { return !!document.getElementById('account-content'); })
+EM_JS(int, member_is_logout_page, (void), { return !!document.querySelector('[data-auto-account-operation="logout"]'); })
 static void membership_init(void) {
     if(!member_is_account_page())return;
     member_ready();
+    if(member_is_logout_page()){codaris_account_submit("logout");return;}
     if(member_is_dashboard())codaris_account_submit("me");
     if(member_verification_link()) { member_verification_view(-1); codaris_account_submit("verify"); }
 }

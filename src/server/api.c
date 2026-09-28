@@ -64,8 +64,9 @@ static void new_token(char raw[65]) {
     sodium_bin2hex(raw, 65, bytes, sizeof(bytes));
     sodium_memzero(bytes, sizeof(bytes));
 }
-static enum MHD_Result respond(struct MHD_Connection *connection, unsigned status, const char *json,
-                               const char *cookie) {
+static enum MHD_Result respond_cookies(struct MHD_Connection *connection, unsigned status,
+                                       const char *json, const char *cookie,
+                                       const char *legacy_cookie) {
     struct MHD_Response *r =
         MHD_create_response_from_buffer(strlen(json), (void *)json, MHD_RESPMEM_MUST_COPY);
     if (!r)
@@ -75,9 +76,20 @@ static enum MHD_Result respond(struct MHD_Connection *connection, unsigned statu
              MHD_add_response_header(r, "X-Content-Type-Options", "nosniff");
     if (cookie)
         ok = ok && MHD_add_response_header(r, "Set-Cookie", cookie);
+    if (legacy_cookie)
+        ok = ok && MHD_add_response_header(r, "Set-Cookie", legacy_cookie);
     enum MHD_Result result = ok ? MHD_queue_response(connection, status, r) : MHD_NO;
     MHD_destroy_response(r);
     return result;
+}
+static enum MHD_Result respond(struct MHD_Connection *connection, unsigned status, const char *json,
+                               const char *cookie) {
+    return respond_cookies(connection, status, json, cookie, NULL);
+}
+static void clear_legacy_session_cookie(const Config *c, char *cookie, size_t capacity) {
+    snprintf(cookie, capacity,
+             "codaris_session=; Path=/api/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+             c->production ? "; Secure" : "");
 }
 static enum MHD_Result respond_credential(struct MHD_Connection *connection, const char *type,
                                          const char *disposition, void *data, size_t length) {
@@ -447,10 +459,10 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         if (health)
             PQfinish(health);
         if (ok) {
-            char body[192];
+            char body[224];
             int sender_aligned = !*c->smtp_user || !strcmp(c->mail_from, c->smtp_user);
             int length = snprintf(body, sizeof(body),
-                                  "{\"message\":\"Ready\",\"version\":\"%s\",\"contact_api\":1,\"credential_api\":2,\"mail_sender_aligned\":%s}",
+                                  "{\"message\":\"Ready\",\"version\":\"%s\",\"contact_api\":1,\"credential_api\":2,\"page_access_api\":1,\"mail_sender_aligned\":%s}",
                                   CODARIS_VERSION_STRING, sender_aligned ? "true" : "false");
             if (length < 0 || (size_t)length >= sizeof(body))
                 return respond(conn, 503, "{\"message\":\"Unavailable\"}", NULL);
@@ -495,9 +507,36 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
     if (!db || PQstatus(db) != CONNECTION_OK)
         goto done;
     if (!strcmp(path, "/api/session") && !post) {
-        unsigned session_status = authenticate(db, conn, id, session_hash) ? 204u : 401u;
-        enum MHD_Result result = respond(conn, session_status,
-                                         session_status == 204 ? "" : "{\"message\":\"Please sign in.\"}",
+        int authenticated = authenticate(db, conn, id, session_hash);
+        const char *raw = MHD_lookup_connection_value(conn, MHD_COOKIE_KIND, "codaris_session");
+        char current_cookie[256] = "", legacy_cookie[128] = "";
+        const char *set_cookie = NULL, *clear_cookie = NULL;
+        if (raw) {
+            if (authenticated && strlen(raw) == 64)
+                snprintf(current_cookie, sizeof(current_cookie),
+                         "codaris_session=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s",
+                         raw, c->production ? "; Secure" : "");
+            else
+                snprintf(current_cookie, sizeof(current_cookie),
+                         "codaris_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+                         c->production ? "; Secure" : "");
+            set_cookie = current_cookie;
+            clear_legacy_session_cookie(c, legacy_cookie, sizeof(legacy_cookie));
+            clear_cookie = legacy_cookie;
+        }
+        enum MHD_Result result = respond_cookies(conn, 200,
+                                                 authenticated ? "{\"authenticated\":true}"
+                                                               : "{\"authenticated\":false}",
+                                                 set_cookie, clear_cookie);
+        if (body)
+            json_object_put(body);
+        PQfinish(db);
+        return result;
+    }
+    if (!strcmp(path, "/api/page-access") && !post) {
+        unsigned access_status = authenticate(db, conn, id, session_hash) ? 204u : 401u;
+        enum MHD_Result result = respond(conn, access_status,
+                                         access_status == 204 ? "" : "{\"message\":\"Please sign in.\"}",
                                          NULL);
         if (body)
             json_object_put(body);
@@ -717,7 +756,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             goto done;
         }
         snprintf(cookie, sizeof(cookie),
-                 "codaris_session=%s; Path=/api/; HttpOnly; SameSite=Strict; Max-Age=2419200%s", raw,
+                 "codaris_session=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s", raw,
                  c->production ? "; Secure" : "");
         sodium_memzero(raw, sizeof(raw));
         status = 200;
@@ -888,7 +927,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         if (!command(db, "DELETE FROM app.sessions WHERE token_hash=$1", 1, v))
             goto done;
         snprintf(cookie, sizeof(cookie),
-                 "codaris_session=; Path=/api/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+                 "codaris_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
                  c->production ? "; Secure" : "");
         status = 200;
         message = "{\"message\":\"Signed out\"}";
@@ -1038,7 +1077,12 @@ done:
     }
     if (body)
         json_object_put(body);
-    return respond(conn, status, message, *cookie ? cookie : NULL);
+    if (*cookie) {
+        char legacy_cookie[128];
+        clear_legacy_session_cookie(c, legacy_cookie, sizeof(legacy_cookie));
+        return respond_cookies(conn, status, message, cookie, legacy_cookie);
+    }
+    return respond(conn, status, message, NULL);
 }
 static enum MHD_Result handler(void *cls, struct MHD_Connection *conn, const char *url,
                                const char *method, const char *version, const char *data,
