@@ -143,7 +143,7 @@ assert 'data-member-route-authenticated="true"' in route_visibility
 assert 'dataset.memberRouteAuthenticated = \'true\'' in auth_nav
 dev_server = (ROOT / 'scripts/serve-dev.py').read_text()
 assert "if '\\r' in location or '\\n' in location:" in dev_server
-assert '# NOSONAR:' in dev_server and 'quote_via=quote' in dev_server
+assert "self.path.replace('\\r', '').replace('\\n', '')" in dev_server and 'quote_via=quote' in dev_server
 assert 'crypto.getRandomValues' in auth_nav and 'Math.random' not in auth_nav
 host = (ROOT / 'web/host.js').read_text()
 assert not re.search(r'innerHTML|outerHTML|document\.write|\beval\s*\(|new\s+Function', host)
