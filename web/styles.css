@@ -237,11 +237,11 @@ h1 span,
 @keyframes home-hero-from-right { from { opacity: 0; transform: translateX(34px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes home-hero-from-center { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
 @keyframes home-hero-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes advance-glyph-cyan { 0% { opacity: 0; } .826% { opacity: 1; } 1.376%, 3.670% { opacity: 0; } 8.257%, 100% { opacity: 1; } }
-@keyframes advance-glyph-white { 0% { opacity: 1; } .826%, 100% { opacity: 0; } }
-@keyframes advance-glyph-hash { 0% { opacity: 0; } 1.376% { opacity: 1; } 3.670%, 100% { opacity: 0; } }
-@keyframes advance-glyph-one { 0% { opacity: 0; } 3.670% { opacity: 1; } 5.963%, 100% { opacity: 0; } }
-@keyframes advance-glyph-zero { 0% { opacity: 0; } 5.963% { opacity: 1; } 8.257%, 100% { opacity: 0; } }
+@keyframes advance-glyph-cyan { 0% { opacity: 0; } 6.488% { opacity: 1; } 7.007%, 9.170% { opacity: 0; } 13.495%, 100% { opacity: 1; } }
+@keyframes advance-glyph-white { 0% { opacity: 1; } 6.488%, 100% { opacity: 0; } }
+@keyframes advance-glyph-hash { 0% { opacity: 0; } 7.007% { opacity: 1; } 9.170%, 100% { opacity: 0; } }
+@keyframes advance-glyph-one { 0% { opacity: 0; } 9.170% { opacity: 1; } 11.332%, 100% { opacity: 0; } }
+@keyframes advance-glyph-zero { 0% { opacity: 0; } 11.332% { opacity: 1; } 13.495%, 100% { opacity: 0; } }
 .advance-glitch-a { display: inline-block; margin-right: -.025em; }
 .advance-glitch-letter { position: relative; display: inline-block; color: transparent; }
 .advance-glyph { position: absolute; inset: 0; display: grid; place-items: center; color: var(--cyan); opacity: 0; pointer-events: none; user-select: none; }
@@ -268,11 +268,11 @@ h1 span,
   html.home-hero-intro:not(.home-meaning-intro) .hero-rain-control { opacity: 0; visibility: hidden; }
   html.home-hero-intro.home-meaning-intro .hero-rain-pause,
   html.home-hero-intro.home-meaning-intro .hero-rain-control { opacity: 1; visibility: visible; animation: home-hero-fade 2.2s cubic-bezier(.2,.7,.25,1) .38s both; }
-  html.home-hero-intro .advance-glyph--cyan { animation: advance-glyph-cyan 21.8s steps(1, end) 5s infinite; }
-  html.home-hero-intro .advance-glyph--white { animation: advance-glyph-white 21.8s steps(1, end) 5s infinite; }
-  html.home-hero-intro .advance-glyph--hash { animation: advance-glyph-hash 21.8s steps(1, end) 5s infinite; }
-  html.home-hero-intro .advance-glyph--one { animation: advance-glyph-one 21.8s steps(1, end) 5s infinite; }
-  html.home-hero-intro .advance-glyph--zero { animation: advance-glyph-zero 21.8s steps(1, end) 5s infinite; }
+  html.home-hero-intro .advance-glyph--cyan { animation: advance-glyph-cyan 23.12s steps(1, end) 5s infinite; }
+  html.home-hero-intro .advance-glyph--white { animation: advance-glyph-white 23.12s steps(1, end) 5s infinite; }
+  html.home-hero-intro .advance-glyph--hash { animation: advance-glyph-hash 23.12s steps(1, end) 5s infinite; }
+  html.home-hero-intro .advance-glyph--one { animation: advance-glyph-one 23.12s steps(1, end) 5s infinite; }
+  html.home-hero-intro .advance-glyph--zero { animation: advance-glyph-zero 23.12s steps(1, end) 5s infinite; }
 }
 .tiny-cross {
   color: var(--cyan);
