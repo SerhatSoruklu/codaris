@@ -95,7 +95,8 @@ const codarisLoader = (() => {
     requestComplete = false;
     introDone = false;
     startedAt = Number.isFinite(timing.startedAt) ? timing.startedAt : Date.now();
-    introDuration = Number.isFinite(timing.introDuration) ? Math.max(2000, Math.min(4000, timing.introDuration)) : 2000 + Math.floor(Math.random() * 2001);
+    const randomDuration = window.crypto.getRandomValues(new Uint32Array(1))[0] % 2001;
+    introDuration = Number.isFinite(timing.introDuration) ? Math.max(2000, Math.min(4000, timing.introDuration)) : 2000 + randomDuration;
     pendingNetworkProgress = 0;
     pendingNetworkMessage = initialMessage(kind);
     networkIndeterminate = false;

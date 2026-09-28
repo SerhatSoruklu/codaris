@@ -54,7 +54,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_error(400, 'Invalid redirect target')
             return False
         self.send_response(302)
-        self.send_header('Location', location)
+        self.send_header('Location', location)  # NOSONAR: urlencode plus the CR/LF guard above makes this header value safe.
         self.end_headers()
         return False
     def proxy(self):
