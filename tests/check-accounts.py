@@ -83,7 +83,8 @@ def call(path, data=None, cookie='', expected=200, request_origin=origin):
     conn.request('GET' if data is None else 'POST', '/api/'+path, None if data is None else json.dumps(data), headers)
     response = conn.getresponse()
     body = json.loads(response.read())
-    received = response.getheader('Set-Cookie')
+    received = next((value for key, value in response.getheaders()
+                     if key.lower() == 'set-cookie' and value.startswith('codaris_session=')), None)
     status = response.status
     conn.close()
     assert status == expected, (path,status,expected,body)
@@ -131,7 +132,7 @@ try:
             raise AssertionError(server.stderr.read().decode())
         try:
             health, _ = call('health')
-            assert health.get('contact_api') == 1 and health.get('mail_sender_aligned') is True
+            assert health.get('contact_api') == 1 and health.get('page_access_api') == 1 and health.get('mail_sender_aligned') is True
             break
         except OSError:
             time.sleep(.05)
@@ -154,11 +155,14 @@ try:
     call('register',registration,expected=201)
     call('register',registration,expected=409)
     call('me',expected=401)
-    assert raw_get('session')[0] == 401
+    assert raw_get('session')[0] == 200
+    assert json.loads(raw_get('session')[2])['authenticated'] is False
+    assert raw_get('page-access')[0] == 401
     call('login',dict(identifier=registration['email'],password='wrong'),expected=401)
     _,cookie=call('login',dict(identifier=registration['email'],password=password))
-    assert 'HttpOnly' in cookie and 'SameSite=Strict' in cookie
-    assert raw_get('session',cookie)[0] == 204
+    assert 'Path=/' in cookie and 'HttpOnly' in cookie and 'SameSite=Strict' in cookie
+    assert json.loads(raw_get('session',cookie)[2])['authenticated'] is True
+    assert raw_get('page-access',cookie)[0] == 204
     me,_=call('me',cookie=cookie)
     assert not me['email_verified'] and me['email']=='test@example.test'
     assert len(me['membership_id'])==24
@@ -332,7 +336,8 @@ try:
     call('login',dict(identifier='new@example.test',password=password),expected=401)
     _,cookie=call('login',dict(identifier='new@example.test',password=new_password))
     call('logout',{},cookie);call('me',cookie=cookie,expected=401)
-    assert raw_get('session',cookie)[0] == 401
+    assert json.loads(raw_get('session',cookie)[2])['authenticated'] is False
+    assert raw_get('page-access',cookie)[0] == 401
     assert psql('SELECT count(*) FROM app.users').stdout.strip()=='1'
     assert psql("SELECT count(*) FROM app.mail_outbox WHERE sent_at IS NOT NULL AND encrypted_token<>''").stdout.strip()=='0'
     # Recovery queue failures must not disclose whether an account exists.

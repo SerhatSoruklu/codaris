@@ -1,5 +1,193 @@
 /* Minimal same-origin session probe for the shared header; no account data is read. */
 (() => {
+// Play the home entrance on each page load; reveal below-fold content when seen.
+if (location.pathname === '/' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const meaning = document.querySelector('.meaning-overview');
+  if (meaning && 'IntersectionObserver' in window) {
+    const meaningObserver = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      document.documentElement.classList.add('home-meaning-intro');
+      meaning.classList.add('home-meaning-intro');
+      meaningObserver.disconnect();
+    }, {threshold: 0.05, rootMargin: '0px 0px 12% 0px'});
+    meaningObserver.observe(meaning);
+  } else if (meaning) {
+    document.documentElement.classList.add('home-meaning-intro');
+    meaning.classList.add('home-meaning-intro');
+  }
+}
+// Shared transition screen. Network phases are reported by the request owner;
+// dashboard completion waits for the authenticated profile response.
+const codarisLoader = (() => {
+  const screen = document.querySelector('[data-codaris-loader]');
+  if (!screen) return null;
+  const titles = {login: 'Welcome back', register: 'Creating your account', logout: 'Signing you out', dashboard: 'Opening your workspace'};
+  const title = screen.querySelector('[data-codaris-loader-title]');
+  const phase = screen.querySelector('[data-codaris-loader-phase]');
+  const progress = screen.querySelector('[data-codaris-loader-progress]');
+  const bar = screen.querySelector('[data-codaris-loader-bar]');
+  const percent = screen.querySelector('[data-codaris-loader-percent]');
+  const fill = screen.querySelector('[data-codaris-loader-fill]');
+  let active = false;
+  let current = 0;
+  let navigationLoaded = false;
+  let requestComplete = false;
+  let activeOperation = '';
+  let introDone = false;
+  let startedAt = 0;
+  let introDuration = 3000;
+  let pendingNetworkProgress = 0;
+  let pendingNetworkMessage = '';
+  let networkIndeterminate = false;
+  let animationFrame = 0;
+  const track = screen.querySelector('.codaris-loader__track');
+  function hide() {
+    active = false;
+    if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    document.body.removeAttribute('data-codaris-busy');
+    screen.hidden = true;
+    screen.setAttribute('aria-hidden', 'true');
+  }
+  function paint(value, message) {
+    current = Math.max(0, Math.min(100, Math.floor(value)));
+    const ratio = current / 100;
+    screen.style.setProperty('--codaris-loader-progress', ratio);
+    bar.style.transform = `scaleX(${ratio})`;
+    fill.setAttribute('y', String(40 * (1 - ratio)));
+    fill.setAttribute('height', String(40 * ratio));
+    percent.textContent = String(current);
+    progress.setAttribute('aria-valuenow', String(current));
+    if (message) phase.textContent = message;
+  }
+  function working(message) {
+    if (!active) return;
+    networkIndeterminate = true;
+    pendingNetworkMessage = message || pendingNetworkMessage;
+    if (!introDone) return;
+    track.classList.add('is-indeterminate');
+    percent.hidden = true;
+    progress.removeAttribute('aria-valuenow');
+    progress.setAttribute('aria-label', 'Network activity');
+    if (message) phase.textContent = message;
+  }
+  function initialMessage(kind) {
+    return ({login: 'Preparing your sign-in request…', register: 'Preparing your account request…', logout: 'Preparing your sign-out request…', dashboard: 'Preparing your workspace…'})[kind] || 'Preparing your request…';
+  }
+  function showNetworkProgress() {
+    track.classList.remove('is-indeterminate');
+    percent.hidden = false;
+    progress.setAttribute('aria-label', 'Transfer progress');
+    paint(50 + pendingNetworkProgress * 0.5, pendingNetworkMessage);
+  }
+  function finishIntro() {
+    if (introDone || !active) return;
+    introDone = true;
+    if (networkIndeterminate) working(pendingNetworkMessage);
+    else showNetworkProgress();
+    if (requestComplete && (navigationLoaded || !['login', 'logout', 'register', 'dashboard'].includes(activeOperation))) hide();
+  }
+  function start(kind, heading = '', timing = {}) {
+    if (typeof kind !== 'string' || (!titles[kind] && !heading)) return;
+    active = true;
+    current = 0;
+    activeOperation = kind;
+    navigationLoaded = false;
+    requestComplete = false;
+    introDone = false;
+    startedAt = Number.isFinite(timing.startedAt) ? timing.startedAt : Date.now();
+    introDuration = Number.isFinite(timing.introDuration) ? Math.max(2000, Math.min(4000, timing.introDuration)) : 2000 + Math.floor(Math.random() * 2001);
+    pendingNetworkProgress = 0;
+    pendingNetworkMessage = initialMessage(kind);
+    networkIndeterminate = false;
+    title.textContent = heading || titles[kind];
+    screen.hidden = false;
+    screen.setAttribute('aria-hidden', 'false');
+    document.body.dataset.codarisBusy = 'true';
+    track.classList.remove('is-indeterminate');
+    percent.hidden = false;
+    progress.setAttribute('aria-label', 'Request progress');
+    const tick = () => {
+      if (!active || introDone) return;
+      const elapsed = Math.max(0, Date.now() - startedAt);
+      paint(Math.min(50, elapsed / introDuration * 50), initialMessage(kind));
+      if (elapsed >= introDuration) finishIntro();
+      else animationFrame = window.requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  function update(value, message) {
+    if (!active) return;
+    pendingNetworkProgress = Math.max(0, Math.min(100, value));
+    pendingNetworkMessage = message || pendingNetworkMessage;
+    networkIndeterminate = false;
+    if (introDone) showNetworkProgress();
+  }
+  function complete(kind, success) {
+    if (!active) return;
+    // The profile request is the real readiness check after a dashboard route
+    // loads. Other account operations complete against their own response.
+    if (kind === 'me' && activeOperation === 'dashboard') kind = 'dashboard';
+    if (!success) {
+      hide();
+      return;
+    }
+    requestComplete = true;
+    pendingNetworkProgress = 100;
+    pendingNetworkMessage = ({register: 'Account created. Opening confirmation…', login: 'Sign-in confirmed. Opening your workspace…', logout: 'Sign-out confirmed. Finishing…', dashboard: 'Your workspace is ready…'})[kind] || 'Request complete.';
+    networkIndeterminate = false;
+    if (!introDone) {
+      if (kind === 'login' || kind === 'logout' || kind === 'register') {
+        try { sessionStorage.setItem('codaris-loader-navigation', JSON.stringify({kind, startedAt, introDuration})); } catch {}
+      }
+      return;
+    }
+    track.classList.remove('is-indeterminate');
+    percent.hidden = false;
+    progress.setAttribute('aria-label', 'Request progress');
+    paint(100, ({register: 'Account created. Opening confirmation…', login: 'Sign-in confirmed. Opening your workspace…', logout: 'Sign-out confirmed. Finishing…', dashboard: 'Your workspace is ready…'})[kind] || 'Request complete.');
+    if (kind === 'login' || kind === 'logout' || kind === 'register') {
+      try { sessionStorage.setItem('codaris-loader-navigation', JSON.stringify({kind, startedAt, introDuration})); } catch {}
+      return;
+    }
+    if (kind !== 'dashboard' || navigationLoaded) hide();
+  }
+  try {
+    const stored = sessionStorage.getItem('codaris-loader-navigation');
+    if (stored) {
+      sessionStorage.removeItem('codaris-loader-navigation');
+      const navigation = JSON.parse(stored);
+      // A successful sign-in commonly lands directly on the dashboard. Keep
+      // its loader active until the profile request confirms workspace access.
+      const isDashboard = /^\/dashboard(?:\/|$)/.test(location.pathname);
+      const kind = ((navigation.kind === 'login' || navigation.kind === 'dashboard') && isDashboard)
+        ? 'dashboard'
+        : navigation.kind === 'dashboard' ? 'login' : navigation.kind;
+      start(kind, '', navigation);
+      window.addEventListener('load', () => {
+        navigationLoaded = true;
+        if (kind !== 'dashboard') {
+          requestComplete = true;
+          pendingNetworkProgress = 100;
+          pendingNetworkMessage = kind === 'logout' ? 'Signed out.' : kind === 'register' ? 'Confirmation page ready.' : 'Workspace page ready.';
+          networkIndeterminate = false;
+          if (introDone) showNetworkProgress();
+        }
+        if (introDone && requestComplete) hide();
+      }, {once: true});
+    }
+  } catch {}
+  function navigateToDashboard(event) {
+    const anchor = event.target.closest('a[href]');
+    if (!anchor || anchor.target || anchor.hasAttribute('download')) return;
+    const destination = new URL(anchor.href, location.href);
+    if (destination.origin !== location.origin || destination.pathname !== '/dashboard/' || location.pathname === '/dashboard/') return;
+    start('dashboard');
+    try { sessionStorage.setItem('codaris-loader-navigation', JSON.stringify({kind: 'dashboard', startedAt, introDuration})); } catch {}
+  }
+  document.addEventListener('click', navigateToDashboard, true);
+  return {start, update, working, complete, isLoggingOut: () => activeOperation === 'logout', isActive: kind => active && activeOperation === kind};
+})();
+window.codarisLoader = codarisLoader;
   const nav = document.querySelector('[data-auth-nav]');
   if (!nav) return;
 
@@ -8,6 +196,7 @@
   const loggedIn = [...nav.querySelectorAll('[data-auth-logged-in]')];
   const dashboard = nav.querySelector('a[href^="/dashboard/"]');
   const onDashboard = /^\/dashboard(?:\/|$)/.test(location.pathname);
+  const memberRoute = document.body.dataset.memberRoute === 'true';
   const joinCallsToAction = [...document.querySelectorAll('a[href]')].flatMap(anchor => {
     // The shared header has its own signed-in/out controls and should not be
     // relabelled as a page CTA while those controls are switching states.
@@ -18,16 +207,81 @@
     if (plainLabel.toLowerCase() !== 'join the coalition') return [];
     const labelNode = [...anchor.childNodes].find(node =>
       node.nodeType === Node.TEXT_NODE && /join the coalition/i.test(node.nodeValue));
-    return labelNode ? [{anchor, labelNode, originalHref: anchor.getAttribute('href'), originalLabel: labelNode.nodeValue}] : [];
+    if (!labelNode) return [];
+    anchor.classList.add('auth-state-cta');
+    return [{anchor, labelNode, originalHref: anchor.getAttribute('href'), originalLabel: labelNode.nodeValue}];
   });
   let lastCheckedAt = 0;
   let stateVersion = 0;
   let sessionRequest = null;
+  const memberMenu = nav.querySelector('[data-member-menu]');
+  const memberMenuTrigger = nav.querySelector('[data-member-menu-trigger]');
+  const memberMenuPanel = nav.querySelector('[data-member-menu-panel]');
+  let memberMenuCloseTimer = 0;
+
+  function closeMemberMenu(restoreFocus = false) {
+    if (!memberMenuTrigger || !memberMenuPanel) return;
+    memberMenuTrigger.setAttribute('aria-expanded', 'false');
+    memberMenuPanel.removeAttribute('data-open');
+    window.clearTimeout(memberMenuCloseTimer);
+    memberMenuCloseTimer = window.setTimeout(() => {
+      if (memberMenuTrigger.getAttribute('aria-expanded') === 'false') memberMenuPanel.hidden = true;
+    }, 180);
+    if (restoreFocus) memberMenuTrigger.focus();
+  }
+  memberMenuTrigger?.addEventListener('click', () => {
+    const opening = memberMenuTrigger.getAttribute('aria-expanded') !== 'true';
+    window.clearTimeout(memberMenuCloseTimer);
+    memberMenuTrigger.setAttribute('aria-expanded', String(opening));
+    if (opening) {
+      memberMenuPanel.hidden = false;
+      window.requestAnimationFrame(() => {
+        if (memberMenuTrigger.getAttribute('aria-expanded') === 'true') memberMenuPanel.setAttribute('data-open', 'true');
+      });
+    } else {
+      memberMenuPanel.removeAttribute('data-open');
+      memberMenuCloseTimer = window.setTimeout(() => { memberMenuPanel.hidden = true; }, 180);
+    }
+  });
+  memberMenu?.addEventListener('click', event => {
+    if (event.target.closest('a')) closeMemberMenu();
+  });
+  document.addEventListener('pointerdown', event => {
+    if (memberMenu && !memberMenu.contains(event.target)) closeMemberMenu();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && memberMenuTrigger?.getAttribute('aria-expanded') === 'true') {
+      closeMemberMenu(true);
+    }
+  });
 
   function renderAuthState(state) {
     stateVersion += 1;
     nav.dataset.authState = state;
     const authenticated = state === 'authenticated';
+    if (!authenticated) closeMemberMenu();
+    if (authenticated && location.pathname === '/login/') {
+      const requested = new URLSearchParams(location.search).get('return_to');
+      if (requested && requested.startsWith('/') && !requested.startsWith('//') && !requested.includes('\\')) {
+        const target = new URL(requested, location.origin);
+        if (target.origin === location.origin && target.pathname !== '/login/' && !target.pathname.startsWith('/api/')) {
+          location.replace(target.pathname + target.search + target.hash);
+          return;
+        }
+      }
+    }
+    if (memberRoute) {
+      if (authenticated) document.body.dataset.memberRouteAuthenticated = 'true';
+      else delete document.body.dataset.memberRouteAuthenticated;
+      if (state === 'unauthenticated') {
+        const returnTo = location.pathname + location.search + location.hash;
+        if (onDashboard) {
+          try { sessionStorage.setItem('codaris-loader-navigation', JSON.stringify({kind: 'dashboard', startedAt: Date.now()})); } catch {}
+        }
+        location.replace('/login/?return_to=' + encodeURIComponent(returnTo));
+        return;
+      }
+    }
     // Keep the auth area quiet until the session probe resolves. This avoids
     // briefly showing signed-out actions to members on every page navigation.
     // If the API is unavailable, render the signed-out actions as a fallback.
@@ -44,7 +298,10 @@
         ? originalLabel.replace(/join the coalition/i, 'Dashboard')
         : originalLabel;
     });
-    if (status) status.textContent = state === 'unknown' ? 'Account status is unavailable.' : '';
+    if (state === 'authenticated' || state === 'unauthenticated') document.body.dataset.authStateReady = 'true';
+    if (status) status.textContent = state === 'unknown'
+      ? (memberRoute ? 'Access could not be verified. Check your connection and refresh.' : 'Account status is unavailable.')
+      : '';
   }
 
   async function refreshAuthState(force) {
@@ -64,9 +321,12 @@
           signal: controller.signal,
         });
         if (requestVersion !== stateVersion) return;
-        if (response.status === 204) renderAuthState('authenticated');
-        else if (response.status === 401) renderAuthState('unauthenticated');
-        else renderAuthState('unknown');
+        if (!response.ok) {
+          renderAuthState('unknown');
+          return;
+        }
+        const session = await response.json();
+        renderAuthState(session.authenticated === true ? 'authenticated' : 'unauthenticated');
       } catch {
         if (requestVersion === stateVersion) renderAuthState('unknown');
       } finally {
@@ -81,7 +341,10 @@
   document.addEventListener('codaris-auth-required', () => renderAuthState('unauthenticated'));
   // A page restored from the back/forward cache can carry an old signed-out
   // header even after login in another page. Recheck on every return to it.
-  window.addEventListener('pageshow', () => refreshAuthState(true));
+  window.addEventListener('pageshow', event => {
+    if (memberRoute && event.persisted) delete document.body.dataset.memberRouteAuthenticated;
+    refreshAuthState(true);
+  });
   window.addEventListener('focus', () => refreshAuthState(true));
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) refreshAuthState(true);

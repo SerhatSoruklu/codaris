@@ -1,6 +1,6 @@
 # Web frameworks and technologies
 
-The public `/web-frameworks/` topic is linked from the member learning panel. It uses the existing documentation layout and native disclosure navigation; reading requires no authentication or JavaScript. The catalogue covers frameworks, libraries, runtimes, CMS tools and static-site technologies, preserving the research pack's type labels rather than treating every entry as a framework.
+The member-only `/web-frameworks/` topic is linked from the member learning panel. It uses the existing documentation layout and native disclosure navigation; after authentication, reading does not require JavaScript. The catalogue covers frameworks, libraries, runtimes, CMS tools and static-site technologies, preserving the research pack's type labels rather than treating every entry as a framework.
 
 ## Sources
 

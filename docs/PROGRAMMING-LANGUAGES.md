@@ -1,6 +1,6 @@
 # Programming languages library
 
-`/programming-languages/` is a public, static educational topic linked from the member dashboard's learning panel. The page does not require membership authentication. All source-pack content is public research, not member data.
+`/programming-languages/` is a member-only, static educational topic linked from the member dashboard's learning panel. The route requires an authenticated session. Source-pack content is research material, not member data.
 
 ## Data and provenance
 

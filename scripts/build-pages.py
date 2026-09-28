@@ -57,7 +57,13 @@ for page in pages:
     description = html.escape(page['description'], quote=True)
     if page.get('indexing') not in {'index', 'noindex'}:
         raise SystemExit('Every route must declare indexing as index or noindex: ' + route)
-    indexable = page['indexing'] == 'index'
+    if page.get('access', 'public') not in {'public', 'member'}:
+        raise SystemExit('Route access must be public or member: ' + route)
+    member_only = page.get('access') == 'member'
+    client_guard = page.get('client_guard', False)
+    if client_guard and not member_only:
+        raise SystemExit('Client-guarded routes must also be member-only: ' + route)
+    indexable = page['indexing'] == 'index' and not member_only
     seo = '<meta name="robots" content="noindex, follow">' if not indexable or not production or not origin else ''
     if origin:
         url = origin + route
@@ -106,14 +112,17 @@ for page in pages:
                      lambda match: '' if production else match.group(1), content, flags=re.S)
     if page.get('development_only'):
         content = '<section class="wrap section resource-page"><p class="eyebrow">MEMBERSHIP / COMING SOON</p><h1 class="page-title">' + title + '</h1><p>Staff access is not available yet.</p><a class="button" href="/join/">Explore membership</a></section>'
-    values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'LEGALCSS': legal_css, 'MEANINGCSS': meaning_css, 'CONTACTCSS': contact_css, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'FOOTER': footer, 'RUNTIME': runtime}
+    home_intro = '<script src="/home-intro.js?v=1"></script>' if not slug else ''
+    values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HOMEINTRO': home_intro, 'LEGALCSS': legal_css, 'MEANINGCSS': meaning_css, 'CONTACTCSS': contact_css, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'MEMBER_ROUTE': 'true' if member_only else 'false', 'FOOTER': footer, 'RUNTIME': runtime}
     document = shell
     for key, value in values.items():
         document = document.replace('{{' + key + '}}', value)
     target = OUT / slug
     target.mkdir(parents=True, exist_ok=True)
     (target / 'index.html').write_text(document, encoding='utf-8')
-robots = 'User-agent: *\nAllow: /\nDisallow: /api/\n'
+member_routes = sorted(page['slug'] for page in pages if page.get('access') == 'member')
+server_guarded_routes = sorted(page['slug'] for page in pages if page.get('access') == 'member' and not page.get('client_guard'))
+robots = 'User-agent: *\nAllow: /\nDisallow: /api/\n' + ''.join('Disallow: /' + route + '/\n' for route in member_routes)
 if origin and production:
     (OUT / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join('<url><loc>' + html.escape(url) + '</loc></url>' for url in urls) + '</urlset>\n', encoding='utf-8')
     robots += 'Sitemap: ' + origin + '/sitemap.xml\n'
@@ -124,6 +133,7 @@ shutil.copy2(WEB / 'legal.css', OUT / 'legal.css')
 shutil.copy2(WEB / 'meaning.css', OUT / 'meaning.css')
 shutil.copy2(WEB / 'contact.css', OUT / 'contact.css')
 shutil.copy2(WEB / 'auth-nav.js', OUT / 'auth-nav.js')
+shutil.copy2(WEB / 'home-intro.js', OUT / 'home-intro.js')
 print(f'Built {len(pages)} static routes; ' + ('production SEO enabled.' if production and origin else 'preview noindex; set CODARIS_PRODUCTION=1 for production indexing.'))
 
 # Generate the Nginx include outside the public document root.
@@ -131,9 +141,22 @@ deploy_out = ROOT / 'build/deploy'
 deploy_out.mkdir(parents=True, exist_ok=True)
 (deploy_out / 'security-headers.conf').write_text(''.join(
     'add_header ' + name + ' "' + value + '" always;\n' for name, value in headers.items()), encoding='utf-8')
+member_route_pattern = '|'.join(server_guarded_routes)
+member_routes_conf = (
+    'location ~ ^/(?:' + member_route_pattern + ')(?:/|$) {\n'
+    '    if ($request_method !~ ^(GET|HEAD)$) { return 405; }\n'
+    '    auth_request /api/page-access;\n'
+    '    error_page 401 = @codaris_member_login;\n'
+    '    try_files $uri $uri/ =404;\n'
+    '}\n'
+    'location @codaris_member_login {\n'
+    '    return 302 /login/?return_to=$uri;\n'
+    '}\n'
+)
+(deploy_out / 'member-routes.conf').write_text(member_routes_conf, encoding='utf-8')
 # A real 404 document prevents static hosts from falling back to the homepage.
 not_found = shell
-values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page could not be found.', 'SEO': '<meta name="robots" content="noindex, follow">', 'LEGALCSS': '', 'MEANINGCSS': '', 'CONTACTCSS': '', 'HEADER': header, 'BREADCRUMB': '', 'RUNTIME': '', 'CONTENT': '<section class="wrap section resource-page"><h1 class="page-title">Page not found.</h1><p>The page may have moved. <a href="/">Return to the homepage.</a></p></section>'})
+values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page could not be found.', 'SEO': '<meta name="robots" content="noindex, follow">', 'LEGALCSS': '', 'MEANINGCSS': '', 'CONTACTCSS': '', 'HEADER': header, 'BREADCRUMB': '', 'MEMBER_ROUTE': 'false', 'RUNTIME': '', 'CONTENT': '<section class="wrap section resource-page"><h1 class="page-title">Page not found.</h1><p>The page may have moved. <a href="/">Return to the homepage.</a></p></section>'})
 for key, value in values.items():
     not_found = not_found.replace('{{' + key + '}}', value)
 (OUT / '404.html').write_text(not_found, encoding='utf-8')

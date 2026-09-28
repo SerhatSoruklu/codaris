@@ -46,7 +46,7 @@ class Document(HTMLParser):
         if tag == 'a' and 'href' in attrs:
             self.links.append(attrs['href'])
         if tag in ('img', 'script') and attrs.get('src', '').startswith('/'):
-            self.assets.append(attrs['src'])
+            self.assets.append(urlsplit(attrs['src']).path)
         if tag == 'link' and attrs.get('href', '').startswith('/'):
             self.assets.append(attrs['href'])
         if tag == 'meta' and attrs.get('http-equiv', '').lower() == 'content-security-policy':
@@ -63,7 +63,7 @@ class Document(HTMLParser):
             self.script = attrs
             self.script_text = ''
             if 'src' in attrs:
-                assert attrs['src'] in ('/host.js', '/codaris.js', '/auth-nav.js'), 'Unreviewed executable script'
+                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/auth-nav.js', '/home-intro.js'), 'Unreviewed executable script'
             else:
                 assert attrs.get('type') == 'application/ld+json', 'Inline executable script'
                 self.jsonld_types = []
@@ -111,24 +111,32 @@ for path, doc in pages.items():
             assert parsed.fragment in pages[target].ids, (path, link)
 for entry in REGISTRY:
     doc = pages[OUT / entry['slug'] / 'index.html']
-    assert doc.noindex == (entry['indexing'] == 'noindex' or not production), entry['slug']
+    member_only = entry.get('access') == 'member'
+    assert doc.noindex == (entry['indexing'] == 'noindex' or member_only or not production), entry['slug']
     expected_url = ORIGIN + '/' + entry['slug'] + ('/' if entry['slug'] else '')
     assert doc.canonical == expected_url, (entry['slug'], doc.canonical)
     assert doc.og_image == ORIGIN + '/assets/Codaris_Flag.png', entry['slug']
     assert doc.twitter_card == 'summary_large_image', entry['slug']
-    if production and entry['indexing'] == 'index':
+    if production and entry['indexing'] == 'index' and not member_only:
         assert 'WebPage' in doc.jsonld_types, entry['slug']
         assert ('Organization' in doc.jsonld_types) == (entry['slug'] == ''), entry['slug']
         assert ('BreadcrumbList' in doc.jsonld_types) == bool(entry['slug']), entry['slug']
-expected = sum(entry['indexing'] == 'index' for entry in REGISTRY) if production else 0
+expected = sum(entry['indexing'] == 'index' and entry.get('access') != 'member' for entry in REGISTRY) if production else 0
 if production:
     urls = list(ElementTree.parse(OUT / 'sitemap.xml').iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc'))
 else:
     assert not (OUT / 'sitemap.xml').exists(), 'Preview builds must omit the sitemap'
     urls = []
 assert len(urls) == expected
-expected_urls = {ORIGIN + '/' + entry['slug'] + ('/' if entry['slug'] else '') for entry in REGISTRY if entry['indexing'] == 'index'} if production else set()
+expected_urls = {ORIGIN + '/' + entry['slug'] + ('/' if entry['slug'] else '') for entry in REGISTRY if entry['indexing'] == 'index' and entry.get('access') != 'member'} if production else set()
 assert {node.text for node in urls} == expected_urls
+member_routes = {entry['slug'] for entry in REGISTRY if entry.get('access') == 'member'}
+assert member_routes == {'dashboard', 'topics'} | {topic['slug'] for topic in json.loads((ROOT / 'data/topics/library.json').read_text())}
+route_guard = (ROOT / 'build/deploy/member-routes.conf').read_text()
+assert 'auth_request /api/page-access;' in route_guard
+assert 'dashboard' not in route_guard  # Browser fragment must survive the sign-in redirect.
+for slug in member_routes - {'dashboard'}:
+    assert slug in route_guard
 host = (ROOT / 'web/host.js').read_text()
 assert not re.search(r'innerHTML|outerHTML|document\.write|\beval\s*\(|new\s+Function', host)
 assert 'onerror=' not in (ROOT / 'scripts/build-pages.py').read_text()

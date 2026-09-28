@@ -39,12 +39,68 @@
     "indexing": "index"
   },
   {
+    "slug": "ecosystem/organizational-participation/organizations",
+    "file": "participation-organizations",
+    "title": "Participating Organizations",
+    "label": "Participating Organizations",
+    "description": "How a future CODARIS directory could record organizational relationships, their scope and status without implying endorsement.",
+    "indexing": "index"
+  },
+  {
+    "slug": "ecosystem/organizational-participation/representatives",
+    "file": "participation-representatives",
+    "title": "Organization Representatives",
+    "label": "Organization Representatives",
+    "description": "The proposed distinction between an individual's CODARIS contribution and their organizational affiliation.",
+    "indexing": "index"
+  },
+  {
+    "slug": "ecosystem/organizational-participation/sponsored-initiatives",
+    "file": "participation-sponsored-initiatives",
+    "title": "Sponsored Initiatives",
+    "label": "Sponsored Initiatives",
+    "description": "How CODARIS could describe material support for initiatives while keeping technical review independent.",
+    "indexing": "index"
+  },
+  {
+    "slug": "ecosystem/organizational-participation/supporters-and-funding",
+    "file": "participation-supporters",
+    "title": "Supporters and Funding",
+    "label": "Supporters and Funding",
+    "description": "Proposed principles for transparent financial and in-kind support that does not confer technical control.",
+    "indexing": "index"
+  },
+  {
+    "slug": "ecosystem/organizational-participation/working-groups",
+    "file": "participation-working-groups",
+    "title": "Working Groups",
+    "label": "Working Groups",
+    "description": "The proposed CODARIS working-group model for scoped, evidence-led technical initiatives and reviewable outputs.",
+    "indexing": "index"
+  },
+  {
+    "slug": "ecosystem/organizational-participation/get-involved",
+    "file": "participation-get-involved",
+    "title": "Get Involved",
+    "label": "Get Involved",
+    "description": "How to start an exploratory conversation about technical contributions to the CODARIS ecosystem.",
+    "indexing": "index"
+  },
+  {
     "slug": "join",
     "title": "Join the Coalition",
     "label": "Join the coalition",
     "description": "Learn about CODARIS membership and apply to join a developer coalition advancing responsible intelligent systems.",
     "interactive": true,
     "indexing": "index"
+  },
+  {
+    "slug": "join/success",
+    "file": "registration-success",
+    "title": "Account Created",
+    "label": "Account created",
+    "description": "Your CODARIS account was created. Check your email to verify the address before signing in.",
+    "indexing": "noindex"
   },
   {
     "slug": "privacy",
@@ -76,6 +132,14 @@
     "indexing": "index"
   },
   {
+    "slug": "logout",
+    "title": "Signing out",
+    "label": "Signing out",
+    "description": "Securely sign out of your CODARIS account.",
+    "interactive": true,
+    "indexing": "noindex"
+  },
+  {
     "slug": "login",
     "title": "Member Login",
     "label": "Member Login",
@@ -91,6 +155,8 @@
     "description": "Manage your CODARIS profile, account security and learning progress in the member workspace.",
     "placeholder": true,
     "interactive": true,
+    "access": "member",
+    "client_guard": true,
     "indexing": "noindex"
   },
   {
@@ -125,6 +191,7 @@
   },
   {
     "slug": "programming-languages",
+    "access": "member",
     "title": "Programming Languages | Developer Field Guide",
     "label": "Programming Languages",
     "description": "Explore 674 programming languages, technical guides, research snapshots, geography and source methodology in the CODARIS developer library.",
@@ -133,6 +200,7 @@
   },
   {
     "slug": "web-frameworks",
+    "access": "member",
     "title": "Web Frameworks & Technologies",
     "label": "Web Frameworks",
     "description": "Explore 631 web technologies, technical guides, architecture, usage research and demographic methodology in the CODARIS developer library.",
@@ -141,6 +209,7 @@
   },
   {
     "slug": "databases",
+    "access": "member",
     "title": "Databases & Data Platforms",
     "label": "Databases",
     "description": "Explore 643 databases and data platforms, technical guides, data models, usage research and source methodology in the CODARIS developer library.",
@@ -149,6 +218,7 @@
   },
   {
     "slug": "runtimes",
+    "access": "member",
     "title": "Runtimes & Execution Platforms",
     "label": "Runtimes & Execution Platforms",
     "description": "A runtime turns executable code into work inside a host environment. Distinguish language implementation, virtual machine, engine, host APIs and managed service before comparing products. The pack spans all of these layers, including histor",
@@ -157,6 +227,7 @@
   },
   {
     "slug": "package-build-tools",
+    "access": "member",
     "title": "Package Managers, Build Tools & Bundlers",
     "label": "Package Managers, Build Tools & Bundlers",
     "description": "Dependency resolution, package distribution, compilation and bundling are different stages of producing software. A reproducible release requires the inputs and transformations to be understood, not merely a build command that succeeds once",
@@ -165,6 +236,7 @@
   },
   {
     "slug": "developer-environments",
+    "access": "member",
     "title": "IDEs, Editors & Developer Environments",
     "label": "IDEs, Editors & Developer Environments",
     "description": "An editor is one part of the development environment. Language servers, debuggers, toolchains, extensions, terminals and remote workspaces determine how code is understood and executed. Choose configurations that remain understandable to th",
@@ -173,6 +245,7 @@
   },
   {
     "slug": "version-control",
+    "access": "member",
     "title": "Version Control & Code Hosting",
     "label": "Version Control & Code Hosting",
     "description": "Version control records changes and relationships between revisions. Hosting services add collaboration, review and automation around that history. A sound workflow makes it possible to explain, review and recover a change.",
@@ -181,6 +254,7 @@
   },
   {
     "slug": "testing-qa",
+    "access": "member",
     "title": "Testing & QA",
     "label": "Testing & QA",
     "description": "Testing collects evidence about behavior under selected conditions. Quality work combines focused tests, boundary checks, realistic integration paths and useful failure diagnosis. A tool catalogue is not a test strategy by itself.",
@@ -189,6 +263,7 @@
   },
   {
     "slug": "cloud-hosting",
+    "access": "member",
     "title": "Cloud, Hosting & Serverless",
     "label": "Cloud, Hosting & Serverless",
     "description": "Cloud architecture distributes responsibility between your team and a provider. Virtual machines, managed platforms, functions, object storage and edge networks expose different control surfaces. Choose from explicit requirements rather tha",
@@ -197,6 +272,7 @@
   },
   {
     "slug": "containers-infrastructure",
+    "access": "member",
     "title": "Containers, Orchestration & Infrastructure",
     "label": "Containers, Orchestration & Infrastructure",
     "description": "Containers package processes and dependencies; orchestrators schedule and reconcile workloads; infrastructure tools manage external resources. These layers interact but have different state and failure models. Keep application health separa",
@@ -205,6 +281,7 @@
   },
   {
     "slug": "cicd-automation",
+    "access": "member",
     "title": "CI/CD & DevOps Automation",
     "label": "CI/CD & DevOps Automation",
     "description": "Continuous integration checks changes together; delivery prepares deployable releases; deployment changes running systems. A pipeline is executable code with access to artifacts and often sensitive credentials, so its trust boundary deserve",
@@ -213,6 +290,7 @@
   },
   {
     "slug": "servers-networking",
+    "access": "member",
     "title": "Web Servers, Proxies & Networking",
     "label": "Web Servers, Proxies & Networking",
     "description": "A request may pass through DNS, transport security, proxies, load balancers and an application server before reaching business logic. Each hop can change routing, headers, buffering and timeout behavior. Trace the full path when diagnosing ",
@@ -221,6 +299,7 @@
   },
   {
     "slug": "messaging-streaming",
+    "access": "member",
     "title": "Messaging, Queues & Event Streaming",
     "label": "Messaging, Queues & Event Streaming",
     "description": "Messaging separates the time and location of producing work from consuming it. Queues, retained event logs, publish/subscribe brokers and stream processors solve different coordination problems. Start by specifying delivery, ordering, reten",
@@ -229,6 +308,7 @@
   },
   {
     "slug": "observability",
+    "access": "member",
     "title": "Observability, Logging & Monitoring",
     "label": "Observability, Logging & Monitoring",
     "description": "Observability uses evidence from a running system to investigate behavior. Metrics, logs, traces and profiles answer different questions. Instrumentation and collection are separate from storage, querying and visualization; a dashboard alon",
@@ -237,6 +317,7 @@
   },
   {
     "slug": "apis-auth-integration",
+    "access": "member",
     "title": "APIs, Protocols, Auth & Integration",
     "label": "APIs, Protocols, Auth & Integration",
     "description": "An API defines a contract across a boundary. Protocols transport messages; schemas describe shapes; identity standards establish authentication or authorization flows; products implement parts of those systems. Keeping these layers separate",
@@ -245,6 +326,7 @@
   },
   {
     "slug": "ai-developer-tools",
+    "access": "member",
     "title": "AI Developer Tools & Coding Systems",
     "label": "AI Developer Tools & Coding Systems",
     "description": "AI coding tools combine models, interfaces, repository context and sometimes executable tools. Completion, chat, code review and autonomous task execution have different capabilities and risk boundaries. Evaluate the actual workflow and its",
@@ -253,6 +335,7 @@
   },
   {
     "slug": "software-development",
+    "access": "member",
     "title": "Software Development",
     "label": "Software Development",
     "description": "Build software as a sequence of explicit decisions: define behavior, model the problem, implement a small change, verify it and maintain it. This guide follows one feature from requirement to release instead of treating coding as the entire",
@@ -261,6 +344,7 @@
   },
   {
     "slug": "system-design",
+    "access": "member",
     "title": "System Design",
     "label": "System Design",
     "description": "System design connects requirements to components, state and failure behavior. Begin with the workload and invariants, then introduce distribution only where it solves a concrete problem. A diagram is useful when every arrow has a contract ",
@@ -269,6 +353,7 @@
   },
   {
     "slug": "python",
+    "access": "member",
     "title": "Python",
     "label": "Python",
     "description": "Learn Python through small, testable programs with explicit inputs and errors. The focus here is developer fundamentals: collections, functions, modules, file handling, exceptions and reproducible environments, rather than a catalogue of th",
@@ -277,6 +362,7 @@
   },
   {
     "slug": "angular",
+    "access": "member",
     "title": "Angular",
     "label": "Angular",
     "description": "Angular organizes browser applications through components, templates, services and framework tooling. This guide focuses on data flow, forms, routing and observable behavior. It is educational content; CODARIS itself continues to use C/WebA",
@@ -285,6 +371,7 @@
   },
   {
     "slug": "web-foundations",
+    "access": "member",
     "title": "Web Foundations",
     "label": "Web Foundations",
     "description": "The web combines semantic documents, styling, browser behavior and a request/response protocol. Start with accessible HTML and understand the network and trust boundaries before adding complex interaction. A page should remain understandabl",
@@ -293,6 +380,7 @@
   },
   {
     "slug": "sql-postgresql",
+    "access": "member",
     "title": "SQL & PostgreSQL",
     "label": "SQL & PostgreSQL",
     "description": "Learn relational modelling and SQL by protecting a small application’s invariants. This guide complements the database catalogue with practical schema, query, transaction and execution-plan work. Examples are educational and should be run i",
@@ -301,6 +389,7 @@
   },
   {
     "slug": "topics",
+    "access": "member",
     "title": "Developer Topics",
     "label": "Explore Topics",
     "description": "Explore 22 populated developer topics: 16 research directories and six practical guides with technical explanations, exercises and source documentation.",
