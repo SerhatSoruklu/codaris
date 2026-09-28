@@ -48,6 +48,11 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_error(503, 'Account service unavailable')
             return False
         location = '/login/?' + urlencode({'return_to': self.path}, quote_via=quote)
+        # urllib has already percent-encoded request data. Keep an explicit
+        # response-header boundary check as defense in depth for send_header.
+        if '\r' in location or '\n' in location:
+            self.send_error(400, 'Invalid redirect target')
+            return False
         self.send_response(302)
         self.send_header('Location', location)
         self.end_headers()
