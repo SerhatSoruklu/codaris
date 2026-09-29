@@ -37,8 +37,38 @@ unset DB_PASSWORD ESCAPED_PASSWORD
 export PGPASSFILE="$PASSFILE" PGHOST="$DB_HOST" PGPORT="$DB_PORT" PGDATABASE="$DB_NAME" PGUSER="$DB_USER"
 unset PGPASSWORD CODARIS_DATABASE_URL
 
+if [[ "$(psql -X -Atqc "SELECT current_database() || ':' || current_user")" != "${DB_NAME}:${DB_USER}" ]]; then
+    echo 'Refusing migration: connected database or role does not match the CODARIS live migration target.' >&2
+    exit 1
+fi
+if [[ "$(psql -X -Atqc "SELECT (NOT r.rolsuper AND NOT r.rolcreatedb AND NOT r.rolcreaterole AND pg_get_userbyid(d.datdba) = current_user) FROM pg_roles r CROSS JOIN pg_database d WHERE r.rolname = current_user AND d.datname = current_database()")" != 't' ]]; then
+    echo 'Refusing migration: codaris_migrator must be a non-privileged owner of the target database.' >&2
+    exit 1
+fi
+
 cd "$ROOT"
 python3 "$ROOT/scripts/db-migrate.py"
+# Keep schema ownership with the non-runtime migration role. The API and mail
+# worker share codaris_app and receive only the table operations they use.
 psql -X -v ON_ERROR_STOP=1 -c \
-    'GRANT SELECT ON app.users, app.external_profiles, app.learning_progress, app.schema_migrations TO codaris_readonly;'
-echo 'Live CODARIS migrations applied; DBeaver read access granted to selected non-credential tables.'
+    'GRANT USAGE ON SCHEMA app TO codaris_app;'
+psql -X -v ON_ERROR_STOP=1 -c \
+    'GRANT SELECT, INSERT, UPDATE ON app.users, app.accounts TO codaris_app;'
+psql -X -v ON_ERROR_STOP=1 -c \
+    'GRANT SELECT, INSERT, DELETE ON app.sessions, app.action_tokens TO codaris_app;'
+psql -X -v ON_ERROR_STOP=1 -c \
+    'GRANT SELECT, INSERT, UPDATE, DELETE ON app.mail_outbox, app.contact_outbox TO codaris_app;'
+psql -X -v ON_ERROR_STOP=1 -c \
+    'GRANT SELECT, INSERT, UPDATE, DELETE ON app.rate_limits TO codaris_app;'
+psql -X -v ON_ERROR_STOP=1 -c \
+    'GRANT SELECT, INSERT, DELETE ON app.learning_progress TO codaris_app;'
+psql -X -v ON_ERROR_STOP=1 -c \
+    'GRANT SELECT, INSERT, UPDATE ON app.membership_credentials TO codaris_app;'
+psql -X -v ON_ERROR_STOP=1 -c \
+    'GRANT USAGE, SELECT ON SEQUENCE app.users_id_seq, app.mail_outbox_id_seq, app.contact_outbox_id_seq TO codaris_app;'
+if [[ "$(psql -X -Atqc "SELECT 1 FROM pg_roles WHERE rolname='codaris_readonly'")" == '1' ]]; then
+    psql -X -v ON_ERROR_STOP=1 -c \
+        'GRANT USAGE ON SCHEMA app TO codaris_readonly; GRANT SELECT ON app.users, app.external_profiles, app.learning_progress, app.schema_migrations TO codaris_readonly;'
+    echo 'Optional codaris_readonly reporting grants refreshed.'
+fi
+echo 'Live CODARIS migrations applied and API runtime privileges refreshed.'

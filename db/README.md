@@ -8,6 +8,8 @@ PostgreSQL is the authoritative CODARIS datastore.
 - Add a new numbered migration for every schema change.
 - Run migrations as `codaris_app` in local development unless a migration explicitly requires an administrator operation.
 - Never embed database passwords in SQL files or source code.
+- In production, `codaris_migrator` owns the database/schema and applies reviewed migrations. The `codaris_app` runtime role is separate, non-superuser, and receives only the table/sequence privileges required by the API and mail worker from `scripts/db-live-migrate.sh`.
+- When a migration adds a table or sequence used by the application, update the explicit runtime grants in `scripts/db-live-migrate.sh` in the same change. Do not make the runtime role an owner or grant it schema creation rights.
 
 Current baseline:
 
