@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,7 +20,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install distribution build tools
-        run: sudo apt-get update && sudo apt-get install -y emscripten libpq-dev libmicrohttpd-dev libsodium-dev libcurl4-openssl-dev libjson-c-dev ninja-build
+        run: sudo apt-get update && sudo apt-get install -y emscripten libpq-dev libmicrohttpd-dev libsodium-dev libcurl4-openssl-dev libjson-c-dev ninja-build nginx openssl
       - name: Initialize isolated build configuration
         run: python3 scripts/init-env.py
       - name: Build browser client
@@ -28,9 +29,13 @@ jobs:
         run: ./scripts/build-client.sh
       - name: Check pages, CSP, links and public artifact boundaries
         run: python3 tests/check-site.py
+      - name: Validate CODARIS Nginx configuration
+        run: ./scripts/check-nginx.sh
       - name: Build native C backend
         run: cmake -S . -B build/server -G Ninja && cmake --build build/server
-      - name: Package public site only
+      - name: Stamp the verified commit into the site
+        run: printf '%s\n' "$GITHUB_SHA" > build/client/version.txt
+      - name: Package allowlisted site and Nginx files
         run: python3 scripts/package-site.py ci
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -38,3 +43,68 @@ jobs:
           path: build/package/ci/
           if-no-files-found: error
           retention-days: 7
+
+  deploy:
+    name: Deploy CODARIS production
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      vars.CODARIS_DEPLOY_ENABLED == 'true' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://codaris.org
+    concurrency:
+      group: codaris-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: codaris-static-site
+          path: build/package/ci
+      - name: Configure the dedicated deployment key and verified host key
+        env:
+          DEPLOY_KEY: ${{ secrets.CODARIS_DEPLOY_PRIVATE_KEY }}
+          DEPLOY_HOST: ${{ vars.CODARIS_DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ vars.CODARIS_DEPLOY_PORT }}
+          DEPLOY_KNOWN_HOSTS: ${{ vars.CODARIS_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ -n "$DEPLOY_KEY" && -n "$DEPLOY_HOST" && -n "$DEPLOY_KNOWN_HOSTS" ]] || {
+            echo 'Configure production environment key, host and verified known_hosts values before deploying.' >&2
+            exit 1
+          }
+          [[ "$DEPLOY_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || { echo 'Invalid deployment host.' >&2; exit 1; }
+          DEPLOY_PORT="${DEPLOY_PORT:-22}"
+          [[ "$DEPLOY_PORT" =~ ^[0-9]{1,5}$ ]] && (( 10#$DEPLOY_PORT > 0 && 10#$DEPLOY_PORT < 65536 )) || {
+            echo 'Invalid deployment SSH port.' >&2
+            exit 1
+          }
+          install -d -m 0700 "$HOME/.ssh"
+          umask 077
+          printf '%s\n' "$DEPLOY_KEY" > "$HOME/.ssh/codaris_deploy"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/codaris_known_hosts"
+          cat > "$HOME/.ssh/config" <<EOF
+          Host codaris-rbx
+            HostName $DEPLOY_HOST
+            User codaris-deploy
+            Port $DEPLOY_PORT
+            IdentityFile $HOME/.ssh/codaris_deploy
+            UserKnownHostsFile $HOME/.ssh/codaris_known_hosts
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            ForwardAgent no
+            ClearAllForwardings yes
+          EOF
+          chmod 0600 "$HOME/.ssh/codaris_deploy" "$HOME/.ssh/codaris_known_hosts" "$HOME/.ssh/config"
+          ssh -o BatchMode=yes codaris-rbx 'test "$(id -un)" = codaris-deploy'
+      - name: Activate the site and CODARIS Nginx policy
+        run: ./scripts/deploy.sh codaris-rbx ci

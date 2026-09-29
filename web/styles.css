@@ -1631,19 +1631,23 @@ main > *, .hero > *, .metrics > *, .pillars > *, .join-section > * { min-width: 
 .site-header .button[aria-current="page"] { color: var(--bg); }
 
 .device-activity { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.device-screen { fill: #73caff; opacity: .04; animation: device-screen-glow 5.8s ease-in-out infinite; }
-.device-secondary { animation-duration: 7.3s; animation-delay: -2s; }
-.device-scan { fill: none; stroke: #9deaff; stroke-width: 2; opacity: 0; animation: device-scan 8s linear infinite; }
-.device-nodes { fill: #b7f5ff; opacity: .25; animation: device-indicators 4.7s ease-in-out infinite; }
-.device-readout { fill: none; stroke: #9deaff; stroke-width: 2; opacity: .15; animation: device-indicators 6.1s ease-in-out -2s infinite; }
+.device-screen { fill: #55c9ff; opacity: .018; animation: device-screen-glow 7.2s ease-in-out infinite; }
+.device-scan { fill: none; stroke: #91efff; stroke-width: 1.5; opacity: 0; animation: device-scan 9s ease-in-out infinite; }
+.device-map-glow { fill: #34dfff; opacity: .16; filter: drop-shadow(0 0 5px #29d8ff) drop-shadow(0 0 11px #168eff); transform-box: fill-box; transform-origin: center; animation: device-map-pulse 4.8s ease-in-out infinite; }
+.device-map-glow:nth-of-type(3n) { animation-delay: -1.6s; }
+.device-map-glow:nth-of-type(3n + 1) { animation-delay: -3.2s; }
+.device-map-core { fill: #c2faff; opacity: .65; filter: drop-shadow(0 0 3px #4ce7ff) drop-shadow(0 0 7px #218dff); animation: device-map-core 4.8s ease-in-out infinite; }
+.device-map-core:nth-of-type(3n) { animation-delay: -1.6s; }
+.device-map-core:nth-of-type(3n + 1) { animation-delay: -3.2s; }
 .server-leds { fill: #d8fbff; stroke: #60d9ff; stroke-width: 2; filter: drop-shadow(0 0 5px #43caff); opacity: .15; animation: server-activity 2.8s ease-in-out infinite; }
 .server-leds-secondary { animation-duration: 3.6s; animation-delay: -1.4s; }
 .server-rack-glow { fill: #43bfff; filter: blur(7px); opacity: .03; animation: server-rack-glow 3.2s ease-in-out infinite; }
 @keyframes server-activity { 0%, 100% { opacity: .08; } 20%, 42% { opacity: 1; } 65%, 82% { opacity: .12; } }
 @keyframes server-rack-glow { 0%, 100% { opacity: .015; } 35%, 50% { opacity: .23; } 75% { opacity: .035; } }
-@keyframes device-screen-glow { 0%, 100% { opacity: .025; } 35% { opacity: .13; } 65% { opacity: .055; } 80% { opacity: .1; } }
-@keyframes device-indicators { 0%, 100% { opacity: .12; } 22%, 36% { opacity: .9; } 55% { opacity: .2; } 75% { opacity: .65; } }
-@keyframes device-scan { 0%, 12% { opacity: 0; transform: translateY(0); } 20% { opacity: .2; } 75% { opacity: .12; } 85%, 100% { opacity: 0; transform: translateY(280px); } }
+@keyframes device-screen-glow { 0%, 100% { opacity: .018; } 38% { opacity: .07; } 68% { opacity: .035; } }
+@keyframes device-map-pulse { 0%, 100% { opacity: .12; transform: scale(.78); } 48% { opacity: .56; transform: scale(1.22); } }
+@keyframes device-map-core { 0%, 100% { opacity: .58; } 48% { opacity: 1; } }
+@keyframes device-scan { 0%, 16% { opacity: 0; transform: translateY(0); } 24% { opacity: .22; } 72% { opacity: .16; transform: translateY(150px); } 86%, 100% { opacity: 0; transform: translateY(190px); } }
 
 /* Development membership workspace. Production HTML keeps the launch gate. */
 [hidden] { display: none !important; }

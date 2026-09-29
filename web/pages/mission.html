@@ -3,14 +3,26 @@
           <div class="cinematic-scene-plane">
           <img class="cinematic-scene-image" src="/assets/mission-photo.webp" width="1672" height="941" fetchpriority="high" alt="">
             <svg class="device-activity" viewBox="0 0 1672 941" aria-hidden="true" focusable="false">
-<defs><clipPath id="mission-tv-mask"><path d="M979 86L1620 46L1622 160L1510 158L1460 180L1432 224L1426 310L1372 354L1360 345L1330 320L1285 312L1250 336L1212 405L1040 412L1040 326L1010 279L979 268Z"/></clipPath></defs>
-<g clip-path="url(#mission-tv-mask)">
-  <path class="device-screen" d="M979 86L1620 46L1620 405L979 417Z"/>
-  <path class="device-scan" d="M975 142L1630 105M975 148L1630 111"/>
-  <g class="device-nodes"><circle cx="1104" cy="177" r="4"/><circle cx="1254" cy="160" r="4"/><circle cx="1425" cy="241" r="4"/><circle cx="1187" cy="278" r="3"/></g>
+<defs>
+  <mask id="mission-monitor-mask" maskUnits="userSpaceOnUse" x="960" y="30" width="712" height="470" mask-type="luminance">
+    <rect x="960" y="30" width="712" height="470" fill="#000"/>
+    <path d="M968 78L1634 37L1634 333L968 365Z" fill="#fff"/>
+    <path d="M1234 297Q1251 282 1280 276Q1313 273 1342 289Q1374 307 1394 341Q1412 373 1419 404Q1420 438 1400 465Q1383 489 1353 504L1220 501Q1187 483 1168 455Q1157 426 1163 395Q1170 355 1194 325Q1211 306 1234 297Z" fill="#000"/>
+    <path d="M1445 291Q1463 272 1501 273Q1543 274 1575 298Q1614 327 1672 333L1672 370L1514 357L1474 334Z" fill="#000"/>
+  </mask>
+</defs>
+<g mask="url(#mission-monitor-mask)">
+  <path class="device-screen" d="M968 78L1634 37L1634 365L968 397Z"/>
+  <path class="device-scan" d="M963 121L1640 80M963 126L1640 85"/>
+  <g class="device-map-glows">
+    <circle class="device-map-glow" cx="1083" cy="169" r="14"/><circle class="device-map-core" cx="1083" cy="169" r="3.5"/>
+    <circle class="device-map-glow" cx="1291" cy="139" r="15"/><circle class="device-map-core" cx="1291" cy="139" r="3.5"/>
+    <circle class="device-map-glow" cx="1323" cy="150" r="12"/><circle class="device-map-core" cx="1323" cy="150" r="3"/>
+    <circle class="device-map-glow" cx="1380" cy="205" r="14"/><circle class="device-map-core" cx="1380" cy="205" r="3.5"/>
+    <circle class="device-map-glow" cx="1460" cy="151" r="15"/><circle class="device-map-core" cx="1460" cy="151" r="3.5"/>
+    <circle class="device-map-glow" cx="1425" cy="270" r="12"/><circle class="device-map-core" cx="1425" cy="270" r="3"/>
+  </g>
 </g>
-<path class="device-screen device-secondary" d="M1177 586L1353 571L1382 620L1360 666L1330 708L1324 732L1220 748Z"/>
-<path class="device-readout" d="M1201 610l62 -5m-60 15l45 -4m-43 14l69 -6m-65 17l36 -3"/>
             </svg>
           </div>
         </div>

@@ -1,0 +1,2 @@
+# The deployment account can invoke only the argument-validating CODARIS helper.
+codaris-deploy ALL=(root) NOPASSWD: /usr/local/sbin/codaris-deploy-release *

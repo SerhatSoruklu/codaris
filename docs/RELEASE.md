@@ -72,6 +72,12 @@ The account integration test creates and drops its own random PostgreSQL databas
 
 The HTTP server currently uses one polling thread and bounded connections; password hashing is intentionally costly. Load-test against expected launch traffic and configure proxy connection/request limits. There is no MFA, staff authorization UI, shared chat, or automated abuse moderation. These are not represented as functioning services. Terms/privacy contain the operator-supplied details and need to remain consistent with actual operational practices. Account deletion/access requests currently use the published privacy mailbox.
 
+The production API is a systemd service, not a `dev.sh` process and not a PM2 application. The API binds to loopback; Nginx is its only public entry point. API and mail-worker unit examples apply systemd filesystem, device, kernel and capability restrictions. Nginx gzip compresses public assets; dynamic JSON is left uncompressed. Brotli is not a required dependency. Nginx per-IP rate and connection limits do not replace provider-level DDoS protection or capacity testing.
+
+## Current public deployment check — 29 September 2026
+
+From the development workspace, `https://codaris.org/` returned HTTP 200 with gzip or Brotli depending on `Accept-Encoding`, and the response came through Cloudflare. The homepage response had no CSP meta policy, and its HTTP response did not include CSP, HSTS, `X-Content-Type-Options`, `X-Frame-Options`, Referrer-Policy or Permissions-Policy. `https://codaris.org/api/health` returned HTTP 404. The `codaris-rbx` SSH alias is not configured in this workspace, so SSH treated it as a hostname and DNS lookup failed. These checks confirm the static site responds and is compressed at the edge, but do not confirm origin security headers, API, PostgreSQL, Nginx proxy, mail timer or live registration. Verify whether Cloudflare is removing headers or the CODARIS Nginx policy is not installed, configure the SSH alias to the trusted origin, and verify Cloudflare client-IP trust at Nginx. Do not enable public registration based on a successful homepage check.
+
 ## Local release candidate validation — 24 September 2026
 
 Version: 1.0.0-beta.1. These results describe this workspace, not a live deployment.
