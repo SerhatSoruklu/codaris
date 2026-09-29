@@ -273,7 +273,7 @@ def activate(release: str) -> None:
     os.chmod(stage, 0o750)
     try:
         extract_archive(stage)
-        shutil.rmtree(stage / 'SHA256SUMS')
+        (stage / 'SHA256SUMS').unlink()
         set_site_group(stage / 'site')
         for item in (stage / 'nginx').iterdir():
             os.chown(item, 0, 0)
@@ -316,6 +316,9 @@ def rollback(release: str) -> None:
     backup = BACKUPS / release
     previous_site = current_target(PREVIOUS)
     active_site = current_target(CURRENT)
+    expected_active_site = (RELEASES / release / 'site').resolve()
+    if active_site != expected_active_site:
+        fail('Rollback can only target the currently active release')
     if not backup.is_dir() or backup.is_symlink() or previous_site is None or active_site is None:
         fail('A verified deployment backup and previous site are required for rollback')
     temporary_backup = BACKUPS / ('.rollback-' + release)
