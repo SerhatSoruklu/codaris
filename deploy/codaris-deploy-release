@@ -1,0 +1,361 @@
+#!/usr/bin/python3
+"""Root-owned, allowlisted CODARIS site/Nginx activation command."""
+from __future__ import annotations
+
+import grp
+import hashlib
+import json
+import os
+from pathlib import Path, PurePosixPath
+import re
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+
+BASE = Path('/srv/codaris')
+RELEASES = BASE / 'releases'
+STAGING = BASE / '.deploy-staging'
+CURRENT = BASE / 'current'
+PREVIOUS = BASE / 'previous'
+BACKUPS = Path('/var/backups/codaris-nginx')
+CONFIGS = {
+    'codaris.conf': Path('/etc/nginx/sites-available/codaris.conf'),
+    'member-routes.conf': Path('/etc/nginx/snippets/codaris-member-routes.conf'),
+    'security-headers.conf': Path('/etc/nginx/snippets/codaris-security-headers.conf'),
+}
+RELEASE_RE = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\Z')
+ROOT_FILES = {
+    'index.html', '404.html', 'styles.css', 'meaning.css', 'legal.css', 'contact.css',
+    'host.js', 'auth-nav.js', 'auth-redirect.js', 'home-intro.js', 'codaris.js',
+    'codaris.wasm', 'robots.txt', 'sitemap.xml', 'version.txt',
+}
+NGINX_FILES = {
+    'nginx/codaris.conf',
+    'nginx/member-routes.conf',
+    'nginx/security-headers.conf',
+}
+MAX_ARCHIVE_BYTES = 250 * 1024 * 1024
+MAX_EXPANDED_BYTES = 350 * 1024 * 1024
+MAX_FILES = 5000
+
+
+def fail(message: str) -> None:
+    raise RuntimeError(message)
+
+
+def allowed_site_path(name: str) -> bool:
+    if not name.startswith('site/'):
+        return False
+    relative = name[5:]
+    parts = relative.split('/')
+    if not relative or any(part in ('', '.', '..') for part in parts):
+        return False
+    if len(parts) == 1:
+        return parts[0] in ROOT_FILES
+    if parts[0] == 'assets':
+        if relative in {'assets/COUNTRY-FLAGS-LICENSE.txt', 'assets/icons/LICENSE'}:
+            return True
+        return re.fullmatch(r'assets/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*\.(?:svg|png|webp)', relative) is not None
+    return parts[-1] == 'index.html' and all(re.fullmatch(r'[a-z0-9-]+', part) for part in parts[:-1])
+
+
+def allowed_path(name: str) -> bool:
+    return name == 'SHA256SUMS' or name in NGINX_FILES or allowed_site_path(name)
+
+
+def extract_archive(destination: Path) -> None:
+    count = 0
+    expanded = 0
+    seen: set[str] = set()
+    raw = sys.stdin.buffer
+
+    class BoundedReader:
+        def __init__(self) -> None:
+            self.total = 0
+
+        def read(self, size: int = -1) -> bytes:
+            data = raw.read(size)
+            self.total += len(data)
+            if self.total > MAX_ARCHIVE_BYTES:
+                fail('Deployment archive exceeds the compressed-size limit')
+            return data
+
+    stream = BoundedReader()
+    try:
+        with tarfile.open(fileobj=stream, mode='r|gz') as archive:
+            for member in archive:
+                raw_name = member.name
+                while raw_name.startswith('./'):
+                    raw_name = raw_name[2:]
+                raw_name = raw_name.rstrip('/')
+                if member.isdir() and raw_name in ('', '.'):
+                    continue
+                if not raw_name or raw_name.startswith('/') or '\\' in raw_name:
+                    fail('Deployment archive has an invalid path')
+                path = PurePosixPath(raw_name)
+                if any(part in ('', '.', '..') for part in path.parts) or str(path) != raw_name:
+                    fail('Deployment archive has a non-canonical path')
+                name = path.as_posix()
+                if member.isdir():
+                    if name not in ('site', 'nginx') and not (
+                        name.startswith('site/assets/')
+                        or (name.startswith('site/') and all(re.fullmatch(r'[a-z0-9-]+', part) for part in name[5:].split('/')))
+                    ):
+                        fail('Deployment archive contains an unexpected directory: ' + name)
+                    (destination / name).mkdir(mode=0o750, parents=True, exist_ok=True)
+                    continue
+                if not member.isfile() or not allowed_path(name) or name in seen:
+                    fail('Deployment archive contains an unsupported or duplicate file: ' + name)
+                if member.size < 0 or member.size > MAX_EXPANDED_BYTES:
+                    fail('Deployment archive contains an oversized file')
+                count += 1
+                expanded += member.size
+                if count > MAX_FILES or expanded > MAX_EXPANDED_BYTES:
+                    fail('Deployment archive exceeds the expanded-size limit')
+                output = destination / name
+                output.parent.mkdir(mode=0o750, parents=True, exist_ok=True)
+                source = archive.extractfile(member)
+                if source is None:
+                    fail('Deployment archive has an unreadable file')
+                fd = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o640)
+                with os.fdopen(fd, 'wb') as target, source:
+                    shutil.copyfileobj(source, target, length=1024 * 1024)
+                seen.add(name)
+    except (tarfile.TarError, OSError) as error:
+        fail('Could not safely read deployment archive: ' + str(error))
+    if 'SHA256SUMS' not in seen or not NGINX_FILES.issubset(seen) or not any(name.startswith('site/') for name in seen):
+        fail('Deployment archive is missing its manifest, site, or Nginx configuration')
+    verify_manifest(destination, seen)
+    if not (destination / 'site/index.html').is_file() or not (destination / 'site/version.txt').is_file():
+        fail('Deployment archive is missing the site index or version')
+
+
+def verify_manifest(root: Path, seen: set[str]) -> None:
+    manifest = root / 'SHA256SUMS'
+    entries: dict[str, str] = {}
+    for line in manifest.read_text(encoding='ascii').splitlines():
+        match = re.fullmatch(r'([0-9a-f]{64})  ([A-Za-z0-9._/-]+)', line)
+        if not match:
+            fail('Deployment checksum manifest is malformed')
+        digest, name = match.groups()
+        if not allowed_path(name) or name in entries:
+            fail('Deployment checksum manifest contains an unsupported or duplicate path')
+        entries[name] = digest
+    payload_files = seen - {'SHA256SUMS'}
+    if set(entries) != payload_files:
+        fail('Deployment checksum manifest does not cover the entire package')
+    for name, expected in entries.items():
+        actual = hashlib.sha256((root / name).read_bytes()).hexdigest()
+        if actual != expected:
+            fail('Deployment checksum mismatch: ' + name)
+
+
+def run(*command: str) -> None:
+    subprocess.run(command, check=True, stdin=subprocess.DEVNULL)
+
+
+def atomic_symlink(target: Path, link: Path, tag: str) -> None:
+    temporary = link.with_name('.' + link.name + '-' + tag)
+    try:
+        temporary.unlink(missing_ok=True)
+        temporary.symlink_to(target)
+        os.replace(temporary, link)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def current_target(link: Path) -> Path | None:
+    if not link.exists() and not link.is_symlink():
+        return None
+    if not link.is_symlink():
+        fail(str(link) + ' must be a symlink')
+    target = Path(os.path.realpath(link))
+    if target.parent.parent != RELEASES or target.name != 'site' or not (target / 'index.html').is_file():
+        fail(str(link) + ' points outside the managed CODARIS releases')
+    return target
+
+
+def snapshot_configs(backup: Path) -> dict[str, bool]:
+    backup.mkdir(mode=0o700, parents=True, exist_ok=False)
+    state: dict[str, bool] = {}
+    for name, destination in CONFIGS.items():
+        if destination.is_symlink():
+            fail('Refusing to replace a symlinked Nginx configuration: ' + str(destination))
+        exists = destination.exists()
+        state[name] = exists
+        if exists:
+            if not destination.is_file():
+                fail('Nginx configuration is not a regular file: ' + str(destination))
+            shutil.copyfile(destination, backup / name)
+            os.chmod(backup / name, 0o600)
+    (backup / 'state.json').write_text(json.dumps(state, sort_keys=True) + '\n', encoding='ascii')
+    os.chmod(backup / 'state.json', 0o600)
+    return state
+
+
+def install_configs(package: Path, backup: Path, state: dict[str, bool]) -> bool:
+    changed = False
+    for name, destination in CONFIGS.items():
+        source = package / 'nginx' / name
+        if not source.is_file() or source.is_symlink():
+            fail('Verified Nginx package file is missing: ' + name)
+        data = source.read_bytes()
+        if destination.exists() and destination.read_bytes() == data:
+            continue
+        changed = True
+        temporary = destination.with_name('.' + destination.name + '.codaris-new')
+        try:
+            fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+            with os.fdopen(fd, 'wb') as output:
+                output.write(data)
+                output.flush()
+                os.fsync(output.fileno())
+            os.chown(temporary, 0, 0)
+            os.chmod(temporary, 0o644)
+            os.replace(temporary, destination)
+        finally:
+            temporary.unlink(missing_ok=True)
+    return changed
+
+
+def restore_configs(backup: Path) -> None:
+    state = json.loads((backup / 'state.json').read_text(encoding='ascii'))
+    for name, destination in CONFIGS.items():
+        if state[name]:
+            data = (backup / name).read_bytes()
+            temporary = destination.with_name('.' + destination.name + '.codaris-restore')
+            fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+            with os.fdopen(fd, 'wb') as output:
+                output.write(data)
+                output.flush()
+                os.fsync(output.fileno())
+            os.chown(temporary, 0, 0)
+            os.chmod(temporary, 0o644)
+            os.replace(temporary, destination)
+        else:
+            destination.unlink(missing_ok=True)
+
+
+def set_site_group(site: Path) -> None:
+    group_id = grp.getgrnam('codaris-web').gr_gid
+    for item in [site, *site.rglob('*')]:
+        if item.is_symlink():
+            fail('Symlinks are not permitted in deployed site content')
+        if item.is_dir():
+            os.chown(item, 0, group_id)
+            os.chmod(item, 0o750)
+        elif item.is_file():
+            os.chown(item, 0, group_id)
+            os.chmod(item, 0o640)
+
+
+def activate(release: str) -> None:
+    if os.geteuid() != 0:
+        fail('This command must run as root through its restricted sudo rule')
+    if not RELEASE_RE.fullmatch(release):
+        fail('Invalid release identifier')
+    if BASE.is_symlink() or RELEASES.is_symlink() or STAGING.is_symlink():
+        fail('CODARIS deployment directories must not be symlinks')
+    if not RELEASES.is_dir() or not STAGING.is_dir() or not BACKUPS.parent.is_dir():
+        fail('Run the one-time CODARIS deployment provisioning first')
+    previous_site = current_target(CURRENT)
+    if previous_site is None:
+        fail('Seed /srv/codaris/current with the currently served site before the first automated release')
+    final = RELEASES / release
+    backup = BACKUPS / release
+    if final.exists() or final.is_symlink() or backup.exists() or backup.is_symlink():
+        fail('Release identifier has already been used')
+    group_id = grp.getgrnam('codaris-web').gr_gid
+    stage: Path | None = Path(tempfile.mkdtemp(prefix='codaris-in-', dir=STAGING))
+    os.chown(stage, 0, group_id)
+    os.chmod(stage, 0o750)
+    try:
+        extract_archive(stage)
+        (stage / 'SHA256SUMS').unlink()
+        set_site_group(stage / 'site')
+        for item in (stage / 'nginx').iterdir():
+            os.chown(item, 0, 0)
+            os.chmod(item, 0o640)
+        os.chown(stage / 'nginx', 0, 0)
+        os.chmod(stage / 'nginx', 0o750)
+        os.chown(stage, 0, group_id)
+        os.chmod(stage, 0o750)
+        os.rename(stage, final)
+        stage = None
+        state = snapshot_configs(backup)
+        try:
+            changed = install_configs(final, backup, state)
+            run('/usr/sbin/nginx', '-t')
+            if changed:
+                run('/usr/bin/systemctl', 'reload', 'nginx')
+            if previous_site is not None:
+                atomic_symlink(previous_site, PREVIOUS, release)
+            atomic_symlink(final / 'site', CURRENT, release)
+        except Exception:
+            restore_configs(backup)
+            try:
+                run('/usr/sbin/nginx', '-t')
+                if 'changed' in locals() and changed:
+                    run('/usr/bin/systemctl', 'reload', 'nginx')
+            except Exception as rollback_error:
+                fail('Activation failed and Nginx rollback needs administrator attention: ' + str(rollback_error))
+            raise
+        print('Activated CODARIS release ' + release)
+    finally:
+        if stage is not None and stage.exists():
+            shutil.rmtree(stage, ignore_errors=True)
+
+
+def rollback(release: str) -> None:
+    if os.geteuid() != 0:
+        fail('This command must run as root through its restricted sudo rule')
+    if not RELEASE_RE.fullmatch(release):
+        fail('Invalid release identifier')
+    backup = BACKUPS / release
+    previous_site = current_target(PREVIOUS)
+    active_site = current_target(CURRENT)
+    expected_active_site = (RELEASES / release / 'site').resolve()
+    if active_site != expected_active_site:
+        fail('Rollback can only target the currently active release')
+    if not backup.is_dir() or backup.is_symlink() or previous_site is None or active_site is None:
+        fail('A verified deployment backup and previous site are required for rollback')
+    temporary_backup = BACKUPS / ('.rollback-' + release)
+    state = snapshot_configs(temporary_backup)
+    try:
+        restore_configs(backup)
+        run('/usr/sbin/nginx', '-t')
+        run('/usr/bin/systemctl', 'reload', 'nginx')
+        atomic_symlink(active_site, PREVIOUS, release + '-rollback')
+        atomic_symlink(previous_site, CURRENT, release + '-rollback')
+    except Exception:
+        restore_configs(temporary_backup)
+        try:
+            run('/usr/sbin/nginx', '-t')
+            run('/usr/bin/systemctl', 'reload', 'nginx')
+        except Exception as rollback_error:
+            fail('Rollback failed and restoration needs administrator attention: ' + str(rollback_error))
+        raise
+    finally:
+        shutil.rmtree(temporary_backup, ignore_errors=True)
+    print('Rolled back CODARIS release ' + release)
+
+
+def main() -> int:
+    try:
+        if len(sys.argv) != 3 or sys.argv[1] not in {'activate', 'rollback'}:
+            fail('Usage: codaris-deploy-release {activate|rollback} RELEASE')
+        action, release = sys.argv[1:]
+        if action == 'activate':
+            activate(release)
+        else:
+            rollback(release)
+        return 0
+    except Exception as error:
+        print('CODARIS deployment failed: ' + str(error), file=sys.stderr)
+        return 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

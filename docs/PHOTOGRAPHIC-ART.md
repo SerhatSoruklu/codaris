@@ -1,10 +1,18 @@
 # Photographic hero artwork
 
-Created with the built-in image generator, using a raster rendering of `web/assets/emblem.svg` as the logo reference. These are fictional photographic-style scenes, not photographs of actual CODARIS facilities or staff. Generated emblems approximate the supplied logo; the page mastheads retain the exact SVG.
+The three current assets were regenerated with the built-in image generator on 29 September 2026. They are fictional photographic-style scenes, not photographs of actual CODARIS facilities or staff. The user-provided portrait was used as an identity reference in Mission. The CODARIS emblem was supplied as a shape reference; the page mastheads retain the exact SVG because embroidered raster patches are illustrative.
 
-Actual source dimensions: 1672 × 941 for all three. The generator did not return requested native 4K. WebP exports use quality 95. The previous cinematic files remain available but are no longer referenced by the pages.
+The image tool returned 1672 × 941 pixels for each image even though the prompts requested 3840 × 2160. These are not native 4K images, and they were not upscaled. The PNG results were encoded as lossless WebP so encoding did not discard pixel information. Final asset sizes are approximately 1.3 MiB for Mission, 1.3 MiB for Global Reach, and 1.4 MiB for Ecosystem.
 
-## Assets and final prompts
+## Current image prompt set
+
+- **Mission — `web/assets/mission-photo.webp`:** Rework the existing wide meeting-room hero, preserve the darker left text area and world-map display, and integrate the user-provided long-haired portrait naturally as one engineer. Keep realistic contemporary office photography and small matching cyan CODARIS shoulder marks. Avoid CGI, weapons, invented text, and watermarks.
+- **Global Reach — `web/assets/global-reach-photo.webp`:** Rework the existing city-window communications-office scene with a Black woman engineer and a white male colleague, the world-map display, and dark left text area. Keep it photorealistic, with the same small cyan CODARIS shoulder mark and no added text or logos.
+- **Ecosystem — `web/assets/ecosystem-photo.webp`:** Rework the existing electronics-lab scene with three engineers around a practical workbench and circuit board. Preserve the server room, realistic daylight, left text area, and matching cyan shoulder marks; avoid CGI and added text.
+
+The previous-generation prompts below are retained as project history and are superseded by this prompt set.
+
+## Previous generation prompts — superseded 29 September 2026
 
 ### mission
 

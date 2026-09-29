@@ -19,6 +19,30 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
         self.member_route_request = False
         super().__init__(*a, directory=str(ROOT / 'build/client'), **kw)
+    def send_error(self, code, message=None, explain=None):
+        if code != 404:
+            try:
+                return super().send_error(code, message, explain)
+            except BrokenPipeError:
+                return
+        # Keep genuine unknown URLs as 404s, but use the same helpful page as
+        # the production site and avoid the stock handler's duplicate error line.
+        page = ROOT / 'build/client/404.html'
+        try:
+            body = page.read_bytes()
+        except OSError:
+            return super().send_error(code, message, explain)
+        self.send_response(404)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.send_header('Cache-Control', 'no-store')
+        self.end_headers()
+        self.log_request(404)
+        if self.command != 'HEAD':
+            try:
+                self.wfile.write(body)
+            except BrokenPipeError:
+                pass
     def end_headers(self):
         if self.member_route_request:
             self.send_header('Cache-Control', 'private, no-store')
@@ -81,6 +105,10 @@ class Handler(SimpleHTTPRequestHandler):
                 self.wfile.write(data)
             finally:
                 backend.close()
+        except BrokenPipeError:
+            # Browsers commonly cancel an in-flight API request during
+            # navigation. The client is gone, so there is no 502 to send.
+            return
         except (OSError, ValueError):
             self.send_error(502, 'Account service unavailable')
     def do_GET(self):

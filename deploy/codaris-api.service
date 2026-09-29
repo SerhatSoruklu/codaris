@@ -2,15 +2,28 @@
 Description=CODARIS account API
 After=network.target postgresql.service
 [Service]
+Type=simple
 User=codaris
 Group=codaris
 EnvironmentFile=/etc/codaris/backend.env
 ExecStart=/opt/codaris/codaris_server
 Restart=on-failure
+RestartSec=3s
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
 UMask=0077
 [Install]
 WantedBy=multi-user.target
