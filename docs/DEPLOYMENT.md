@@ -22,7 +22,7 @@ Read-only SSH inspection was performed on 29 September 2026 using the supplied `
    ```
 
    Keep `/srv/codaris`, `releases`, and `.deploy-staging` root-owned and not writable by the deployment account. `www-data` receives read access through `codaris-web`. Nginx must launch replacement workers after the group membership change. Do not give `codaris-deploy` membership in other application groups.
-3. Create a dedicated GitHub Actions Ed25519 key on a trusted workstation with `ssh-keygen -t ed25519 -N '' -C codaris-github-deploy`. This non-interactive key is limited to a deployment-only account. Add its public key to `/home/codaris-deploy/.ssh/authorized_keys` with the `restrict` option; set `.ssh` to owner `codaris-deploy`, mode 0700, and `authorized_keys` to mode 0600. Keep its private half only in the GitHub `production` environment secret. Do not reuse another application's key, paste private keys into chat, or install a privileged server key in GitHub.
+3. Create a dedicated GitHub Actions Ed25519 key on a trusted workstation with `ssh-keygen -t ed25519 -f ~/.ssh/codaris_github_deploy -N '' -C codaris-github-deploy`; the explicit path avoids overwriting a personal default SSH key. This non-interactive key is limited to a deployment-only account. Add its public key to `/home/codaris-deploy/.ssh/authorized_keys` with the `restrict` option; set `.ssh` to owner `codaris-deploy`, mode 0700, and `authorized_keys` to mode 0600. Keep its private half only in the GitHub `production` environment secret. Do not reuse another application's key, paste private keys into chat, or install a privileged server key in GitHub.
 4. Install the single root helper and its sudoers rule from a reviewed checkout:
 
    ```bash
