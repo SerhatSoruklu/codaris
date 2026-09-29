@@ -70,6 +70,13 @@ jobs:
         with:
           name: codaris-static-site
           path: build/package/ci
+      - name: Join the private deployment tailnet
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd # v4.2.0
+        with:
+          oauth-client-id: ${{ secrets.CODARIS_TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.CODARIS_TAILSCALE_OAUTH_SECRET }}
+          tags: tag:codaris-ci
+          ping: ${{ vars.CODARIS_DEPLOY_HOST }}
       - name: Configure the dedicated deployment key and verified host key
         env:
           DEPLOY_KEY: ${{ secrets.CODARIS_DEPLOY_PRIVATE_KEY }}
