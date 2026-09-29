@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Allowlisted site and CODARIS Nginx deployment bundle. No source or secrets."""
+"""Allowlisted site, native API and CODARIS Nginx bundle. No source or secrets."""
 import hashlib
+import os
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -43,13 +45,37 @@ deployment_files = [
     (root / 'build/deploy/security-headers.conf', Path('nginx/security-headers.conf')),
     (root / 'build/deploy/member-routes.conf', Path('nginx/member-routes.conf')),
 ]
+api_files = []
+if not admin_site:
+    api_source = Path(os.environ.get('CODARIS_API_BINARY', root / 'build/server/codaris_server'))
+    if not api_source.is_file() or api_source.is_symlink():
+        raise SystemExit('Missing or unsafe production API binary; build the native backend first')
+    try:
+        dynamic = subprocess.run(['readelf', '-d', str(api_source)], check=True,
+                                 capture_output=True, text=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        raise SystemExit('Could not inspect API runtime linkage; install binutils and rebuild')
+    if re.search(r'\((?:RPATH|RUNPATH)\)', dynamic):
+        raise SystemExit('API binary contains a build-machine library path; use system runtime libraries')
+    api_files = [
+        (api_source, Path('api/codaris_server')),
+        (root / 'web/assets/fonts/DejaVuSans.ttf', Path('api/DejaVuSans.ttf')),
+        (root / 'web/assets/fonts/DejaVuSans-LICENSE.txt', Path('api/DejaVuSans-LICENSE.txt')),
+    ]
 for file, relative in deployment_files:
     if not file.is_file() or file.is_symlink():
         raise SystemExit('Missing or unsafe CODARIS deployment config: ' + str(file))
     output = target / relative
     output.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(file, output)
+for file, relative in api_files:
+    if not file.is_file() or file.is_symlink():
+        raise SystemExit('Missing or unsafe CODARIS API deployment file: ' + str(file))
+    output = target / relative
+    output.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(file, output)
 manifest = ''.join(hashlib.sha256(file.read_bytes()).hexdigest() + '  site/' + relative.as_posix() + '\n' for file, relative in files)
 manifest += ''.join(hashlib.sha256(file.read_bytes()).hexdigest() + '  ' + relative.as_posix() + '\n' for file, relative in deployment_files)
+manifest += ''.join(hashlib.sha256(file.read_bytes()).hexdigest() + '  ' + relative.as_posix() + '\n' for file, relative in api_files)
 (target / 'SHA256SUMS').write_text(manifest, encoding='utf-8')
-print(f'Packaged {len(files)} site files and {len(deployment_files)} CODARIS Nginx files into {target}')
+print(f'Packaged {len(files)} site files, {len(deployment_files)} Nginx files and {len(api_files)} API files into {target}')

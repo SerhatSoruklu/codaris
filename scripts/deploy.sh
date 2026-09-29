@@ -30,10 +30,15 @@ if [[ -n "$PACKAGE_ID" ]]; then
 else
     export CODARIS_PRODUCTION=1
     python3 "$ROOT/scripts/project.py" production build-client
+    SERVER_BUILD="$ROOT/build/server-release-system"
+    cmake -S "$ROOT" -B "$SERVER_BUILD" -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_PREFIX_PATH=/usr -DCMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH=FALSE \
+        -DCMAKE_FIND_USE_PACKAGE_ROOT_PATH=FALSE
+    cmake --build "$SERVER_BUILD" --parallel
     python3 "$ROOT/tests/check-site.py"
     "$ROOT/scripts/check-nginx.sh"
     printf '%s\n' "$REVISION" > "$ROOT/build/client/version.txt"
-    python3 "$ROOT/scripts/package-site.py" "$RELEASE"
+    CODARIS_API_BINARY="$SERVER_BUILD/codaris_server" python3 "$ROOT/scripts/package-site.py" "$RELEASE"
     PACKAGE_DIR="$ROOT/build/package/$RELEASE"
 fi
 

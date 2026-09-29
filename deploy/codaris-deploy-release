@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Root-owned, allowlisted CODARIS site/Nginx activation command."""
+"""Root-owned, allowlisted CODARIS site/API/Nginx activation command."""
 from __future__ import annotations
 
 import grp
@@ -13,6 +13,9 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
+import urllib.error
+import urllib.request
 
 BASE = Path('/srv/codaris')
 RELEASES = BASE / 'releases'
@@ -20,6 +23,11 @@ STAGING = BASE / '.deploy-staging'
 CURRENT = BASE / 'current'
 PREVIOUS = BASE / 'previous'
 BACKUPS = Path('/var/backups/codaris-nginx')
+API_BASE = Path('/opt/codaris')
+API_RELEASES = API_BASE / 'releases'
+API_STAGING = API_BASE / '.deploy-staging'
+API_CURRENT = API_BASE / 'current'
+API_PREVIOUS = API_BASE / 'previous'
 CONFIGS = {
     'codaris.conf': Path('/etc/nginx/sites-available/codaris.conf'),
     'member-routes.conf': Path('/etc/nginx/snippets/codaris-member-routes.conf'),
@@ -35,6 +43,11 @@ NGINX_FILES = {
     'nginx/codaris.conf',
     'nginx/member-routes.conf',
     'nginx/security-headers.conf',
+}
+API_FILES = {
+    'api/codaris_server',
+    'api/DejaVuSans.ttf',
+    'api/DejaVuSans-LICENSE.txt',
 }
 MAX_ARCHIVE_BYTES = 250 * 1024 * 1024
 MAX_EXPANDED_BYTES = 350 * 1024 * 1024
@@ -62,7 +75,7 @@ def allowed_site_path(name: str) -> bool:
 
 
 def allowed_path(name: str) -> bool:
-    return name == 'SHA256SUMS' or name in NGINX_FILES or allowed_site_path(name)
+    return name == 'SHA256SUMS' or name in NGINX_FILES or name in API_FILES or allowed_site_path(name)
 
 
 def extract_archive(destination: Path) -> None:
@@ -99,7 +112,7 @@ def extract_archive(destination: Path) -> None:
                     fail('Deployment archive has a non-canonical path')
                 name = path.as_posix()
                 if member.isdir():
-                    if name not in ('site', 'nginx') and not (
+                    if name not in ('site', 'nginx', 'api') and not (
                         name.startswith('site/assets/')
                         or (name.startswith('site/') and all(re.fullmatch(r'[a-z0-9-]+', part) for part in name[5:].split('/')))
                     ):
@@ -125,8 +138,9 @@ def extract_archive(destination: Path) -> None:
                 seen.add(name)
     except (tarfile.TarError, OSError) as error:
         fail('Could not safely read deployment archive: ' + str(error))
-    if 'SHA256SUMS' not in seen or not NGINX_FILES.issubset(seen) or not any(name.startswith('site/') for name in seen):
-        fail('Deployment archive is missing its manifest, site, or Nginx configuration')
+    if ('SHA256SUMS' not in seen or not NGINX_FILES.issubset(seen) or
+            not API_FILES.issubset(seen) or not any(name.startswith('site/') for name in seen)):
+        fail('Deployment archive is missing its manifest, site, API, or Nginx configuration')
     verify_manifest(destination, seen)
     if not (destination / 'site/index.html').is_file() or not (destination / 'site/version.txt').is_file():
         fail('Deployment archive is missing the site index or version')
@@ -175,6 +189,72 @@ def current_target(link: Path) -> Path | None:
     if target.parent.parent != RELEASES or target.name != 'site' or not (target / 'index.html').is_file():
         fail(str(link) + ' points outside the managed CODARIS releases')
     return target
+
+
+def current_api_target(link: Path) -> Path | None:
+    if not link.exists() and not link.is_symlink():
+        return None
+    if not link.is_symlink():
+        fail(str(link) + ' must be a symlink')
+    target = Path(os.path.realpath(link))
+    if (target.parent != API_RELEASES or not RELEASE_RE.fullmatch(target.name) or
+            not (target / 'codaris_server').is_file() or not os.access(target / 'codaris_server', os.X_OK)):
+        fail(str(link) + ' points outside the managed CODARIS API releases')
+    return target
+
+
+def restore_link(target: Path | None, link: Path, tag: str) -> None:
+    if target is None:
+        if link.exists() and not link.is_symlink():
+            fail(str(link) + ' must be a symlink')
+        link.unlink(missing_ok=True)
+        return
+    atomic_symlink(target, link, tag)
+
+
+def api_healthy(attempts: int = 1) -> bool:
+    local_opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    for attempt in range(attempts):
+        try:
+            with local_opener.open('http://127.0.0.1:8080/api/health', timeout=3) as response:
+                if response.status == 200:
+                    health = json.loads(response.read(4096))
+                    if (health.get('contact_api') == 1 and health.get('credential_api') == 2 and
+                            health.get('page_access_api') == 1):
+                        return True
+        except (OSError, ValueError, urllib.error.URLError):
+            pass
+        if attempt + 1 < attempts:
+            time.sleep(1)
+    return False
+
+
+def install_api_release(source: Path, release: str) -> Path:
+    if API_BASE.is_symlink() or API_RELEASES.is_symlink() or API_STAGING.is_symlink():
+        fail('CODARIS API deployment directories must not be symlinks')
+    if not API_RELEASES.is_dir() or not API_STAGING.is_dir():
+        fail('Run the one-time CODARIS API provisioning first')
+    destination = API_RELEASES / release
+    if destination.exists() or destination.is_symlink():
+        fail('API release identifier has already been used')
+    group_id = grp.getgrnam('codaris').gr_gid
+    stage = Path(tempfile.mkdtemp(prefix='codaris-api-in-', dir=API_STAGING))
+    try:
+        for name in ('codaris_server', 'DejaVuSans.ttf', 'DejaVuSans-LICENSE.txt'):
+            input_path = source / name
+            if not input_path.is_file() or input_path.is_symlink():
+                fail('Verified API package file is missing: ' + name)
+            output = stage / name
+            shutil.copyfile(input_path, output, follow_symlinks=False)
+            os.chown(output, 0, group_id)
+            os.chmod(output, 0o750 if name == 'codaris_server' else 0o640)
+        os.chown(stage, 0, group_id)
+        os.chmod(stage, 0o750)
+        os.rename(stage, destination)
+        return destination
+    except Exception:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
 
 
 def snapshot_configs(backup: Path) -> dict[str, bool]:
@@ -256,16 +336,25 @@ def activate(release: str) -> None:
         fail('This command must run as root through its restricted sudo rule')
     if not RELEASE_RE.fullmatch(release):
         fail('Invalid release identifier')
-    if BASE.is_symlink() or RELEASES.is_symlink() or STAGING.is_symlink():
+    if (BASE.is_symlink() or RELEASES.is_symlink() or STAGING.is_symlink() or
+            API_BASE.is_symlink() or API_RELEASES.is_symlink() or API_STAGING.is_symlink()):
         fail('CODARIS deployment directories must not be symlinks')
-    if not RELEASES.is_dir() or not STAGING.is_dir() or not BACKUPS.parent.is_dir():
+    if (not RELEASES.is_dir() or not STAGING.is_dir() or not BACKUPS.parent.is_dir() or
+            not API_RELEASES.is_dir() or not API_STAGING.is_dir()):
         fail('Run the one-time CODARIS deployment provisioning first')
     previous_site = current_target(CURRENT)
     if previous_site is None:
         fail('Seed /srv/codaris/current with the currently served site before the first automated release')
+    previous_api = current_api_target(API_CURRENT)
+    if previous_api is None:
+        fail('Seed /opt/codaris/current with the bootstrap API release before the first automated release')
+    if not api_healthy():
+        fail('The currently installed CODARIS API is not healthy; refusing deployment')
     final = RELEASES / release
     backup = BACKUPS / release
-    if final.exists() or final.is_symlink() or backup.exists() or backup.is_symlink():
+    api_final = API_RELEASES / release
+    if (final.exists() or final.is_symlink() or api_final.exists() or api_final.is_symlink() or
+            backup.exists() or backup.is_symlink()):
         fail('Release identifier has already been used')
     group_id = grp.getgrnam('codaris-web').gr_gid
     stage: Path | None = Path(tempfile.mkdtemp(prefix='codaris-in-', dir=STAGING))
@@ -274,6 +363,8 @@ def activate(release: str) -> None:
     try:
         extract_archive(stage)
         (stage / 'SHA256SUMS').unlink()
+        api_final = install_api_release(stage / 'api', release)
+        shutil.rmtree(stage / 'api')
         set_site_group(stage / 'site')
         for item in (stage / 'nginx').iterdir():
             os.chown(item, 0, 0)
@@ -285,24 +376,43 @@ def activate(release: str) -> None:
         os.rename(stage, final)
         stage = None
         state = snapshot_configs(backup)
+        prior_previous_site = current_target(PREVIOUS)
+        prior_previous_api = current_api_target(API_PREVIOUS)
+        config_touched = False
+        nginx_reload_attempted = False
         try:
+            config_touched = True
             changed = install_configs(final, backup, state)
             run('/usr/sbin/nginx', '-t')
-            if changed:
-                run('/usr/bin/systemctl', 'reload', 'nginx')
-            if previous_site is not None:
-                atomic_symlink(previous_site, PREVIOUS, release)
+            atomic_symlink(previous_api, API_PREVIOUS, release)
+            atomic_symlink(api_final, API_CURRENT, release)
+            run('/usr/bin/systemctl', 'restart', 'codaris-api.service')
+            if not api_healthy(20):
+                fail('The new CODARIS API did not become healthy; deployment was rolled back')
+            atomic_symlink(previous_site, PREVIOUS, release)
             atomic_symlink(final / 'site', CURRENT, release)
+            if changed:
+                nginx_reload_attempted = True
+                run('/usr/bin/systemctl', 'reload', 'nginx')
         except Exception:
             restore_configs(backup)
+            restore_link(previous_site, CURRENT, release + '-restore-site')
+            restore_link(prior_previous_site, PREVIOUS, release + '-restore-previous-site')
+            api_was_changed = current_api_target(API_CURRENT) != previous_api
+            restore_link(previous_api, API_CURRENT, release + '-restore-api')
+            restore_link(prior_previous_api, API_PREVIOUS, release + '-restore-previous-api')
             try:
                 run('/usr/sbin/nginx', '-t')
-                if 'changed' in locals() and changed:
+                if api_was_changed:
+                    run('/usr/bin/systemctl', 'restart', 'codaris-api.service')
+                    if not api_healthy(20):
+                        fail('The previous CODARIS API did not become healthy after rollback')
+                if config_touched and nginx_reload_attempted:
                     run('/usr/bin/systemctl', 'reload', 'nginx')
             except Exception as rollback_error:
-                fail('Activation failed and Nginx rollback needs administrator attention: ' + str(rollback_error))
+                fail('Activation failed and CODARIS rollback needs administrator attention: ' + str(rollback_error))
             raise
-        print('Activated CODARIS release ' + release)
+        print('Activated CODARIS site and API release ' + release)
     finally:
         if stage is not None and stage.exists():
             shutil.rmtree(stage, ignore_errors=True)
@@ -316,30 +426,54 @@ def rollback(release: str) -> None:
     backup = BACKUPS / release
     previous_site = current_target(PREVIOUS)
     active_site = current_target(CURRENT)
+    previous_api = current_api_target(API_PREVIOUS)
+    active_api = current_api_target(API_CURRENT)
     expected_active_site = (RELEASES / release / 'site').resolve()
-    if active_site != expected_active_site:
-        fail('Rollback can only target the currently active release')
-    if not backup.is_dir() or backup.is_symlink() or previous_site is None or active_site is None:
-        fail('A verified deployment backup and previous site are required for rollback')
+    expected_active_api = API_RELEASES / release
+    if active_site != expected_active_site or active_api != expected_active_api:
+        fail('Rollback can only target the currently active site and API release')
+    if (not backup.is_dir() or backup.is_symlink() or previous_site is None or active_site is None or
+            previous_api is None or active_api is None):
+        fail('A verified deployment backup and previous site/API releases are required for rollback')
     temporary_backup = BACKUPS / ('.rollback-' + release)
-    state = snapshot_configs(temporary_backup)
+    snapshot_configs(temporary_backup)
+    prior_previous_site = current_target(PREVIOUS)
+    prior_previous_api = current_api_target(API_PREVIOUS)
+    api_was_changed = False
+    nginx_reload_attempted = False
     try:
         restore_configs(backup)
         run('/usr/sbin/nginx', '-t')
-        run('/usr/bin/systemctl', 'reload', 'nginx')
+        atomic_symlink(previous_api, API_CURRENT, release + '-rollback-api')
+        atomic_symlink(active_api, API_PREVIOUS, release + '-rollback-previous-api')
+        api_was_changed = True
+        run('/usr/bin/systemctl', 'restart', 'codaris-api.service')
+        if not api_healthy(20):
+            fail('The previous CODARIS API did not become healthy during rollback')
         atomic_symlink(active_site, PREVIOUS, release + '-rollback')
         atomic_symlink(previous_site, CURRENT, release + '-rollback')
+        nginx_reload_attempted = True
+        run('/usr/bin/systemctl', 'reload', 'nginx')
     except Exception:
         restore_configs(temporary_backup)
+        restore_link(active_site, CURRENT, release + '-rollback-restore-site')
+        restore_link(prior_previous_site, PREVIOUS, release + '-rollback-restore-previous-site')
+        restore_link(active_api, API_CURRENT, release + '-rollback-restore-api')
+        restore_link(prior_previous_api, API_PREVIOUS, release + '-rollback-restore-previous-api')
         try:
             run('/usr/sbin/nginx', '-t')
-            run('/usr/bin/systemctl', 'reload', 'nginx')
+            if api_was_changed:
+                run('/usr/bin/systemctl', 'restart', 'codaris-api.service')
+                if not api_healthy(20):
+                    fail('The current CODARIS API did not become healthy after rollback recovery')
+            if nginx_reload_attempted:
+                run('/usr/bin/systemctl', 'reload', 'nginx')
         except Exception as rollback_error:
-            fail('Rollback failed and restoration needs administrator attention: ' + str(rollback_error))
+            fail('Rollback failed and CODARIS restoration needs administrator attention: ' + str(rollback_error))
         raise
     finally:
         shutil.rmtree(temporary_backup, ignore_errors=True)
-    print('Rolled back CODARIS release ' + release)
+    print('Rolled back CODARIS site and API release ' + release)
 
 
 def main() -> int:

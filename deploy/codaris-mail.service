@@ -6,7 +6,8 @@ Type=oneshot
 User=codaris
 Group=codaris
 EnvironmentFile=/etc/codaris/backend.env
-ExecStart=/opt/codaris/codaris_server --mail-once
+Environment=CODARIS_CREDENTIAL_FONT=/opt/codaris/current/DejaVuSans.ttf
+ExecStart=/opt/codaris/current/codaris_server --mail-once
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
