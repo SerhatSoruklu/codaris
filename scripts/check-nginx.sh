@@ -22,6 +22,8 @@ sed \
   -e "s|/etc/nginx/snippets/codaris-member-routes.conf|$ROOT/build/deploy/member-routes.conf|g" \
   -e "s|/etc/letsencrypt/live/codaris.org/fullchain.pem|$TMP/cert.pem|g" \
   -e "s|/etc/letsencrypt/live/codaris.org/privkey.pem|$TMP/key.pem|g" \
+  -e "s|/etc/letsencrypt/live/api.codaris.org/fullchain.pem|$TMP/cert.pem|g" \
+  -e "s|/etc/letsencrypt/live/api.codaris.org/privkey.pem|$TMP/key.pem|g" \
   -e "s|/var/log/nginx/codaris.access.log|$TMP/codaris.access.log|g" \
   -e "s|/var/log/nginx/codaris.error.log|$TMP/codaris.error.log|g" \
   -e "s|/srv/codaris/current|$TMP/site|g" \

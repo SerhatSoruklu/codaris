@@ -61,8 +61,8 @@ verify_live_release() {
             return 1
         }
     done
-    health="$(curl --fail --silent --show-error --max-time 20 https://codaris.org/api/health)" || {
-        echo 'Public /api/health did not return HTTP 200.' >&2
+    health="$(curl --fail --silent --show-error --max-time 20 https://api.codaris.org/api/health)" || {
+        echo 'Public API /api/health did not return HTTP 200.' >&2
         return 1
     }
     printf '%s' "$health" | python3 -c 'import json,sys; d=json.load(sys.stdin); raise SystemExit(0 if d.get("contact_api")==1 and d.get("credential_api")==2 and d.get("page_access_api")==1 else 1)' || {

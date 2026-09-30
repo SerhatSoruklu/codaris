@@ -84,7 +84,7 @@ def call(path, data=None, cookie='', expected=200, request_origin=origin):
     response = conn.getresponse()
     body = json.loads(response.read())
     received = next((value for key, value in response.getheaders()
-                     if key.lower() == 'set-cookie' and value.startswith('codaris_session=')), None)
+                     if key.lower() == 'set-cookie' and value.startswith('codaris_session_v2=')), None)
     status = response.status
     conn.close()
     assert status == expected, (path,status,expected,body)
@@ -162,7 +162,7 @@ try:
     _,cookie=call('login',dict(identifier=registration['email'],password=password))
     assert 'Path=/' in cookie and 'HttpOnly' in cookie and 'SameSite=Strict' in cookie
     assert json.loads(raw_get('session',cookie)[2])['authenticated'] is True
-    assert raw_get('page-access',cookie)[0] == 204
+    assert raw_get('page-access',cookie)[0] == 403
     me,_=call('me',cookie=cookie)
     assert not me['email_verified'] and me['email']=='test@example.test'
     assert len(me['membership_id'])==24
@@ -213,6 +213,7 @@ try:
     call('verify',dict(token=verification),expected=400)
     me,_=call('me',cookie=cookie);assert me['email_verified']
     assert me['credential']['status']=='active'
+    assert raw_get('page-access',cookie)[0] == 204
     credential_id=me['credential']['verification_id']
     verified,_=call('credential/verify?credential='+credential_id)
     assert verified=={'valid':True,'display_name':registration['name'],'membership_number':me['credential']['membership_number'],'role':registration['role'],'status':'active','issued_at':verified['issued_at']}
@@ -357,6 +358,16 @@ try:
     account_messages = [m for m in messages if str(m['Subject']) not in
                         ('CODARIS contact message', 'We received your message to CODARIS')]
     assert all(m['Reply-To']=='contact@codaris.org' for m in account_messages)
+    for message in account_messages:
+        text_body = message.get_body(preferencelist=('plain',)).get_content()
+        assert 'https://x.com/CodarisORG' in text_body
+        assert 'https://www.linkedin.com/company/codarisorg/' in text_body
+        html_body = message.get_body(preferencelist=('html',)).get_content()
+        assert 'Follow CODARIS on X @CodarisORG' in html_body
+        assert 'Connect with CODARIS on LinkedIn CODARISorg' in html_body
+        assert 'https://x.com/CodarisORG' in html_body
+        assert 'https://www.linkedin.com/company/codarisorg/' in html_body
+        assert '/assets/x-logo-email.png' in html_body
     # Production cookie/origin policy is exercised without sending external mail.
     server.terminate();server.wait(timeout=5)
     diagnostics=server.stderr.read().decode()
@@ -373,8 +384,54 @@ try:
     call('login',dict(identifier='new@example.test',password=new_password),expected=403)
     _,secure_cookie=call('login',dict(identifier='new@example.test',password=new_password),request_origin='https://codaris.org')
     assert '; Secure' in secure_cookie and 'HttpOnly' in secure_cookie
+    me,_=call('me',cookie=secure_cookie,request_origin='https://codaris.org')
+    assert me['credential']['status']=='active' and me['email_verified']
+    assert me['session_started_at'] > 0
+    public_credential=me['credential']['verification_id']
+    # Deactivation requires the current password, disables public verification,
+    # blocks member access and invalidates every other active session.
+    _,other_cookie=call('login',dict(identifier='new@example.test',password=new_password),
+                        request_origin='https://codaris.org')
+    call('membership',dict(action='deactivate',current_password='wrong'),secure_cookie,
+         expected=403,request_origin='https://codaris.org')
+    deactivated,_=call('membership',dict(action='deactivate',current_password=new_password),
+                       secure_cookie,request_origin='https://codaris.org')
+    assert 'deactivated' in deactivated['message'].lower()
+    me,_=call('me',cookie=secure_cookie,request_origin='https://codaris.org')
+    assert me['email_verified'] and me['credential']['status']=='suspended'
+    assert me['credential']['public_enabled'] is False
+    assert raw_get('page-access',secure_cookie)[0] == 403
+    call('progress',dict(topic='4',read='1'),secure_cookie,expected=403,
+         request_origin='https://codaris.org')
+    assert raw_get('me',other_cookie)[0] == 401
+    assert call('credential/verify?credential='+public_credential)[0]['valid'] is False
+    # Reactivation preserves verified email but does not restore public exposure
+    # without a fresh opt-in from the credential control.
+    call('membership',dict(action='reactivate',current_password='wrong'),secure_cookie,
+         expected=403,request_origin='https://codaris.org')
+    call('membership',dict(action='reactivate',current_password=new_password),secure_cookie,
+         request_origin='https://codaris.org')
+    me,_=call('me',cookie=secure_cookie,request_origin='https://codaris.org')
+    assert me['credential']['status']=='active' and not me['credential']['public_enabled']
+    assert raw_get('page-access',secure_cookie)[0] == 204
+    # Deletion rejects either missing confirmation or a bad password, then
+    # removes the account tree and revokes the session after valid confirmation.
+    call('account/delete',dict(confirmation='DELETE MY ACCOUNT',current_password=new_password),
+         secure_cookie,expected=403,request_origin='https://codaris.org')
+    call('account/delete',dict(confirmation='DELETE MY CODARIS ACCOUNT',current_password='wrong'),
+         secure_cookie,expected=403,request_origin='https://codaris.org')
+    assert raw_get('me',secure_cookie)[0] == 200
+    call('progress',dict(topic='4',read='1'),secure_cookie,request_origin='https://codaris.org')
+    call('account/delete',dict(confirmation='DELETE MY CODARIS ACCOUNT',current_password=new_password),
+         secure_cookie,request_origin='https://codaris.org')
+    assert raw_get('me',secure_cookie)[0] == 401
+    assert psql('SELECT count(*) FROM app.users').stdout.strip()=='0'
+    assert psql("SELECT count(*) FROM app.accounts WHERE email='new@example.test'").stdout.strip()=='0'
+    for table in ('accounts','sessions','membership_credentials','learning_progress'):
+        assert psql('SELECT count(*) FROM app.'+table+' x WHERE NOT EXISTS '
+                    '(SELECT 1 FROM app.users u WHERE u.id=x.user_id)').stdout.strip()=='0', table
     completed=True
-    print('PASS: account flows, legacy credential backfill/consent, public projection, SVG/PDF/PNG data, QR decoding, optional Code 128 decoding, SMTP, CSRF, recovery and rate limits')
+    print('PASS: account flows, deactivation/reactivation and access revocation, permanent deletion/cascades, legacy credential backfill/consent, public projection, SVG/PDF/PNG data, QR decoding, optional Code 128 decoding, SMTP, CSRF, recovery and rate limits')
 finally:
     if server:
         server.terminate()

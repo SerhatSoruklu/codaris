@@ -37,19 +37,24 @@ static int send_mail(const Config *c, const char *id, const char *recipient, con
                "contact contact@codaris.org immediately.";
         button = "Open CODARIS";
     }
-    char link[1024], text[2048], html[4096], from[320], to[320], title[128], message_id[128];
+    char link[1024], social_image[1024], text[2048], html[4096], from[320], to[320], title[128], message_id[128];
     int n =
         snprintf(link, sizeof(link), "%s/%s/%s%s", c->origin,
                  *token ? (!strcmp(kind, "reset") ? "reset-password" : "verify-email") : "login",
                  *token ? "#" : "", token);
     if (n < 0 || (size_t)n >= sizeof(link))
         return 0;
+    n = snprintf(social_image, sizeof(social_image), "%s/assets/x-logo-email.png", c->origin);
+    if (n < 0 || (size_t)n >= sizeof(social_image))
+        return 0;
     /* Config origin is parsed as an origin; escape its only possible HTML metacharacter. */
-    if (strpbrk(link, "<>\"'&"))
+    if (strpbrk(link, "<>\"'&") || strpbrk(social_image, "<>\"'&"))
         return 0;
     n = snprintf(text, sizeof(text),
                  "CODARIS — BUILD. VERIFY. ADVANCE.\n\n%s\n\n%s\n\n%s: %s\n\nNever share your "
-                 "password.\nContact: contact@codaris.org\n",
+                 "password.\nContact: contact@codaris.org\n\nFollow CODARIS on X: "
+                 "https://x.com/CodarisORG\nConnect with CODARIS on LinkedIn: "
+                 "https://www.linkedin.com/company/codarisorg/\n",
                  subject, copy, button, link);
     if (n < 0 || (size_t)n >= sizeof(text))
         return 0;
@@ -68,9 +73,17 @@ static int send_mail(const Config *c, const char *id, const char *recipient, con
         "20px;background:#4be3ed;color:#080f16;border-radius:8px;text-decoration:none;font-weight:"
         "bold\">%s</a></p><p style=\"font-size:12px;color:#526571\">Never share your password. If "
         "the button does not work, use the link in the plain-text version of this "
-        "email.</p></td></tr></table><p style=\"font-size:12px;color:#526571\">BUILD. VERIFY. "
-        "ADVANCE.<br>contact@codaris.org</p></td></tr></table></body></html>",
-        subject, subject, copy, link, button);
+        "email.</p></td></tr></table><table role=\"presentation\" style=\"margin-top:14px\"><tr><td "
+        "align=\"center\"><a href=\"https://x.com/CodarisORG\" aria-label=\"CODARIS on X\" "
+        "style=\"display:inline-block;vertical-align:middle;margin-right:8px\"><img src=\"%s\" "
+        "width=\"24\" height=\"24\" alt=\"X\" style=\"display:block;border:0\"></a><a "
+        "href=\"https://x.com/CodarisORG\" style=\"vertical-align:middle;color:#526571;font-size:12px;"
+        "text-decoration:none\">Follow CODARIS on X @CodarisORG</a><span style=\"padding:0 8px;color:#526571\">·</span>"
+        "<a href=\"https://www.linkedin.com/company/codarisorg/\" style=\"vertical-align:middle;color:#526571;font-size:12px;"
+        "text-decoration:none\">Connect with CODARIS on LinkedIn CODARISorg</a></td></tr></table><p "
+        "style=\"font-size:12px;color:#526571\">BUILD. VERIFY. ADVANCE.<br>contact@codaris.org</p>"
+        "</td></tr></table></body></html>",
+        subject, subject, copy, link, button, social_image);
     if (n < 0 || (size_t)n >= sizeof(html))
         return 0;
     snprintf(from, sizeof(from), "From: CODARIS <%s>", c->mail_from);
@@ -146,6 +159,7 @@ done:
     curl_mime_free(mime);
     curl_easy_cleanup(curl);
     sodium_memzero(link, sizeof(link));
+    sodium_memzero(social_image, sizeof(social_image));
     sodium_memzero(text, sizeof(text));
     sodium_memzero(html, sizeof(html));
     return ok;

@@ -36,8 +36,9 @@ CONFIGS = {
 RELEASE_RE = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\Z')
 ROOT_FILES = {
     'index.html', '404.html', 'styles.css', 'meaning.css', 'legal.css', 'contact.css',
-    'host.js', 'auth-nav.js', 'auth-redirect.js', 'home-intro.js', 'codaris.js',
-    'codaris.wasm', 'robots.txt', 'sitemap.xml', 'version.txt',
+    'host.js', 'auth-nav.js', 'api-origin.js', 'auth-redirect.js', 'member-access.js',
+    'home-intro.js', 'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml',
+    'version.txt', 'site.webmanifest',
 }
 NGINX_FILES = {
     'nginx/codaris.conf',

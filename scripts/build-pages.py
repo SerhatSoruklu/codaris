@@ -29,6 +29,7 @@ for asset in (WEB / 'assets').iterdir():
     if asset.suffix not in {'.png', '.webp'}:
         continue
     shutil.copy2(asset, OUT / 'assets' / asset.name)
+shutil.copy2(WEB / 'assets/codaris-favicon-v2.svg', OUT / 'assets/codaris-favicon-v2.svg')
 runpy.run_path(str(ROOT / 'scripts/build-lucide-sprite.py'))
 icon_out = OUT / 'assets/icons'
 icon_out.mkdir(parents=True, exist_ok=True)
@@ -51,8 +52,12 @@ for page in pages:
         raise SystemExit('Invalid or duplicate page route')
     seen_routes.add(slug)
     route = '/' + slug + '/' if slug else '/'
-    # Apply the brand suffix once for every route and metadata surface.
-    seo_title = page['title'] + ' | CODARIS'
+    # Keep one brand mention and enforce concise metadata on every route.
+    seo_title = page['title'].strip() + ' | CODARIS'
+    if seo_title.count('CODARIS') != 1 or len(seo_title) > 60:
+        raise SystemExit('SEO title must contain CODARIS once and fit 60 characters: ' + route)
+    if not 140 <= len(page['description']) <= 160:
+        raise SystemExit('SEO description must be 140–160 characters: ' + route)
     title = html.escape(seo_title, quote=True)
     description = html.escape(page['description'], quote=True)
     if page.get('indexing') not in {'index', 'noindex'}:
@@ -76,7 +81,7 @@ for page in pages:
             if not slug:
                 data['@graph'][:0] = [
                     {'@type': 'WebSite', '@id': origin + '/#website', 'name': 'CODARIS', 'url': origin + '/', 'publisher': {'@id': origin + '/#organization'}},
-                    {'@type': 'Organization', '@id': origin + '/#organization', 'name': 'CODARIS', 'alternateName': 'Coalition Of Developers Advancing Responsible Intelligent Systems', 'url': origin + '/', 'sameAs': ['https://x.com/codarisorg']}]
+                    {'@type': 'Organization', '@id': origin + '/#organization', 'name': 'CODARIS', 'alternateName': 'Coalition Of Developers Advancing Responsible Intelligent Systems', 'url': origin + '/', 'sameAs': ['https://x.com/codarisorg', 'https://www.linkedin.com/company/codarisorg/']}]
             if slug:
                 crumb_names = slug.split('/')
                 crumb_items = [{'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': origin + '/'}]
@@ -87,12 +92,13 @@ for page in pages:
                 data['@graph'].append({'@type': 'BreadcrumbList', 'itemListElement': crumb_items})
             seo += '\n<script type="application/ld+json">' + json.dumps(data).replace('<', '\\u003c') + '</script>'
     if origin:
-        image_url = origin + '/assets/Codaris_Flag.png'
-        alt = 'CODARIS flag with its member community emblem.'
+        image_url = origin + '/assets/codaris-social-v2.png'
+        alt = 'CODARIS coalition mark and BUILD. VERIFY. ADVANCE. message on a dark teal background.'
         seo += '\n<meta property="og:image" content="' + html.escape(image_url, quote=True) + '">'
+        seo += '\n<meta property="og:image:secure_url" content="' + html.escape(image_url, quote=True) + '">'
         seo += '\n<meta property="og:image:type" content="image/png">'
-        seo += '\n<meta property="og:image:width" content="1448">'
-        seo += '\n<meta property="og:image:height" content="1086">'
+        seo += '\n<meta property="og:image:width" content="1200">'
+        seo += '\n<meta property="og:image:height" content="630">'
         seo += '\n<meta property="og:image:alt" content="' + html.escape(alt, quote=True) + '">'
         seo += '\n<meta name="twitter:image" content="' + html.escape(image_url, quote=True) + '">'
         seo += '\n<meta name="twitter:image:alt" content="' + html.escape(alt, quote=True) + '">'
@@ -112,7 +118,7 @@ for page in pages:
                      lambda match: '' if production else match.group(1), content, flags=re.S)
     if page.get('development_only'):
         content = '<section class="wrap section resource-page"><p class="eyebrow">MEMBERSHIP / COMING SOON</p><h1 class="page-title">' + title + '</h1><p>Staff access is not available yet.</p><a class="button" href="/join/">Explore membership</a></section>'
-    home_intro = '<script src="/home-intro.js?v=1"></script>' if not slug else ''
+    home_intro = '<script src="/home-intro.js?v=2"></script>' if not slug else ''
     values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HOMEINTRO': home_intro, 'LEGALCSS': legal_css, 'MEANINGCSS': meaning_css, 'CONTACTCSS': contact_css, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'MEMBER_ROUTE': 'true' if member_only else 'false', 'FOOTER': footer, 'RUNTIME': runtime}
     document = shell
     for key, value in values.items():
@@ -133,7 +139,10 @@ shutil.copy2(WEB / 'legal.css', OUT / 'legal.css')
 shutil.copy2(WEB / 'meaning.css', OUT / 'meaning.css')
 shutil.copy2(WEB / 'contact.css', OUT / 'contact.css')
 shutil.copy2(WEB / 'auth-nav.js', OUT / 'auth-nav.js')
+shutil.copy2(WEB / 'api-origin.js', OUT / 'api-origin.js')
+shutil.copy2(WEB / 'site.webmanifest', OUT / 'site.webmanifest')
 shutil.copy2(WEB / 'auth-redirect.js', OUT / 'auth-redirect.js')
+shutil.copy2(WEB / 'member-access.js', OUT / 'member-access.js')
 shutil.copy2(WEB / 'home-intro.js', OUT / 'home-intro.js')
 print(f'Built {len(pages)} static routes; ' + ('production SEO enabled.' if production and origin else 'preview noindex; set CODARIS_PRODUCTION=1 for production indexing.'))
 
@@ -146,12 +155,11 @@ member_route_pattern = '|'.join(server_guarded_routes)
 member_routes_conf = (
     'location ~ ^/(?:' + member_route_pattern + ')(?:/|$) {\n'
     '    if ($request_method !~ ^(GET|HEAD)$) { return 405; }\n'
-    '    auth_request /api/page-access;\n'
-    '    error_page 401 = @codaris_member_login;\n'
+    '    auth_request /_codaris_page_access;\n'
+    '    error_page 401 =401 /member-sign-in-required/;\n'
+    '    error_page 403 = /member-access-unavailable/;\n'
+    '    error_page 500 502 503 504 /member-service-unavailable/;\n'
     '    try_files $uri $uri/ =404;\n'
-    '}\n'
-    'location @codaris_member_login {\n'
-    '    return 302 /login/?return_to=$uri;\n'
     '}\n'
 )
 (deploy_out / 'member-routes.conf').write_text(member_routes_conf, encoding='utf-8')

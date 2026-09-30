@@ -102,7 +102,9 @@ EMSCRIPTEN_KEEPALIVE void codaris_validate_field(const char *name, int length, i
     }
     if (reveal) {
         if (flags & 1) message = "Please complete this required field.";
+        else if ((flags & 2) && !strcmp(name, "linkedin")) message = "Enter a valid HTTPS LinkedIn profile URL.";
         else if (flags & 2) message = "Enter a valid email address or complete URL.";
+        else if ((flags & 4) && !strcmp(name, "linkedin")) message = "Use a LinkedIn profile URL in the format https://www.linkedin.com/in/your-name/.";
         else if (flags & 4) message = "Use a complete HTTPS URL (https://…).";
         else if (length > 0 && length < minimum) message = "Please add more detail to meet the minimum length.";
         else if (maximum > 0 && length > maximum) message = "Please shorten this value to the character limit.";
@@ -166,7 +168,7 @@ EM_JS(int, view_has_countries, (void), {
 
 EM_JS(void, view_community_metrics, (void), {
     if(!document.getElementById('supporters-metric'))return;
-    fetch('/api/community',{credentials:'same-origin',cache:'no-store'})
+    fetch(window.codarisApiUrl('/api/community'),{credentials:'omit',cache:'no-store'})
       .then(response=>{if(!response.ok)throw new Error('Unavailable');return response.json();})
       .then(data=>{document.getElementById('supporters-metric').textContent=String(data.members);
           document.getElementById('countries-metric').textContent=String(data.countries);})

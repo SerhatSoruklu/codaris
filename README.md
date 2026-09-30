@@ -68,7 +68,7 @@ The project keeps application logic in C. The browser application is C17 compile
 
 ```text
 Browser: semantic HTML/CSS + C17 → WebAssembly
-                    │ same-origin HTTPS /api/
+                    │ HTTPS https://api.codaris.org/api/
                     ▼
 Native C API ── libpq ── PostgreSQL
        └── SMTP delivery worker
@@ -133,7 +133,7 @@ The client output is written to `build/client`. For a production-indexed static 
 - `config/backend.development.env`
 - `config/backend.production.env`
 
-Select the environment explicitly with `python3 scripts/project.py dev ACTION` or `prod ACTION`. The selected file takes precedence over inherited shell settings. Frontend configuration rejects backend-only values. Frontend API calls use same-origin `/api/`; `CODARIS_SITE_URL` configures the canonical public site URL, not the API destination. See [configuration documentation](config/README.md) for supported variables and platform-specific defaults.
+Select the environment explicitly with `python3 scripts/project.py dev ACTION` or `prod ACTION`. The selected file takes precedence over inherited shell settings. Frontend configuration rejects backend-only values. Local frontend API calls use same-origin `/api/`; production calls use `https://api.codaris.org/api/`. `CODARIS_SITE_URL` configures the canonical public site URL, not the API destination. See [configuration documentation](config/README.md) for supported variables and platform-specific defaults.
 
 For a separate database, configure PostgreSQL using `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, and a protected libpq password file, or use backend-only `CODARIS_DATABASE_URL`. Do not commit credentials. `CODARIS_MAIL_KEY` is a private, environment-specific 32-byte key used to protect queued action tokens. Never put database credentials, SMTP passwords or this key in frontend configuration or generated browser output.
 

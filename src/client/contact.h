@@ -51,8 +51,8 @@ EM_JS(void, contact_bind_form, (void), {
         if (output) { output.textContent = "Sending your message…"; output.setAttribute("role", "status"); }
         const payload = {};
         new FormData(form).forEach((value, key) => { payload[key] = value; });
-        fetch("/api/contact", {
-            method: "POST", credentials: "same-origin", cache: "no-store",
+        fetch(window.codarisApiUrl("/api/contact"), {
+            method: "POST", credentials: "omit", cache: "no-store",
             headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
         }).then(async response => {
             const type = response.headers.get("content-type") || "";

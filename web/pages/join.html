@@ -133,13 +133,13 @@
                     <option value="Student">Student</option>
                     <option value="Other">Other</option></select
                   ><small class="field-hint" id="role-hint"
-                    >Choose the closest match to your work or interests.</small
+                    >Choose the closest match to your work or interests. Your required LinkedIn profile provides professional context for this role.</small
                   >
                   <p class="field-error" id="role-error" aria-live="polite"></p>
                 </div>
-                <div class="form-field">
+                <div class="form-field full">
                   <label for="join-linkedin"
-                    >LinkedIn <span>(optional)</span></label
+                    >LinkedIn</label
                   ><input
                     type="url"
                     id="join-linkedin"
@@ -147,10 +147,11 @@
                     placeholder="https://linkedin.com/in/…"
                     maxlength="2048"
                     aria-describedby="linkedin-hint linkedin-count linkedin-error"
-                    pattern="https://.+"
+                    pattern="https://(www\.)?linkedin\.com/in/[^\/?#]+/?([?#].*)?"
+                    title="Use an HTTPS LinkedIn profile URL, such as https://www.linkedin.com/in/your-name/"
+                    required
                   /><small class="field-hint" id="linkedin-hint"
-                    >Use a LinkedIn profile URL on linkedin.com. Ownership is not
-                    verified.</small
+                    >Use your LinkedIn profile URL to provide professional context for the role you selected. A URL alone does not verify profile ownership or developer experience.</small
                   ><small class="field-count" id="linkedin-count"
                     >0 / 2048</small
                   >
@@ -180,7 +181,7 @@
                     aria-live="polite"
                   ></p>
                 </div>
-                <div class="form-field full">
+                <div class="form-field">
                   <label for="join-website"
                     >Website <span>(optional)</span></label
                   ><input

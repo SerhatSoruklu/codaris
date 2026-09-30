@@ -55,15 +55,17 @@ api_binary_is_stale() {
 }
 cleanup() {
     for child_pid in "$MAIL_PID" "$API_PID"; do
-        if [[ -n "$child_pid" ]] && kill -0 "$child_pid" 2>/dev/null; then
-            kill -TERM "$child_pid" 2>/dev/null || true
+        if [[ -n "$child_pid" ]] && kill -0 -- "-${child_pid}" 2>/dev/null; then
+            kill -TERM -- "-${child_pid}" 2>/dev/null || true
         fi
     done
     for child_pid in "$MAIL_PID" "$API_PID"; do
         if [[ -n "$child_pid" ]]; then wait "$child_pid" 2>/dev/null || true; fi
     done
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 if ! api_is_current || api_binary_is_stale; then
     # Rebuilds replace the executable on disk, but an already-running API keeps
     # serving its old code. Restart only this project's managed development API.
@@ -91,7 +93,7 @@ if ! api_is_current || api_binary_is_stale; then
     mkdir -p "$ROOT/.local/log"
     chmod 700 "$ROOT/.local" "$ROOT/.local/log"
     API_LOG="$ROOT/.local/log/account-api.log"
-    "$ROOT/scripts/run-server.sh" development >"$API_LOG" 2>&1 &
+    setsid "$ROOT/scripts/run-server.sh" development >"$API_LOG" 2>&1 &
     API_PID=$!
     ready=0
     for _ in {1..60}; do
@@ -120,15 +122,16 @@ if mail_is_configured; then
     MAIL_LOG="$ROOT/.local/log/mail-worker.log"
     touch "$MAIL_LOG"
     chmod 600 "$MAIL_LOG"
-    (
+    setsid bash -c '
+        root="$1"
         umask 077
         while true; do
-            if ! python3 "$ROOT/scripts/project.py" development mail; then
-                echo 'Development mail drain failed; pending messages will be retried.' >&2
+            if ! python3 "$root/scripts/project.py" development mail; then
+                echo "Development mail drain failed; pending messages will be retried." >&2
             fi
             sleep 60
         done
-    ) >>"$MAIL_LOG" 2>&1 &
+    ' -- "$ROOT" >>"$MAIL_LOG" 2>&1 &
     MAIL_PID=$!
     echo "Development mail worker running; log: ${MAIL_LOG}"
 else

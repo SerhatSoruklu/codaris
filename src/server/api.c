@@ -268,6 +268,24 @@ static int url_normalize(const char *input, const char *provider, char out[2049]
     curl_url_cleanup(u);
     return ok;
 }
+static int linkedin_profile_normalize(const char *input, char out[2049]) {
+    if (!url_normalize(input, "linkedin.com", out) || !*out)
+        return 0;
+    CURLU *u = curl_url();
+    char *path = NULL;
+    int ok = u && !curl_url_set(u, CURLUPART_URL, out, 0) &&
+             !curl_url_get(u, CURLUPART_PATH, &path, 0) && !strncmp(path, "/in/", 4);
+    if (ok) {
+        const char *slug = path + 4;
+        const char *end = strchr(slug, '/');
+        size_t length = end ? (size_t)(end - slug) : strlen(slug);
+        ok = (!end || !end[1]) && length > 0 && !(length == 1 && slug[0] == '.') &&
+             !(length == 2 && slug[0] == '.' && slug[1] == '.');
+    }
+    curl_free(path);
+    curl_url_cleanup(u);
+    return ok;
+}
 /* Avatars are exactly 100x100 RGBA pixels, never uploaded file formats. */
 static int avatar_ok(const char *value) {
     if (!*value)
@@ -376,7 +394,7 @@ static char *contact_payload_encrypt(const Config *c, const char *plain) {
 }
 static int authenticate(PGconn *db, struct MHD_Connection *connection, char id[32],
                         char session_hash[65]) {
-    const char *raw = MHD_lookup_connection_value(connection, MHD_COOKIE_KIND, "codaris_session");
+    const char *raw = MHD_lookup_connection_value(connection, MHD_COOKIE_KIND, "codaris_session_v2");
     if (!raw || strlen(raw) != 64)
         return 0;
     digest(raw, session_hash);
@@ -389,6 +407,15 @@ static int authenticate(PGconn *db, struct MHD_Connection *connection, char id[3
     if (r)
         PQclear(r);
     return ok;
+}
+static int membership_active(PGconn *db, const char *id) {
+    const char *v[] = {id};
+    PGresult *r = query(db,
+        "SELECT 1 FROM app.accounts a JOIN app.membership_credentials c ON c.user_id=a.user_id "
+        "WHERE a.user_id=$1::bigint AND a.email_verified AND c.status='active'", 1, v);
+    int active = r && PQntuples(r) == 1;
+    if (r) PQclear(r);
+    return active;
 }
 static void credential_random(char public_number[21], char verification_id[37]) {
     static const char alphabet[] = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -508,35 +535,47 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         goto done;
     if (!strcmp(path, "/api/session") && !post) {
         int authenticated = authenticate(db, conn, id, session_hash);
-        const char *raw = MHD_lookup_connection_value(conn, MHD_COOKIE_KIND, "codaris_session");
+        const char *raw = MHD_lookup_connection_value(conn, MHD_COOKIE_KIND, "codaris_session_v2");
         char current_cookie[256] = "", legacy_cookie[128] = "";
         const char *set_cookie = NULL, *clear_cookie = NULL;
         if (raw) {
             if (authenticated && strlen(raw) == 64)
                 snprintf(current_cookie, sizeof(current_cookie),
-                         "codaris_session=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s",
-                         raw, c->production ? "; Secure" : "");
+                         "codaris_session_v2=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s",
+                         raw, c->production ? "; Domain=codaris.org; Secure" : "");
             else
                 snprintf(current_cookie, sizeof(current_cookie),
-                         "codaris_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
-                         c->production ? "; Secure" : "");
+                         "codaris_session_v2=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+                         c->production ? "; Domain=codaris.org; Secure" : "");
             set_cookie = current_cookie;
             clear_legacy_session_cookie(c, legacy_cookie, sizeof(legacy_cookie));
             clear_cookie = legacy_cookie;
         }
-        enum MHD_Result result = respond_cookies(conn, 200,
-                                                 authenticated ? "{\"authenticated\":true}"
-                                                               : "{\"authenticated\":false}",
-                                                 set_cookie, clear_cookie);
+        char session_json[512] = "{\"authenticated\":false}";
+        if (authenticated) {
+            const char *v[] = {session_hash, id};
+            r = query(db,
+                "SELECT json_build_object('authenticated',true,'name',u.display_name,"
+                "'session_started_at',extract(epoch from s.created_at)::bigint)::text "
+                "FROM app.sessions s JOIN app.users u ON u.id=s.user_id "
+                "WHERE s.token_hash=$1 AND s.user_id=$2::bigint", 2, v);
+            if (r && PQntuples(r) == 1)
+                snprintf(session_json, sizeof(session_json), "%s", PQgetvalue(r, 0, 0));
+            if (r) { PQclear(r); r = NULL; }
+        }
+        enum MHD_Result result = respond_cookies(conn, 200, session_json, set_cookie, clear_cookie);
         if (body)
             json_object_put(body);
         PQfinish(db);
         return result;
     }
     if (!strcmp(path, "/api/page-access") && !post) {
-        unsigned access_status = authenticate(db, conn, id, session_hash) ? 204u : 401u;
+        int authenticated = authenticate(db, conn, id, session_hash);
+        unsigned access_status = !authenticated ? 401u : membership_active(db, id) ? 204u : 403u;
         enum MHD_Result result = respond(conn, access_status,
-                                         access_status == 204 ? "" : "{\"message\":\"Please sign in.\"}",
+                                         access_status == 204 ? "" :
+                                         access_status == 401 ? "{\"message\":\"Please sign in.\"}" :
+                                         "{\"message\":\"Active membership is required.\"}",
                                          NULL);
         if (body)
             json_object_put(body);
@@ -558,7 +597,9 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
     if (!strcmp(path, "/api/community") && !post) {
         r = query(db,
                   "SELECT json_build_object('members',count(*),'countries',count(DISTINCT "
-                  "lower(country)))::text FROM app.accounts WHERE email_verified",
+                  "lower(a.country)))::text FROM app.accounts a "
+                  "JOIN app.membership_credentials c ON c.user_id=a.user_id "
+                  "WHERE a.email_verified AND c.status='active'",
                   0, NULL);
         if (r && PQntuples(r) == 1) {
             enum MHD_Result result = respond(conn, 200, PQgetvalue(r, 0, 0), NULL);
@@ -653,7 +694,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             !length_ok(country, 2, 120) || !membership_country_allowed(country) ||
             !role_ok(role) || !length_ok(reason, 20, 2000) ||
             !password_ok(password) || !email_normalize(field(body, "email"), email) ||
-            !url_normalize(field(body, "linkedin"), "linkedin.com", linkedin) ||
+            !linkedin_profile_normalize(field(body, "linkedin"), linkedin) ||
             !url_normalize(field(body, "github"), "github.com", github) ||
             !url_normalize(field(body, "website"), "", website))
             goto invalid;
@@ -756,8 +797,8 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             goto done;
         }
         snprintf(cookie, sizeof(cookie),
-                 "codaris_session=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s", raw,
-                 c->production ? "; Secure" : "");
+                 "codaris_session_v2=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s", raw,
+                 c->production ? "; Domain=codaris.org; Secure" : "");
         sodium_memzero(raw, sizeof(raw));
         status = 200;
         message = "{\"message\":\"Signed in\"}";
@@ -876,18 +917,18 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         status=400;message="{\"message\":\"Choose SVG or PDF credential output.\"}";goto done;
     }
     if (!strcmp(path, "/api/me") && !strcmp(method, "GET")) {
-        const char *v[] = {id};
+        const char *v[] = {id, session_hash};
         r = query(
             db,
             "SELECT "
             "json_build_object('name',u.display_name,'membership_id',u.username,'email',a.email,'"
             "email_verified',a.email_verified,'country',a.country,'role',a.role,'motivation',a."
             "motivation,'linkedin',a.linkedin,'github',a.github,'website',a.website,'avatar',"
-            "encode(a.avatar_rgba,'base64'),'credential',json_build_object('membership_number',c.membership_number,'verification_id',c.verification_id::text,'status',c.status,'issued_at',c.issued_at,'public_enabled',c.public_enabled),'progress',"
+            "encode(a.avatar_rgba,'base64'),'credential',json_build_object('membership_number',c.membership_number,'verification_id',c.verification_id::text,'status',c.status,'issued_at',c.issued_at,'public_enabled',c.public_enabled),'session_started_at',(SELECT extract(epoch from s.created_at)::bigint FROM app.sessions s WHERE s.token_hash=$2),'progress',"
             "COALESCE((SELECT sum(1::bigint << topic::integer) FROM app.learning_progress WHERE "
             "user_id=a.user_id),0))::text FROM "
             "app.accounts a JOIN app.users u ON u.id=a.user_id JOIN app.membership_credentials c ON c.user_id=a.user_id WHERE a.user_id=$1::bigint",
-            1, v);
+            2, v);
         if (r && PQntuples(r) == 1) {
             enum MHD_Result result = respond(conn, 200, PQgetvalue(r, 0, 0), NULL);
             PQclear(r);
@@ -904,6 +945,11 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         goto done;
     }
     if (!strcmp(path, "/api/progress")) {
+        if (!membership_active(db, id)) {
+            status = 403;
+            message = "{\"message\":\"An active membership is required to save learning progress.\"}";
+            goto done;
+        }
         const char *topic = field(body, "topic"), *read = field(body, "read");
         char *end = NULL;
         long number = strtol(topic, &end, 10);
@@ -927,8 +973,8 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         if (!command(db, "DELETE FROM app.sessions WHERE token_hash=$1", 1, v))
             goto done;
         snprintf(cookie, sizeof(cookie),
-                 "codaris_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
-                 c->production ? "; Secure" : "");
+                 "codaris_session_v2=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+                 c->production ? "; Domain=codaris.org; Secure" : "");
         status = 200;
         message = "{\"message\":\"Signed out\"}";
         goto done;
@@ -938,14 +984,87 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
     transaction = 1;
     const char *iv[] = {id};
     r = query(db,
-              "SELECT email,password_hash,email_verified FROM app.accounts WHERE "
-              "user_id=$1::bigint FOR UPDATE",
+              "SELECT a.email,a.password_hash,a.email_verified,u.username FROM app.accounts a "
+              "JOIN app.users u ON u.id=a.user_id WHERE a.user_id=$1::bigint FOR UPDATE OF a,u",
               1, iv);
     if (!r || PQntuples(r) != 1)
         goto done;
     char old_email[255];
     snprintf(old_email, sizeof(old_email), "%s", PQgetvalue(r, 0, 0));
-    if (!strcmp(path, "/api/profile")) {
+    if (!strcmp(path, "/api/membership")) {
+        const char *action = field(body, "action");
+        const char *current = field(body, "current_password");
+        if (strlen(current) > 512 ||
+            crypto_pwhash_str_verify(PQgetvalue(r, 0, 1), current, strlen(current))) {
+            status = 403;
+            message = "{\"message\":\"Current password is incorrect.\"}";
+            goto done;
+        }
+        if (!strcmp(action, "deactivate")) {
+            PGresult *transition = query(db,
+                "UPDATE app.membership_credentials SET status='suspended',public_enabled=false,"
+                "consented_at=NULL,updated_at=now() WHERE user_id=$1::bigint AND status='active' "
+                "RETURNING 1",
+                1, iv);
+            if (!transition) goto done;
+            int changed = PQntuples(transition) == 1;
+            PQclear(transition);
+            if (!changed) {
+                status = 409;
+                message = "{\"message\":\"This membership is not active. Refresh your profile and try again.\"}";
+                goto done;
+            }
+            const char *sv[] = {id, session_hash};
+            if (!command(db,
+                "DELETE FROM app.sessions WHERE user_id=$1::bigint AND token_hash<>$2", 2, sv))
+                goto done;
+            message = "{\"message\":\"Membership deactivated. You can reactivate it from your profile.\"}";
+        } else if (!strcmp(action, "reactivate")) {
+            if (strcmp(PQgetvalue(r, 0, 2), "t")) {
+                status = 403;
+                message = "{\"message\":\"Verify your email before reactivating membership.\"}";
+                goto done;
+            }
+            PGresult *transition = query(db,
+                "UPDATE app.membership_credentials SET status='active',issued_at=coalesce(issued_at,now()),"
+                "updated_at=now() WHERE user_id=$1::bigint AND status='suspended' RETURNING 1",
+                1, iv);
+            if (!transition) goto done;
+            int changed = PQntuples(transition) == 1;
+            PQclear(transition);
+            if (!changed) {
+                status = 409;
+                message = "{\"message\":\"This membership cannot be reactivated. Refresh your profile and try again.\"}";
+                goto done;
+            }
+            message = "{\"message\":\"Membership reactivated.\"}";
+        } else {
+            goto invalid;
+        }
+    } else if (!strcmp(path, "/api/account/delete")) {
+        const char *current = field(body, "current_password");
+        if (strcmp(field(body, "confirmation"), "DELETE MY CODARIS ACCOUNT") ||
+            strlen(current) > 512 ||
+            crypto_pwhash_str_verify(PQgetvalue(r, 0, 1), current, strlen(current))) {
+            status = 403;
+            message = "{\"message\":\"Enter the confirmation phrase and your current password to delete this account.\"}";
+            goto done;
+        }
+        char username[25];
+        snprintf(username, sizeof(username), "%s", PQgetvalue(r, 0, 3));
+        const char *buckets[] = {old_email, username};
+        if (!command(db,
+                     "DELETE FROM app.rate_limits WHERE bucket IN "
+                     "('register:'||$1,'recover:'||$1,'login:'||lower($1),"
+                     "'login:'||lower($2),'contact-email:'||$1)",
+                     2, buckets))
+            goto done;
+        if (!command(db, "DELETE FROM app.users WHERE id=$1::bigint", 1, iv)) goto done;
+        snprintf(cookie, sizeof(cookie),
+                 "codaris_session_v2=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+                 c->production ? "; Domain=codaris.org; Secure" : "");
+        message = "{\"message\":\"Account permanently deleted.\"}";
+    } else if (!strcmp(path, "/api/profile")) {
         char linkedin[2049], github[2049], website[2049];
         const char *name = field(body, "name"), *country = field(body, "country"),
                    *role = field(body, "role");
@@ -1051,7 +1170,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
     goto done;
 invalid:
     status = 400;
-    message = "{\"message\":\"Check the fields, password length and HTTPS profile URLs. The "
+    message = "{\"message\":\"Check the required fields, password length, LinkedIn profile URL and HTTPS profile URLs. The "
               "original application reason cannot be edited.\"}";
     goto done;
 throttled:
