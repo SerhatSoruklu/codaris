@@ -53,7 +53,7 @@ python3 "$ROOT/scripts/db-migrate.py"
 psql -X -v ON_ERROR_STOP=1 -c \
     'GRANT USAGE ON SCHEMA app TO codaris_app;'
 psql -X -v ON_ERROR_STOP=1 -c \
-    'GRANT SELECT, INSERT, UPDATE ON app.users, app.accounts TO codaris_app;'
+    'GRANT SELECT, INSERT, UPDATE ON app.users, app.accounts TO codaris_app; GRANT DELETE ON app.users TO codaris_app;'
 psql -X -v ON_ERROR_STOP=1 -c \
     'GRANT SELECT, INSERT, DELETE ON app.sessions, app.action_tokens TO codaris_app;'
 psql -X -v ON_ERROR_STOP=1 -c \

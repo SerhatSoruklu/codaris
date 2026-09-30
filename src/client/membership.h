@@ -83,9 +83,9 @@ EMSCRIPTEN_KEEPALIVE void codaris_progress_response(int status) {
 }
 /* DOM access and JSON serialization are browser transport; C chooses operations
  * and owns navigation / success handling. Passwords are never persisted. */
-EM_JS(void, member_request, (const char *operation, const char *endpoint), {
-    const kind=UTF8ToString(operation), path=UTF8ToString(endpoint);
-    const form=document.querySelector('[data-account-form="'+kind+'"]');
+EM_JS(void, member_request_payload_init, (void), {
+    if(window.codarisBuildAccountPayload)return;
+    window.codarisBuildAccountPayload=function(kind,form){
     const payload={};
     if(form)new FormData(form).forEach((value,key)=>{payload[key]=value;});
     if(kind==='credential'){
@@ -98,7 +98,7 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
             payload.avatar="";
             if(!canvas.hidden) {
                 const context=canvas.getContext('2d');
-                if(!context){Module.ccall('codaris_account_response',null,['string','number','string','number'],[kind,0,'Unable to read the profile picture.',0]);return;}
+                if(!context){Module.ccall('codaris_account_response',null,['string','number','string','number'],[kind,0,'Unable to read the profile picture.',0]);return null;}
                 const pixels=context.getImageData(0,0,100,100).data;
                 let raw="";for(let i=0;i<pixels.length;i++)raw+=String.fromCharCode(pixels[i]);
                 payload.avatar=btoa(raw);
@@ -106,26 +106,23 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
         }
     }
     if(kind==='verify'||kind==='reset')payload.token=window.codarisActionToken||"";
-    const options={credentials:'same-origin',cache:'no-store'};
-    if(kind!=='me'){
-        options.method='POST';options.headers={'Content-Type':'application/json'};
-        options.body=JSON.stringify(payload);
-    }
-    if(form)form.querySelectorAll('button').forEach(e=>e.disabled=true);
-    const request=window.codarisAccountRequest(path,options,kind);
-    request.then(async response => {
+    return payload;
+    };
+})
+EM_JS(void, member_request_response_init, (void), {
+    if(window.codarisHandleAccountResponse)return;
+    window.codarisHandleAccountResponse=async function(kind,response){
         if(response.status===401||(response.ok&&kind==='password'))
             document.dispatchEvent(new Event('codaris-auth-required'));
         const contentType=response.headers.get('content-type')||"";
-        if(!contentType.toLowerCase().includes('application/json')) {
+        if(!contentType.toLowerCase().includes('application/json'))
             throw new Error('The account service returned an unexpected response. Please try again later.');
-        }
         const data=await response.json();
-        if (kind === 'me' && response.ok) {
-            Module.ccall('codaris_progress_loaded', null, ['number'], [data.progress || 0]);
-            const raw=atob(data.avatar || "");
+        if(kind==='me'&&response.ok){
+            Module.ccall('codaris_progress_loaded',null,['number'],[data.progress||0]);
+            const raw=atob(data.avatar||"");
             document.querySelectorAll('#avatar-preview, #member-card-avatar').forEach(canvas=>{
-                const context=canvas.getContext('2d'); if(!context)return;
+                const context=canvas.getContext('2d');if(!context)return;
                 canvas.hidden=!raw;
                 if(raw){const pixels=new Uint8ClampedArray(raw.length);for(let i=0;i<raw.length;i++)pixels[i]=raw.charCodeAt(i);context.putImageData(new ImageData(pixels,100,100),0,0);}
                 else context.clearRect(0,0,100,100);
@@ -133,28 +130,42 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
             document.querySelectorAll('[data-avatar-fallback]').forEach(e=>e.hidden=!!raw);
             const removePicture=document.getElementById('avatar-remove');
             if(removePicture)removePicture.hidden=!raw;
-            const mapping = {'profile-name':'name','profile-country':'country','profile-role':'role',
-                'profile-linkedin':'linkedin','profile-github':'github','profile-website':'website'};
-            Object.entries(mapping).forEach(([id, key]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.value = id === 'profile-country' && data[key] === 'Turkey'
-                        ? 'Türkiye' : (data[key] || "");
-                    if (id === 'profile-country') element.dispatchEvent(new Event('change', {bubbles:true}));
-                    if (element.dataset.characterCount) {
-                        const count = document.getElementById(element.dataset.characterCount);
-                        if (count) count.textContent = element.value.length + ' / ' + element.maxLength;
-                    }
+            const mapping={'profile-name':'name','profile-country':'country','profile-role':'role','profile-linkedin':'linkedin','profile-github':'github','profile-website':'website'};
+            Object.entries(mapping).forEach(([id,key])=>{
+                const element=document.getElementById(id);
+                if(element){
+                    element.value=id==='profile-country'&&data[key]==='Turkey'?'Türkiye':(data[key]||"");
+                    if(id==='profile-country')element.dispatchEvent(new Event('change',{bubbles:true}));
+                    if(element.dataset.characterCount){const count=document.getElementById(element.dataset.characterCount);if(count)count.textContent=element.value.length+' / '+element.maxLength;}
                 }
             });
-            const text = {'member-display-name':'name','membership-id':'membership_id',
-                'account-email':'email','application-reason':'motivation'};
-            Object.entries(text).forEach(([id,key]) => { const e=document.getElementById(id); if(e)e.textContent=data[key] || ""; });
+            const text={'member-display-name':'name','membership-id':'membership_id','account-email':'email','application-reason':'motivation'};
+            Object.entries(text).forEach(([id,key])=>{const e=document.getElementById(id);if(e)e.textContent=data[key]||"";});
             document.dispatchEvent(new CustomEvent('codaris-member-profile',{detail:data}));
         }
-        Module.ccall('codaris_account_response', null, ['string','number','string','number'],
-            [kind, response.status, data.message || "", data.email_verified ? 1 : 0]);
-    }).catch(error => {
+        Module.ccall('codaris_account_response',null,['string','number','string','number'],[kind,response.status,data.message||"",data.email_verified?1:0]);
+    };
+})
+static int member_request_helpers_ready;
+static void member_request_helpers_init(void) {
+    if(member_request_helpers_ready)return;
+    member_request_payload_init();
+    member_request_response_init();
+    member_request_helpers_ready=1;
+}
+EM_JS(void, member_request, (const char *operation, const char *endpoint), {
+    const kind=UTF8ToString(operation),path=UTF8ToString(endpoint);
+    const form=document.querySelector('[data-account-form="'+kind+'"]');
+    const payload=window.codarisBuildAccountPayload(kind,form);
+    if(payload===null)return;
+    const options={credentials:'same-origin',cache:'no-store'};
+    if(kind!=='me'){
+        options.method='POST';options.headers={'Content-Type':'application/json'};
+        options.body=JSON.stringify(payload);
+    }
+    if(form)form.querySelectorAll('button').forEach(e=>e.disabled=true);
+    const request=window.codarisAccountRequest(path,options,kind);
+    request.then(response=>window.codarisHandleAccountResponse(kind,response)).catch(error=>{
         Module.ccall('codaris_account_response', null,
         ['string','number','string','number'], [kind,0,
             error instanceof TypeError ? 'Unable to reach the account service. Please try again.' :
@@ -162,11 +173,23 @@ EM_JS(void, member_request, (const char *operation, const char *endpoint), {
     })
       .finally(() => {
         if (form) { form.querySelectorAll('button').forEach(e => e.disabled = false);
-            form.querySelectorAll('input[type="password"]').forEach(e => e.value = ""); }
+            form.querySelectorAll('input[type="password"]').forEach(e => {
+                e.value = "";
+                e.dispatchEvent(new Event('input', {bubbles:true}));
+            }); }
       });
 })
 EM_JS(void, member_navigate, (const char *path), {
     let destination=UTF8ToString(path);
+    if(destination==="/" && window.codarisLoader) {
+        const dialog=document.getElementById('account-delete-dialog');
+        if(dialog && dialog.open) dialog.close();
+        window.codarisLoader.start('delete', 'Permanently deleting your account');
+        window.codarisLoader.working('Account removed. Signing you out…');
+        window.codarisLoader.setAction('Finish deletion and continue now', '/');
+        window.setTimeout(() => location.replace('/'), 3500);
+        return;
+    }
     const signedOut=destination==='/login/?signed_out=1';
     if(signedOut)destination='/login/';
     if(destination==='/login/' && !signedOut && (location.pathname==='/dashboard' || location.pathname.startsWith('/dashboard/'))) {
@@ -195,7 +218,9 @@ EM_JS(int, member_form_matches, (const char *kind), {
     const form=document.querySelector('[data-account-form="'+UTF8ToString(kind)+'"]');
     if(!form)return 1;
     const password=form.elements.namedItem('password'), confirm=form.elements.namedItem('confirmation');
-    if (!confirm) return 1;
+    /* Only compare repeat fields on forms containing a new password and its
+     * confirmation. Account deletion uses a phrase plus the current password. */
+    if (!password || !confirm) return 1;
     const matches = password && password.value === confirm.value;
     confirm.setAttribute('aria-invalid', String(!matches));
     const error = document.getElementById('application-confirm-error');
@@ -204,12 +229,13 @@ EM_JS(int, member_form_matches, (const char *kind), {
     return !!matches;
 })
 EMSCRIPTEN_KEEPALIVE void codaris_account_submit(const char *kind) {
-    static const char *operations[]={"register","login","profile","password","email","recover","verify","reset","resend","logout","me","credential"};
+    static const char *operations[]={"register","login","profile","password","email","recover","verify","reset","resend","logout","me","credential","membership","delete-account"};
     if(!member_form_matches(kind)){member_result(kind,"Check the highlighted password confirmation.",1);return;}
     for(size_t i=0;i<sizeof(operations)/sizeof(operations[0]);i++) if(!strcmp(kind,operations[i])) {
-        const char *endpoint=!strcmp(kind,"credential")?"/api/credential/public":NULL;
+        const char *endpoint=!strcmp(kind,"credential")?"/api/credential/public":
+                             !strcmp(kind,"delete-account")?"/api/account/delete":NULL;
         char path[40];int n=endpoint?snprintf(path,sizeof(path),"%s",endpoint):snprintf(path,sizeof(path),"/api/%s",kind);
-        if(n>0 && (size_t)n<sizeof(path))member_request(kind,path);
+        if(n>0 && (size_t)n<sizeof(path)){member_request_helpers_init();member_request(kind,path);}
         return;
     }
 }
@@ -230,7 +256,9 @@ EM_JS(void, member_verification_view, (int status), {
       ? 'Your membership is active. Sign in to start building and learning.'
       : status === -1 ? 'Please wait while we confirm your verification link.'
       : 'The link may have expired or already been used. Sign in to check your verification status or request a new link.';
-    document.getElementById('verification-retry').hidden = status !== 0 && status < 500;
+    const showRetry = status === 0 || status >= 500;
+    document.getElementById('verification-retry').hidden = !showRetry;
+    document.getElementById('verification-retry-form').hidden = !showRetry;
 })
 EM_JS(void, member_credential_response, (int status, const char *message), {
     const toggle = document.getElementById('credential-public-enabled');
@@ -249,19 +277,23 @@ EMSCRIPTEN_KEEPALIVE void codaris_account_response(const char *kind,int status,c
     if(!strcmp(kind,"credential")){member_credential_response(status,message);return;}
     if(!strcmp(kind,"me")) {
         if(status==401){member_navigate("/login/");return;}
-        if(status==200){member_authenticated(verified);view_text("email-verification",verified?"Email verified · membership active":"Email not verified · check your inbox");}
+        if(status==200){member_authenticated(verified);view_text("email-verification",verified?"Email verified. Current membership status is shown in your profile.":"Email not verified · check your inbox");}
         else {member_result("account",message,1);member_route_ready();}
         return;
     }
-    member_result(kind,message,status < 200 || status >= 300);
+    const char *display_message = message;
+    if (!strcmp(kind,"delete-account") && status == 403)
+        display_message = "Check the phrase and password.";
+    member_result(kind,display_message,status < 200 || status >= 300);
     if (!strcmp(kind,"verify")) member_verification_view(status);
     if (!strcmp(kind,"recover") && status == 400) member_recovery_invalid(message);
     if(status<200 || status>=300)return;
     if(!strcmp(kind,"register"))member_navigate("/join/success/");
     else if(!strcmp(kind,"login"))member_navigate("/dashboard/");
     else if(!strcmp(kind,"logout"))member_navigate("/login/?signed_out=1");
+    else if(!strcmp(kind,"delete-account"))member_navigate("/");
     else if(!strcmp(kind,"password"))member_navigate("/login/");
-    else if(!strcmp(kind,"profile") || !strcmp(kind,"email"))codaris_account_submit("me");
+    else if(!strcmp(kind,"profile") || !strcmp(kind,"email") || !strcmp(kind,"membership"))codaris_account_submit("me");
 }
 /* Browser file metadata limits decoding; server storage accepts only an exact
  * 100x100 RGBA pixel buffer, never a file format or metadata. */

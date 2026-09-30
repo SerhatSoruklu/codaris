@@ -50,4 +50,7 @@ except (OSError, ValueError) as error:
     # Configuration errors carry filenames/key names only, never secret values.
     print(str(error), file=sys.stderr)
     result = 2
+except KeyboardInterrupt:
+    print('\nCODARIS command interrupted.', file=sys.stderr, flush=True)
+    result = 130
 raise SystemExit(result)

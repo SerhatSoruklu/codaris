@@ -15,9 +15,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{TITLE}}">
 <meta name="twitter:description" content="{{DESCRIPTION}}">
+<meta name="twitter:site" content="@codarisorg">
 {{SEO}}
 {{HOMEINTRO}}
-<link rel="icon" href="/assets/emblem.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/codaris-favicon-v2.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/codaris-favicon-32-v2.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/assets/codaris-favicon-16-v2.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/assets/codaris-apple-touch-icon-v2.png" sizes="180x180">
+<link rel="manifest" href="/site.webmanifest">
 <link rel="stylesheet" href="/styles.css">
 <noscript><style>body:not([data-auth-state-ready="true"]) main a[href="/join/"], body:not([data-auth-state-ready="true"]) footer a[href="/join/"] { visibility: visible; }</style></noscript>
 {{LEGALCSS}}
@@ -39,6 +44,7 @@
 <p class="codaris-loader__phase" data-codaris-loader-phase role="status" aria-live="polite" aria-atomic="true">Preparing your request…</p>
 <div class="codaris-loader__track" data-codaris-loader-progress role="progressbar" aria-label="Request progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span data-codaris-loader-bar></span></div>
 <p class="codaris-loader__percent"><span data-codaris-loader-percent>0</span><span aria-hidden="true">%</span></p>
+<a class="button button-secondary codaris-loader__action" data-codaris-loader-action href="/" hidden></a>
 </div>
 </div>
 <main id="main">
@@ -46,7 +52,7 @@
 {{CONTENT}}
 </main>
 {{FOOTER}}
-<script src="/auth-nav.js?v=4" defer></script>
+<script src="/auth-nav.js?v=7" defer></script>
 {{RUNTIME}}
 </body>
 </html>

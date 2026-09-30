@@ -414,12 +414,84 @@
             </article>
             <article class="stack-layer">
               <span class="stack-symbol" aria-hidden="true">SQL</span>
-              <div><p class="stack-label">04 / BACKEND FOUNDATION</p><h3>C + PostgreSQL</h3><p>A native C backend uses libpq to connect to PostgreSQL. The database foundation is in place; a live website API is still to come.</p></div>
+              <div><p class="stack-label">04 / BACKEND FOUNDATION</p><h3>C + PostgreSQL</h3><p>A native C backend uses libpq to connect to PostgreSQL and serves the live website API. A separate, read-only Research API for topic data is planned.</p></div>
             </article>
           </div>
         </div>
         <div class="stack-tooling">
           <p class="stack-label">BEHIND THE BUILD</p>
           <ul aria-label="Build tools"><li><strong>Python</strong> Page &amp; asset generation</li><li><strong>Bash / PowerShell</strong> Linux &amp; Windows workflows</li><li><strong>CMake</strong> Native backend builds</li></ul>
+        </div>
+      </section>
+
+      <section id="research-api" class="wrap section research-api-section" aria-labelledby="research-api-title">
+        <div class="research-api-panel">
+          <div class="research-api-copy">
+            <p class="eyebrow">FROM TOPIC RESEARCH TO YOUR TOOLS</p>
+            <span class="coming-soon-badge"><span aria-hidden="true">✳</span> Planned / In development</span>
+            <h2 id="research-api-title">Research that travels further.</h2>
+            <p>We’re planning a read-only API that will let CODARIS members retrieve structured research and catalogue data from our topic library for use in their own analysis, scripts, and tools.</p>
+            <p>Topic records are being shaped to carry their sources, update context, and limitations with them. Access details and data terms will be published before the API launches.</p>
+            <a class="research-api-link" href="/topics/">Explore the member topic library <svg class="icon icon--sm" aria-hidden="true" focusable="false"><use href="/assets/icons/lucide.svg#arrow-right"></use></svg></a>
+            <p class="research-api-access-note">Member sign-in is required. New to CODARIS? <a href="/join/">Join to request access.</a></p>
+            <p class="research-api-status">PLANNED SERVICE <span aria-hidden="true">/</span> API ACCESS IS NOT AVAILABLE YET</p>
+          </div>
+          <figure class="research-api-visual" tabindex="0" aria-label="Research data flow diagram. Scroll horizontally on small screens to inspect the connections.">
+            <svg class="research-api-graphic" viewBox="0 0 620 390" role="img" aria-labelledby="research-api-graphic-title research-api-graphic-desc" xmlns="http://www.w3.org/2000/svg">
+              <title id="research-api-graphic-title">Planned flow from CODARIS topic research to member tools</title>
+              <desc id="research-api-graphic-desc">Topic collections connect to structured, source-linked research data, then to a planned API and tools members could build.</desc>
+              <defs>
+                <linearGradient id="research-api-panel-fill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#102631"/><stop offset="1" stop-color="#0a121b"/></linearGradient>
+                <linearGradient id="research-api-route-fill" x1="0" x2="1"><stop stop-color="#45d9ad"/><stop offset="1" stop-color="#59e4eb"/></linearGradient>
+                <radialGradient id="research-api-glow"><stop stop-color="#59e4eb" stop-opacity=".18"/><stop offset="1" stop-color="#59e4eb" stop-opacity="0"/></radialGradient>
+              </defs>
+              <rect x="1" y="1" width="618" height="388" rx="18" fill="url(#research-api-panel-fill)" stroke="#294551"/>
+              <circle cx="476" cy="70" r="138" fill="url(#research-api-glow)"/>
+              <path d="M24 58h572M24 332h572" stroke="#8bdce21a"/>
+              <text x="28" y="39" class="research-api-svg-label">CODARIS / RESEARCH DATA FLOW</text>
+
+              <g class="research-api-topic">
+                <rect x="28" y="91" width="154" height="51" rx="8" fill="#0c1b25" stroke="#294551"/>
+                <circle cx="47" cy="116" r="4" fill="#59e4eb"/><text x="61" y="120" class="research-api-svg-text">AI SYSTEMS</text>
+                <rect x="28" y="160" width="154" height="51" rx="8" fill="#0c1b25" stroke="#294551"/>
+                <circle cx="47" cy="185" r="4" fill="#45d9ad"/><text x="61" y="189" class="research-api-svg-text">DATABASES</text>
+                <rect x="28" y="229" width="154" height="51" rx="8" fill="#0c1b25" stroke="#294551"/>
+                <circle cx="47" cy="254" r="4" fill="#59e4eb"/><text x="61" y="258" class="research-api-svg-text">DEVELOPER TOOLS</text>
+              </g>
+
+              <path class="research-api-route" d="M182 116h34M182 185h34M182 254h34M216 116v138M216 185h34" fill="none" stroke="url(#research-api-route-fill)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+              <g>
+                <rect x="250" y="123" width="169" height="124" rx="12" fill="#0b1822" stroke="#3a6671"/>
+                <path d="M270 145h30M270 157h18M270 169h24" stroke="#59e4eb" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+                <text x="270" y="197" class="research-api-svg-heading">SOURCE-LINKED</text>
+                <text x="270" y="216" class="research-api-svg-muted">Structured records + context</text>
+                <text x="270" y="232" class="research-api-svg-muted">JSON / CSV formats</text>
+              <circle class="research-api-node" cx="216" cy="116" r="3" fill="#59e4eb"/>
+              <circle class="research-api-node" cx="216" cy="185" r="3" fill="#59e4eb"/>
+              <circle class="research-api-node" cx="216" cy="254" r="3" fill="#59e4eb"/>
+                <path d="m244 181 4 4-4 4" fill="none" stroke="#59e4eb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+
+              <path class="research-api-route research-api-route--tertiary" d="M419 185h32" fill="none" stroke="url(#research-api-route-fill)" stroke-width="2" stroke-linecap="round"/>
+              <g>
+                <rect x="451" y="139" width="139" height="92" rx="12" fill="#10252d" stroke="#59e4eb" stroke-opacity=".75"/>
+                <path d="M466 163h19v19h-19zM471 168h9M471 173h9M471 178h5" fill="none" stroke="#59e4eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <text x="491" y="171" class="research-api-svg-heading">RESEARCH API</text>
+                <text x="466" y="205" class="research-api-svg-muted">Member access / planned</text>
+                <circle class="research-api-node research-api-node--strong" cx="451" cy="185" r="3" fill="#59e4eb"/>
+                <path d="m445 181 4 4-4 4" fill="none" stroke="#59e4eb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+
+              <g class="research-api-output">
+                <path class="research-api-route research-api-route--output" d="M520 231v32" fill="none" stroke="url(#research-api-route-fill)" stroke-width="2" stroke-linecap="round"/>
+                <path d="m516 257 4 4 4-4" fill="none" stroke="#59e4eb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="451" y="263" width="139" height="43" rx="8" fill="#0b1822" stroke="#294551"/>
+                <circle cx="466" cy="284" r="3" fill="#45d9ad"/><text x="478" y="288" class="research-api-svg-text">MEMBER TOOLS</text>
+              </g>
+              <text x="28" y="361" class="research-api-svg-footer">CURATED TOPICS <tspan fill="#5d7f8c">/</tspan> TRACEABLE SOURCES <tspan fill="#5d7f8c">/</tspan> RESPONSIBLE USE</text>
+            </svg>
+            <figcaption><span class="research-api-scroll-hint">Swipe or scroll sideways to follow the flow. </span>Illustrative concept — this research API is not live yet.</figcaption>
+          </figure>
         </div>
       </section>

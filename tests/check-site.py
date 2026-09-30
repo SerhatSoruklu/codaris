@@ -28,7 +28,11 @@ class Document(HTMLParser):
         self.script_text = ''
         self.canonical = None
         self.og_image = None
+        self.og_image_type = None
+        self.og_image_width = None
+        self.og_image_height = None
         self.twitter_card = None
+        self.twitter_image = None
         self.jsonld_types = []
 
     def handle_starttag(self, tag, attrs):
@@ -57,13 +61,21 @@ class Document(HTMLParser):
             self.canonical = attrs.get('href')
         if tag == 'meta' and attrs.get('property') == 'og:image':
             self.og_image = attrs.get('content')
+        if tag == 'meta' and attrs.get('property') == 'og:image:type':
+            self.og_image_type = attrs.get('content')
+        if tag == 'meta' and attrs.get('property') == 'og:image:width':
+            self.og_image_width = attrs.get('content')
+        if tag == 'meta' and attrs.get('property') == 'og:image:height':
+            self.og_image_height = attrs.get('content')
         if tag == 'meta' and attrs.get('name') == 'twitter:card':
             self.twitter_card = attrs.get('content')
+        if tag == 'meta' and attrs.get('name') == 'twitter:image':
+            self.twitter_image = attrs.get('content')
         if tag == 'script':
             self.script = attrs
             self.script_text = ''
             if 'src' in attrs:
-                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/auth-nav.js', '/home-intro.js'), 'Unreviewed executable script'
+                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/auth-nav.js', '/auth-redirect.js', '/member-access.js', '/home-intro.js'), 'Unreviewed executable script'
             else:
                 assert attrs.get('type') == 'application/ld+json', 'Inline executable script'
                 self.jsonld_types = []
@@ -115,8 +127,11 @@ for entry in REGISTRY:
     assert doc.noindex == (entry['indexing'] == 'noindex' or member_only or not production), entry['slug']
     expected_url = ORIGIN + '/' + entry['slug'] + ('/' if entry['slug'] else '')
     assert doc.canonical == expected_url, (entry['slug'], doc.canonical)
-    assert doc.og_image == ORIGIN + '/assets/Codaris_Flag.png', entry['slug']
+    assert doc.og_image == ORIGIN + '/assets/codaris-social-v2.png', entry['slug']
+    assert doc.og_image_type == 'image/png', entry['slug']
+    assert doc.og_image_width == '1200' and doc.og_image_height == '630', entry['slug']
     assert doc.twitter_card == 'summary_large_image', entry['slug']
+    assert doc.twitter_image == doc.og_image, entry['slug']
     if production and entry['indexing'] == 'index' and not member_only:
         assert 'WebPage' in doc.jsonld_types, entry['slug']
         assert ('Organization' in doc.jsonld_types) == (entry['slug'] == ''), entry['slug']
@@ -134,6 +149,7 @@ member_routes = {entry['slug'] for entry in REGISTRY if entry.get('access') == '
 assert member_routes == {'dashboard', 'topics'} | {topic['slug'] for topic in json.loads((ROOT / 'data/topics/library.json').read_text())}
 route_guard = (ROOT / 'build/deploy/member-routes.conf').read_text()
 assert 'auth_request /api/page-access;' in route_guard
+assert 'error_page 403 = /member-access-unavailable/;' in route_guard
 assert 'dashboard' not in route_guard  # Browser fragment must survive the sign-in redirect.
 for slug in member_routes - {'dashboard'}:
     assert slug in route_guard
@@ -143,13 +159,19 @@ assert 'data-member-route-authenticated="true"' in route_visibility
 assert 'dataset.memberRouteAuthenticated = \'true\'' in auth_nav
 assert 'response.status === 204' in auth_nav
 dev_server = (ROOT / 'scripts/serve-dev.py').read_text()
+assert "if response.status == 403:" in dev_server and "send_member_status_page(403, 'member-access-unavailable')" in dev_server
+assert "send_member_status_page(401, 'member-sign-in-required')" in dev_server
+assert "send_member_status_page(503, 'member-service-unavailable')" in dev_server
 assert "send_header('Location'" not in dev_server
-assert '/auth-redirect.js' in dev_server
 auth_redirect = (ROOT / 'web/auth-redirect.js').read_text()
 assert 'location.pathname + location.search + location.hash' in auth_redirect
 assert "searchParams.set('return_to', destination)" in auth_redirect
 assert "'auth-redirect.js'" in (ROOT / 'scripts/package-site.py').read_text()
+member_access = (ROOT / 'web/member-access.js').read_text()
+assert "searchParams.set('return_to', destination)" in member_access
+assert "'member-access.js'" in (ROOT / 'scripts/package-site.py').read_text()
 assert 'crypto.getRandomValues' in auth_nav and 'Math.random' not in auth_nav
+assert 'Finish signing out now' in auth_nav and 'Go to dashboard now' in auth_nav
 host = (ROOT / 'web/host.js').read_text()
 assert not re.search(r'innerHTML|outerHTML|document\.write|\beval\s*\(|new\s+Function', host)
 assert 'onerror=' not in (ROOT / 'scripts/build-pages.py').read_text()
@@ -158,4 +180,15 @@ for script in ('build-client.sh', 'build-client.ps1'):
 headers = json.loads((ROOT / 'deploy/security-headers.json').read_text())
 assert "frame-ancestors 'none'" in headers['Content-Security-Policy']
 assert headers['X-Content-Type-Options'] == 'nosniff'
+shell = (ROOT / 'web/index.html').read_text()
+for asset in ('codaris-favicon-v2.svg', 'codaris-favicon-32-v2.png',
+              'codaris-favicon-16-v2.png', 'codaris-apple-touch-icon-v2.png'):
+    assert f'/assets/{asset}' in shell
+    assert (OUT / 'assets' / asset).is_file(), asset
+assert '/site.webmanifest' in shell
+manifest = json.loads((OUT / 'site.webmanifest').read_text())
+for icon in manifest['icons']:
+    assert (OUT / icon['src'].lstrip('/')).is_file(), icon['src']
+assert (OUT / 'assets/x-logo-email.png').is_file()
+assert (OUT / 'assets/codaris-social-v2.png').is_file()
 print(f'PASS: {len(pages)} documents; CSP, scripts, IDs, links, assets, metadata and build hardening.')

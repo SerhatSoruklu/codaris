@@ -499,6 +499,10 @@ document.querySelectorAll('[data-login-field]').forEach(input => {
 document.querySelectorAll('[data-account-form]').forEach(form => {
   form.addEventListener('submit', event => {
     event.preventDefault();
+    if (event.submitter?.dataset.membershipAction) {
+      const action = form.elements.namedItem('action');
+      if (action) action.value = event.submitter.dataset.membershipAction;
+    }
     if (membershipReady()) Module.ccall('codaris_account_submit', null, ['string'], [form.dataset.accountForm]);
   });
 });
@@ -506,6 +510,51 @@ document.querySelectorAll('[data-account-action]').forEach(button => {
   button.addEventListener('click', () => {
     if (membershipReady()) Module.ccall('codaris_account_submit', null, ['string'], [button.dataset.accountAction]);
   });
+});
+const accountDeleteDialog = document.getElementById('account-delete-dialog');
+const accountDeleteForm = document.querySelector('[data-account-form="delete-account"]');
+const accountDeletePhrase = document.getElementById('delete-account-confirmation');
+const accountDeletePassword = document.getElementById('delete-account-password');
+const accountDeleteSubmit = document.getElementById('delete-account-submit');
+const accountDeleteStepOne = document.getElementById('delete-account-step-one');
+const accountDeleteStepTwo = document.getElementById('delete-account-step-two');
+function showAccountDeleteStep(step) {
+  if (!accountDeleteStepOne || !accountDeleteStepTwo) return;
+  accountDeleteStepOne.hidden = step !== 1;
+  accountDeleteStepTwo.hidden = step !== 2;
+  document.querySelectorAll('[data-delete-step]').forEach(item => {
+    const current = Number(item.dataset.deleteStep) === step;
+    item.setAttribute('aria-current', current ? 'step' : 'false');
+    item.classList.toggle('is-current', current);
+    item.classList.toggle('is-complete', Number(item.dataset.deleteStep) < step);
+  });
+}
+function updateAccountDeleteReady() {
+  if (!accountDeleteSubmit) return;
+  accountDeleteSubmit.disabled = !accountDeletePhrase || !accountDeletePassword ||
+    accountDeletePhrase.value !== 'DELETE MY CODARIS ACCOUNT' || !accountDeletePassword.value;
+}
+document.querySelector('[data-delete-account-open]')?.addEventListener('click', () => {
+  showAccountDeleteStep(1);
+  accountDeleteForm?.reset();
+  updateAccountDeleteReady();
+  accountDeleteDialog?.showModal();
+});
+document.querySelector('[data-delete-step-next]')?.addEventListener('click', () => {
+  showAccountDeleteStep(2);
+  accountDeletePhrase?.focus();
+});
+document.querySelector('[data-delete-step-back]')?.addEventListener('click', () => {
+  showAccountDeleteStep(1);
+  document.querySelector('[data-delete-account-open]')?.focus();
+});
+document.querySelector('[data-delete-dialog-close]')?.addEventListener('click', () => accountDeleteDialog?.close());
+accountDeletePhrase?.addEventListener('input', updateAccountDeleteReady);
+accountDeletePassword?.addEventListener('input', updateAccountDeleteReady);
+accountDeleteDialog?.addEventListener('close', () => {
+  accountDeleteForm?.reset();
+  showAccountDeleteStep(1);
+  updateAccountDeleteReady();
 });
 const avatarFile = document.getElementById('avatar-file');
 const avatarCanvas = document.getElementById('avatar-preview');
@@ -765,9 +814,21 @@ function updateCredentialControls(data, credential) {
 }
 function updateCredentialMessages(data, credential) {
   const live=document.getElementById('credential-live-status');
-  if(live)live.textContent=!data.email_verified?'Email verification required':credential.status==='active'?'Active · issued '+(credential.issued_at||''):'Credential pending verification';
+  if(live) {
+    live.textContent=!data.email_verified?'Email verification required':credential.status==='active'?'Active · issued '+(credential.issued_at||''):credential.status==='suspended'?'Deactivated':'Credential pending verification';
+    live.classList.toggle('credential-live-status--inactive',credential.status==='suspended');
+  }
   const summary=document.getElementById('credential-summary');
-  if(summary)summary.textContent=!data.email_verified?'Verify your email to activate and download your membership credential.':credential.status==='active'?'Your credential reflects your current CODARIS membership. The QR code checks its live status.':'Your credential is being prepared.';
+  if(summary)summary.textContent=!data.email_verified?'Verify your email to activate and download your membership credential.':credential.status==='active'?'Your credential reflects your current CODARIS membership. The QR code checks its live status.':credential.status==='suspended'?'Your membership is deactivated. Reactivate it from your profile to restore access.':'Your credential is being prepared.';
+  const status=document.getElementById('membership-status-label');
+  const inactive=credential.status==='suspended';
+  if(status){status.textContent=inactive?'Deactivated':credential.status==='active'?'Active':credential.status==='revoked'?'Revoked':'Pending verification';status.classList.toggle('membership-status-label--inactive',inactive);}
+  const deactivate=document.getElementById('membership-deactivate');
+  const reactivate=document.getElementById('membership-reactivate');
+  const password=document.getElementById('membership-current-password');
+  if(deactivate)deactivate.hidden=inactive||credential.status!=='active';
+  if(reactivate)reactivate.hidden=!inactive;
+  if(password)password.required=credential.status==='active'||inactive;
 }
 function syncCredentialStage(data, credential) {
   const stage=document.getElementById('credential-stage');

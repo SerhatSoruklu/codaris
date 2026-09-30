@@ -21,13 +21,14 @@ if (location.pathname === '/' && !matchMedia('(prefers-reduced-motion: reduce)')
 const codarisLoader = (() => {
   const screen = document.querySelector('[data-codaris-loader]');
   if (!screen) return null;
-  const titles = {login: 'Welcome back', register: 'Creating your account', logout: 'Signing you out', dashboard: 'Opening your workspace'};
+  const titles = {login: 'Welcome back', register: 'Creating your account', logout: 'Signing you out', dashboard: 'Opening your workspace', delete: 'Permanently deleting your account'};
   const title = screen.querySelector('[data-codaris-loader-title]');
   const phase = screen.querySelector('[data-codaris-loader-phase]');
   const progress = screen.querySelector('[data-codaris-loader-progress]');
   const bar = screen.querySelector('[data-codaris-loader-bar]');
   const percent = screen.querySelector('[data-codaris-loader-percent]');
   const fill = screen.querySelector('[data-codaris-loader-fill]');
+  const action = screen.querySelector('[data-codaris-loader-action]');
   let active = false;
   let current = 0;
   let navigationLoaded = false;
@@ -40,10 +41,12 @@ const codarisLoader = (() => {
   let pendingNetworkMessage = '';
   let networkIndeterminate = false;
   let animationFrame = 0;
+  let autoHideTimer = 0;
   const track = screen.querySelector('.codaris-loader__track');
   function hide() {
     active = false;
     if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    if (autoHideTimer) window.clearTimeout(autoHideTimer);
     document.body.removeAttribute('data-codaris-busy');
     screen.hidden = true;
     screen.setAttribute('aria-hidden', 'true');
@@ -71,7 +74,7 @@ const codarisLoader = (() => {
     if (message) phase.textContent = message;
   }
   function initialMessage(kind) {
-    return ({login: 'Preparing your sign-in request…', register: 'Preparing your account request…', logout: 'Preparing your sign-out request…', dashboard: 'Preparing your workspace…'})[kind] || 'Preparing your request…';
+    return ({login: 'Preparing your sign-in request…', register: 'Preparing your account request…', logout: 'Preparing your sign-out request…', dashboard: 'Preparing your workspace…', delete: 'Removing your profile and signing you out…'})[kind] || 'Preparing your request…';
   }
   function showNetworkProgress() {
     track.classList.remove('is-indeterminate');
@@ -84,7 +87,11 @@ const codarisLoader = (() => {
     introDone = true;
     if (networkIndeterminate) working(pendingNetworkMessage);
     else showNetworkProgress();
-    if (requestComplete && (navigationLoaded || !['login', 'logout', 'register', 'dashboard'].includes(activeOperation))) hide();
+    if (requestComplete && (navigationLoaded || !['login', 'logout', 'register', 'dashboard'].includes(activeOperation))) finishRoute();
+  }
+  function finishRoute() {
+    if (autoHideTimer) window.clearTimeout(autoHideTimer);
+    autoHideTimer = window.setTimeout(hide, 1800);
   }
   function start(kind, heading = '', timing = {}) {
     if (typeof kind !== 'string' || (!titles[kind] && !heading)) return;
@@ -101,6 +108,7 @@ const codarisLoader = (() => {
     pendingNetworkMessage = initialMessage(kind);
     networkIndeterminate = false;
     title.textContent = heading || titles[kind];
+    if (action) action.hidden = true;
     screen.hidden = false;
     screen.setAttribute('aria-hidden', 'false');
     document.body.dataset.codarisBusy = 'true';
@@ -150,7 +158,33 @@ const codarisLoader = (() => {
       try { sessionStorage.setItem('codaris-loader-navigation', JSON.stringify({kind, startedAt, introDuration})); } catch {}
       return;
     }
-    if (kind !== 'dashboard' || navigationLoaded) hide();
+    if (kind !== 'dashboard' || navigationLoaded) finishRoute();
+  }
+  function setAction(label, href) {
+    if (!action || typeof label !== 'string' || typeof href !== 'string') return;
+    const destination = new URL(href, location.href);
+    if (destination.origin !== location.origin || !destination.pathname.startsWith('/')) return;
+    action.textContent = label;
+    action.href = destination.pathname + destination.search + destination.hash;
+    action.hidden = false;
+  }
+  function setContinueAction(label) {
+    if (!action) return;
+    action.textContent = label;
+    action.href = location.pathname + location.search + location.hash;
+    action.hidden = false;
+    action.onclick = event => {
+      event.preventDefault();
+      // The destination is already loaded. Let people dismiss the transition
+      // immediately while any remaining page data continues to load normally.
+      hide();
+    };
+  }
+  function routeAction(kind) {
+    if (kind === 'logout') return 'Finish signing out now';
+    if (kind === 'register') return 'Continue to email verification now';
+    if (kind === 'dashboard' && /^\/dashboard(?:\/|$)/.test(location.pathname)) return 'Go to dashboard now';
+    return 'Go to this page now';
   }
   try {
     const stored = sessionStorage.getItem('codaris-loader-navigation');
@@ -164,6 +198,8 @@ const codarisLoader = (() => {
         ? 'dashboard'
         : navigation.kind === 'dashboard' ? 'login' : navigation.kind;
       start(kind, '', navigation);
+      const actionLabel = routeAction(kind);
+      if (actionLabel) setContinueAction(actionLabel);
       window.addEventListener('load', () => {
         navigationLoaded = true;
         if (kind !== 'dashboard') {
@@ -173,7 +209,9 @@ const codarisLoader = (() => {
           networkIndeterminate = false;
           if (introDone) showNetworkProgress();
         }
-        if (introDone && requestComplete) hide();
+        const loadedAction = routeAction(kind);
+        if (loadedAction) setContinueAction(loadedAction);
+        if (introDone && requestComplete) finishRoute();
       }, {once: true});
     }
   } catch {}
@@ -186,7 +224,7 @@ const codarisLoader = (() => {
     try { sessionStorage.setItem('codaris-loader-navigation', JSON.stringify({kind: 'dashboard', startedAt, introDuration})); } catch {}
   }
   document.addEventListener('click', navigateToDashboard, true);
-  return {start, update, working, complete, isLoggingOut: () => activeOperation === 'logout', isActive: kind => active && activeOperation === kind};
+  return {start, update, working, complete, setAction, isLoggingOut: () => activeOperation === 'logout', isActive: kind => active && activeOperation === kind};
 })();
 window.codarisLoader = codarisLoader;
   const nav = document.querySelector('[data-auth-nav]');
@@ -218,7 +256,24 @@ window.codarisLoader = codarisLoader;
   const memberMenu = nav.querySelector('[data-member-menu]');
   const memberMenuTrigger = nav.querySelector('[data-member-menu-trigger]');
   const memberMenuPanel = nav.querySelector('[data-member-menu-panel]');
+  const memberMenuName = nav.querySelector('[data-member-menu-name]');
+  const memberSessionAge = nav.querySelector('[data-member-session-age]');
+  let sessionStartedAt = 0;
   let memberMenuCloseTimer = 0;
+
+  function paintMemberSummary(profile) {
+    if (memberMenuName && profile?.name) memberMenuName.textContent = profile.name;
+    const startedAt = Number(profile?.session_started_at);
+    if (Number.isFinite(startedAt) && startedAt > 0) sessionStartedAt = startedAt * 1000;
+    if (!memberSessionAge || !sessionStartedAt) return;
+    const totalMinutes = Math.max(0, Math.floor((Date.now() - sessionStartedAt) / 60000));
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+    const duration = days ? `${days}d ${hours}h` : hours ? `${hours}h ${minutes}m` : `${minutes}m`;
+    memberSessionAge.textContent = `Signed in for ${duration}`;
+  }
+  window.setInterval(() => paintMemberSummary({}), 60000);
 
   function closeMemberMenu(restoreFocus = false) {
     if (!memberMenuTrigger || !memberMenuPanel) return;
@@ -260,7 +315,12 @@ window.codarisLoader = codarisLoader;
     stateVersion += 1;
     nav.dataset.authState = state;
     const authenticated = state === 'authenticated';
-    if (!authenticated) closeMemberMenu();
+    if (!authenticated) {
+      closeMemberMenu();
+      sessionStartedAt = 0;
+      if (memberMenuName) memberMenuName.textContent = 'Member';
+      if (memberSessionAge) memberSessionAge.textContent = 'Session duration unavailable';
+    }
     if (authenticated && location.pathname === '/login/') {
       const requested = new URLSearchParams(location.search).get('return_to');
       if (requested && requested.startsWith('/') && !requested.startsWith('//') && !requested.includes('\\')) {
@@ -331,6 +391,7 @@ window.codarisLoader = codarisLoader;
           return;
         }
         const session = await response.json();
+        if (session.authenticated === true) paintMemberSummary(session);
         renderAuthState(session.authenticated === true ? 'authenticated' : 'unauthenticated');
       } catch {
         if (requestVersion === stateVersion) renderAuthState('unknown');
@@ -342,7 +403,14 @@ window.codarisLoader = codarisLoader;
     return sessionRequest;
   }
 
-  document.addEventListener('codaris-member-profile', () => renderAuthState('authenticated'));
+  document.addEventListener('codaris-member-profile', event => {
+    paintMemberSummary(event.detail);
+    const paused = event.detail?.credential?.status === 'suspended';
+    if (paused) document.body.dataset.membershipStatus = 'suspended';
+    else delete document.body.dataset.membershipStatus;
+    document.querySelectorAll('[data-membership-paused-warning]').forEach(warning => { warning.hidden = !paused; });
+    renderAuthState('authenticated');
+  });
   document.addEventListener('codaris-auth-required', () => renderAuthState('unauthenticated'));
   // A page restored from the back/forward cache can carry an old signed-out
   // header even after login in another page. Recheck on every return to it.
