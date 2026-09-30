@@ -416,11 +416,11 @@ window.codarisLoader = codarisLoader;
   // header even after login in another page. Recheck on every return to it.
   window.addEventListener('pageshow', event => {
     if (memberRoute && event.persisted) delete document.body.dataset.memberRouteAuthenticated;
-    refreshAuthState(true);
+    void refreshAuthState(true);
   });
-  window.addEventListener('focus', () => refreshAuthState(true));
+  window.addEventListener('focus', () => { void refreshAuthState(true); });
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) refreshAuthState(true);
+    if (!document.hidden) void refreshAuthState(true);
   });
-  refreshAuthState(true);
+  void refreshAuthState(true);
 })();
