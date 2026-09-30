@@ -14,13 +14,49 @@ jobs:
   build:
     name: Build and security checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Set weekly package cache key
+        id: apt-cache-week
+        run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ runner.temp }}/codaris-apt/archives/*.deb
+          key: ${{ runner.os }}-ubuntu-24.04-apt-${{ hashFiles('.github/ci-build-packages.txt') }}-${{ steps.apt-cache-week.outputs.week }}
+          restore-keys: |
+            ${{ runner.os }}-ubuntu-24.04-apt-${{ hashFiles('.github/ci-build-packages.txt') }}-
       - name: Install distribution build tools
-        run: sudo apt-get update && sudo apt-get install -y binutils emscripten libpq-dev libmicrohttpd-dev libsodium-dev libcurl4-openssl-dev libjson-c-dev ninja-build nginx openssl
+        run: |
+          set -euo pipefail
+          apt_archives="$RUNNER_TEMP/codaris-apt/archives/"
+          sudo install -d -o _apt -g root -m 0755 "$apt_archives/partial"
+          mapfile -t requested_packages < <(sed -e '/^[[:space:]]*#/d' -e '/^[[:space:]]*$/d' .github/ci-build-packages.txt)
+          packages=()
+          for package in "${requested_packages[@]}"; do
+            case "$package" in
+              binutils) binary=as ;;
+              ninja-build) binary=ninja ;;
+              nginx) binary=nginx ;;
+              openssl) binary=openssl ;;
+              *) packages+=("$package"); continue ;;
+            esac
+            if ! command -v "$binary" >/dev/null 2>&1; then
+              packages+=("$package")
+            fi
+          done
+          sudo apt-get -o Dir::Cache::archives="$apt_archives" update
+          sudo apt-get -o Dir::Cache::archives="$apt_archives" install -y --no-install-recommends "${packages[@]}"
+      - name: Make Ubuntu package archives readable for cache storage
+        if: always()
+        run: sudo chmod -R a+rX "$RUNNER_TEMP/codaris-apt/archives" 2>/dev/null || true
+      - uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        if: always()
+        with:
+          path: ${{ runner.temp }}/codaris-apt/archives/*.deb
+          key: ${{ runner.os }}-ubuntu-24.04-apt-${{ hashFiles('.github/ci-build-packages.txt') }}-${{ steps.apt-cache-week.outputs.week }}
       - name: Initialize isolated build configuration
         run: python3 scripts/init-env.py
       - name: Build browser client
