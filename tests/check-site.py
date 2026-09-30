@@ -52,7 +52,7 @@ class Document(HTMLParser):
         if tag in ('img', 'script') and attrs.get('src', '').startswith('/'):
             self.assets.append(urlsplit(attrs['src']).path)
         if tag == 'link' and attrs.get('href', '').startswith('/'):
-            self.assets.append(attrs['href'])
+            self.assets.append(urlsplit(attrs['href']).path)
         if tag == 'meta' and attrs.get('http-equiv', '').lower() == 'content-security-policy':
             self.csp = attrs['content']
         if tag == 'meta' and attrs.get('name') == 'robots':
@@ -75,7 +75,7 @@ class Document(HTMLParser):
             self.script = attrs
             self.script_text = ''
             if 'src' in attrs:
-                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/auth-nav.js', '/auth-redirect.js', '/member-access.js', '/home-intro.js'), 'Unreviewed executable script'
+                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/auth-nav.js', '/api-origin.js', '/auth-redirect.js', '/member-access.js', '/home-intro.js'), 'Unreviewed executable script'
             else:
                 assert attrs.get('type') == 'application/ld+json', 'Inline executable script'
                 self.jsonld_types = []
@@ -148,7 +148,7 @@ assert {node.text for node in urls} == expected_urls
 member_routes = {entry['slug'] for entry in REGISTRY if entry.get('access') == 'member'}
 assert member_routes == {'dashboard', 'topics'} | {topic['slug'] for topic in json.loads((ROOT / 'data/topics/library.json').read_text())}
 route_guard = (ROOT / 'build/deploy/member-routes.conf').read_text()
-assert 'auth_request /api/page-access;' in route_guard
+assert 'auth_request /_codaris_page_access;' in route_guard
 assert 'error_page 403 = /member-access-unavailable/;' in route_guard
 assert 'dashboard' not in route_guard  # Browser fragment must survive the sign-in redirect.
 for slug in member_routes - {'dashboard'}:

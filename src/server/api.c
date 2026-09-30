@@ -268,6 +268,24 @@ static int url_normalize(const char *input, const char *provider, char out[2049]
     curl_url_cleanup(u);
     return ok;
 }
+static int linkedin_profile_normalize(const char *input, char out[2049]) {
+    if (!url_normalize(input, "linkedin.com", out) || !*out)
+        return 0;
+    CURLU *u = curl_url();
+    char *path = NULL;
+    int ok = u && !curl_url_set(u, CURLUPART_URL, out, 0) &&
+             !curl_url_get(u, CURLUPART_PATH, &path, 0) && !strncmp(path, "/in/", 4);
+    if (ok) {
+        const char *slug = path + 4;
+        const char *end = strchr(slug, '/');
+        size_t length = end ? (size_t)(end - slug) : strlen(slug);
+        ok = length > 0 && !(length == 1 && slug[0] == '.') &&
+             !(length == 2 && slug[0] == '.' && slug[1] == '.');
+    }
+    curl_free(path);
+    curl_url_cleanup(u);
+    return ok;
+}
 /* Avatars are exactly 100x100 RGBA pixels, never uploaded file formats. */
 static int avatar_ok(const char *value) {
     if (!*value)
@@ -376,7 +394,7 @@ static char *contact_payload_encrypt(const Config *c, const char *plain) {
 }
 static int authenticate(PGconn *db, struct MHD_Connection *connection, char id[32],
                         char session_hash[65]) {
-    const char *raw = MHD_lookup_connection_value(connection, MHD_COOKIE_KIND, "codaris_session");
+    const char *raw = MHD_lookup_connection_value(connection, MHD_COOKIE_KIND, "codaris_session_v2");
     if (!raw || strlen(raw) != 64)
         return 0;
     digest(raw, session_hash);
@@ -517,18 +535,18 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         goto done;
     if (!strcmp(path, "/api/session") && !post) {
         int authenticated = authenticate(db, conn, id, session_hash);
-        const char *raw = MHD_lookup_connection_value(conn, MHD_COOKIE_KIND, "codaris_session");
+        const char *raw = MHD_lookup_connection_value(conn, MHD_COOKIE_KIND, "codaris_session_v2");
         char current_cookie[256] = "", legacy_cookie[128] = "";
         const char *set_cookie = NULL, *clear_cookie = NULL;
         if (raw) {
             if (authenticated && strlen(raw) == 64)
                 snprintf(current_cookie, sizeof(current_cookie),
-                         "codaris_session=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s",
-                         raw, c->production ? "; Secure" : "");
+                         "codaris_session_v2=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s",
+                         raw, c->production ? "; Domain=codaris.org; Secure" : "");
             else
                 snprintf(current_cookie, sizeof(current_cookie),
-                         "codaris_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
-                         c->production ? "; Secure" : "");
+                         "codaris_session_v2=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+                         c->production ? "; Domain=codaris.org; Secure" : "");
             set_cookie = current_cookie;
             clear_legacy_session_cookie(c, legacy_cookie, sizeof(legacy_cookie));
             clear_cookie = legacy_cookie;
@@ -676,7 +694,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             !length_ok(country, 2, 120) || !membership_country_allowed(country) ||
             !role_ok(role) || !length_ok(reason, 20, 2000) ||
             !password_ok(password) || !email_normalize(field(body, "email"), email) ||
-            !url_normalize(field(body, "linkedin"), "linkedin.com", linkedin) ||
+            !linkedin_profile_normalize(field(body, "linkedin"), linkedin) ||
             !url_normalize(field(body, "github"), "github.com", github) ||
             !url_normalize(field(body, "website"), "", website))
             goto invalid;
@@ -779,8 +797,8 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             goto done;
         }
         snprintf(cookie, sizeof(cookie),
-                 "codaris_session=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s", raw,
-                 c->production ? "; Secure" : "");
+                 "codaris_session_v2=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s", raw,
+                 c->production ? "; Domain=codaris.org; Secure" : "");
         sodium_memzero(raw, sizeof(raw));
         status = 200;
         message = "{\"message\":\"Signed in\"}";
@@ -955,8 +973,8 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         if (!command(db, "DELETE FROM app.sessions WHERE token_hash=$1", 1, v))
             goto done;
         snprintf(cookie, sizeof(cookie),
-                 "codaris_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
-                 c->production ? "; Secure" : "");
+                 "codaris_session_v2=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+                 c->production ? "; Domain=codaris.org; Secure" : "");
         status = 200;
         message = "{\"message\":\"Signed out\"}";
         goto done;
@@ -1043,8 +1061,8 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             goto done;
         if (!command(db, "DELETE FROM app.users WHERE id=$1::bigint", 1, iv)) goto done;
         snprintf(cookie, sizeof(cookie),
-                 "codaris_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
-                 c->production ? "; Secure" : "");
+                 "codaris_session_v2=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
+                 c->production ? "; Domain=codaris.org; Secure" : "");
         message = "{\"message\":\"Account permanently deleted.\"}";
     } else if (!strcmp(path, "/api/profile")) {
         char linkedin[2049], github[2049], website[2049];
@@ -1152,7 +1170,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
     goto done;
 invalid:
     status = 400;
-    message = "{\"message\":\"Check the fields, password length and HTTPS profile URLs. The "
+    message = "{\"message\":\"Check the required fields, password length, LinkedIn profile URL and HTTPS profile URLs. The "
               "original application reason cannot be edited.\"}";
     goto done;
 throttled:

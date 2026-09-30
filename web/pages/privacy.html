@@ -37,7 +37,7 @@
             <thead><tr><th scope="col">Information</th><th scope="col">Source and use</th></tr></thead>
             <tbody>
               <tr><th scope="row">Account and application</th><td>Your name, email address, country, selected role, joining statement and randomly generated membership ID. These are entered during registration; the statement is stored with the account and cannot be edited in account settings.</td></tr>
-              <tr><th scope="row">Profile details</th><td>Optional LinkedIn, GitHub and website URLs, and an optional profile image. URLs are stored as claims; CODARIS does not verify profile ownership. The browser sends a 100 × 100 pixel image representation rather than the selected original file.</td></tr>
+              <tr><th scope="row">Profile details</th><td>A LinkedIn profile URL is required during registration to provide professional context for the role you select. GitHub and website URLs and a profile image are optional. URLs are self-reported claims; CODARIS does not verify profile ownership or developer experience. The browser sends a 100 × 100 pixel image representation rather than the selected original file.</td></tr>
               <tr><th scope="row">Authentication</th><td>Your password is processed to create an Argon2id password hash. The database stores that hash, not the password. Session and one-time action tokens are random; the database stores token hashes for sessions and action links.</td></tr>
               <tr><th scope="row">Membership credential</th><td>CODARIS creates a randomly assigned public membership number and a separate opaque verification identifier. Neither is your private sign-in membership ID. Your credential status and issue date are maintained with the account. New members see the public-field disclosure at registration; existing members must enable public verification themselves.</td></tr>
               <tr><th scope="row">Learning progress</th><td>When you mark a topic as read while signed in, the topic and time are associated with your account so progress can be restored.</td></tr>
@@ -53,7 +53,7 @@
       <section class="legal-section" id="purposes" aria-labelledby="purposes-title">
         <p class="legal-number">03</p><h2 id="purposes-title">Why we use information</h2>
         <ul>
-          <li><strong>To handle an application and provide an account:</strong> create an account, identify it, save profile settings and learning progress, and provide membership features you request.</li>
+          <li><strong>To handle an application and provide an account:</strong> create an account, identify it, retain the LinkedIn profile URL you submit as context for your selected role, save profile settings and learning progress, and provide membership features you request.</li>
           <li><strong>To verify and protect account access:</strong> confirm access to the email address, authenticate sign-ins, support password recovery and respond to email or password changes.</li>
           <li><strong>To protect and operate the service:</strong> rate-limit requests, investigate faults and prevent misuse.</li>
           <li><strong>To show community totals:</strong> count email-verified members with active credentials and the number of distinct self-reported countries. The totals do not identify individual members.</li>

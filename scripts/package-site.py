@@ -19,7 +19,7 @@ if target.exists():
     raise SystemExit('Release already packaged; choose a new identifier')
 files = []
 allowed_root = {'index.html', '404.html', 'styles.css', 'meaning.css', 'legal.css', 'contact.css',
-                'host.js', 'auth-nav.js', 'auth-redirect.js', 'member-access.js', 'home-intro.js', 'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml', 'version.txt', 'site.webmanifest'}
+                'host.js', 'auth-nav.js', 'api-origin.js', 'auth-redirect.js', 'member-access.js', 'home-intro.js', 'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml', 'version.txt', 'site.webmanifest'}
 for file in sorted(source.rglob('*')):
     if file.is_symlink():
         raise SystemExit('Symlinks are not allowed in site output')

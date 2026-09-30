@@ -84,7 +84,7 @@ def call(path, data=None, cookie='', expected=200, request_origin=origin):
     response = conn.getresponse()
     body = json.loads(response.read())
     received = next((value for key, value in response.getheaders()
-                     if key.lower() == 'set-cookie' and value.startswith('codaris_session=')), None)
+                     if key.lower() == 'set-cookie' and value.startswith('codaris_session_v2=')), None)
     status = response.status
     conn.close()
     assert status == expected, (path,status,expected,body)

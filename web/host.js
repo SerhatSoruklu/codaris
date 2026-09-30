@@ -271,13 +271,14 @@ if (rainHero && 'IntersectionObserver' in window) {
 function membershipReady() { return document.body.dataset.memberReady === 'true'; }
 
 window.codarisAccountRequest = (path, options, kind) => {
+  const endpoint = window.codarisApiUrl(path);
   const dashboardProfile = kind === 'me' && window.codarisLoader?.isActive('dashboard');
   const showLoader = kind === 'login' || kind === 'register' || kind === 'logout' || dashboardProfile;
-  if (!showLoader) return fetch(path, options);
+  if (!showLoader) return fetch(endpoint, {...options, credentials: 'include'});
   window.codarisLoader?.start(kind);
   return new Promise((resolve, reject) => {
   const xhr = new XMLHttpRequest();
-  xhr.open(options.method || 'GET', path, true);
+  xhr.open(options.method || 'GET', endpoint, true);
   xhr.withCredentials = true;
   xhr.timeout = 30000;
   Object.entries(options.headers || {}).forEach(([key, value]) => xhr.setRequestHeader(key, value));
@@ -677,7 +678,8 @@ const credentialImageCache = new Map();
 function credentialImageForSide(side) {
   if (!credentialImageCache.has(side)) {
     const source = new Image();
-    const url = '/api/credential/card?format=svg&side=' + side + '&v=' + Date.now();
+    const url = window.codarisApiUrl('/api/credential/card?format=svg&side=' + side + '&v=' + Date.now());
+    source.crossOrigin = 'use-credentials';
     const loaded = new Promise((resolve, reject) => {
       source.onload = () => resolve(url);
       source.onerror = () => reject(new Error('Your credential preview is temporarily unavailable.'));
@@ -772,7 +774,7 @@ document.getElementById('credential-stage')?.addEventListener('pointerup', event
 async function saveCredential(format) {
   const side=window.codarisCredentialSide==='back'?'back':'front';
   if(format==='png'){
-    const response=await fetch('/api/credential/card?format=svg&side='+side,{credentials:'same-origin',cache:'no-store'});
+    const response=await fetch(window.codarisApiUrl('/api/credential/card?format=svg&side='+side),{credentials:'include',cache:'no-store'});
     if(response.status===401)document.dispatchEvent(new Event('codaris-auth-required'));
     if(!response.ok)throw new Error('Credential image is not available yet.');
     const image=new Image(), blob=await response.blob(), objectUrl=URL.createObjectURL(blob);
@@ -784,8 +786,8 @@ async function saveCredential(format) {
       const a=document.createElement('a');a.href=URL.createObjectURL(png);a.download='codaris-membership-'+side+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
     }finally{URL.revokeObjectURL(objectUrl);}return;
   }
-  const url='/api/credential/card?format='+format+(format==='svg'?'&side='+side:'');
-  const response=await fetch(url,{credentials:'same-origin',cache:'no-store'});
+  const url=window.codarisApiUrl('/api/credential/card?format='+format+(format==='svg'?'&side='+side:''));
+  const response=await fetch(url,{credentials:'include',cache:'no-store'});
   if(response.status===401)document.dispatchEvent(new Event('codaris-auth-required'));
   if(!response.ok)throw new Error('Credential download is unavailable.');
   const blob=await response.blob(),objectUrl=URL.createObjectURL(blob),a=document.createElement('a');
@@ -857,7 +859,7 @@ document.addEventListener('codaris-member-profile',event=>{
 function loadPublicCredential(){
   const status=document.getElementById('credential-verify-status');if(!status)return;
   const params=new URLSearchParams(location.search),credential=params.get('credential')||'';
-  const endpoint=new URL('/api/credential/verify',window.location.origin);
+  const endpoint=new URL(window.codarisApiUrl('/api/credential/verify'));
   endpoint.searchParams.set('credential',credential);
   fetch(endpoint.href,{credentials:'omit',cache:'no-store'})
     .then(response=>response.json()).then(data=>{

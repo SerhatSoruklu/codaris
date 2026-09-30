@@ -58,7 +58,7 @@ EMSCRIPTEN_KEEPALIVE void codaris_member_key(int index, const char *key) {
 }
 static int pending_topic=-1;
 EM_JS(void, member_progress_request, (int topic,int read), {
-    fetch('/api/progress',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
+    fetch(window.codarisApiUrl('/api/progress'),{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({topic:String(topic),read:String(read)})})
       .then(response=>{if(response.status===401)document.dispatchEvent(new Event('codaris-auth-required'));Module.ccall('codaris_progress_response',null,['number'],[response.status]);})
       .catch(()=>Module.ccall('codaris_progress_response',null,['number'],[0]));

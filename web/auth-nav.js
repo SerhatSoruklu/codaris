@@ -375,8 +375,8 @@ window.codarisLoader = codarisLoader;
     const timeout = window.setTimeout(() => controller.abort(), 5000);
     sessionRequest = (async () => {
       try {
-        const response = await fetch('/api/session', {
-          credentials: 'same-origin',
+        const response = await fetch(window.codarisApiUrl('/api/session'), {
+          credentials: 'include',
           cache: 'no-store',
           headers: { Accept: 'application/json' },
           signal: controller.signal,

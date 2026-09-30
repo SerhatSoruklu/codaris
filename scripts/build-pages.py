@@ -118,7 +118,7 @@ for page in pages:
                      lambda match: '' if production else match.group(1), content, flags=re.S)
     if page.get('development_only'):
         content = '<section class="wrap section resource-page"><p class="eyebrow">MEMBERSHIP / COMING SOON</p><h1 class="page-title">' + title + '</h1><p>Staff access is not available yet.</p><a class="button" href="/join/">Explore membership</a></section>'
-    home_intro = '<script src="/home-intro.js?v=1"></script>' if not slug else ''
+    home_intro = '<script src="/home-intro.js?v=2"></script>' if not slug else ''
     values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HOMEINTRO': home_intro, 'LEGALCSS': legal_css, 'MEANINGCSS': meaning_css, 'CONTACTCSS': contact_css, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'MEMBER_ROUTE': 'true' if member_only else 'false', 'FOOTER': footer, 'RUNTIME': runtime}
     document = shell
     for key, value in values.items():
@@ -139,6 +139,7 @@ shutil.copy2(WEB / 'legal.css', OUT / 'legal.css')
 shutil.copy2(WEB / 'meaning.css', OUT / 'meaning.css')
 shutil.copy2(WEB / 'contact.css', OUT / 'contact.css')
 shutil.copy2(WEB / 'auth-nav.js', OUT / 'auth-nav.js')
+shutil.copy2(WEB / 'api-origin.js', OUT / 'api-origin.js')
 shutil.copy2(WEB / 'site.webmanifest', OUT / 'site.webmanifest')
 shutil.copy2(WEB / 'auth-redirect.js', OUT / 'auth-redirect.js')
 shutil.copy2(WEB / 'member-access.js', OUT / 'member-access.js')
@@ -154,7 +155,7 @@ member_route_pattern = '|'.join(server_guarded_routes)
 member_routes_conf = (
     'location ~ ^/(?:' + member_route_pattern + ')(?:/|$) {\n'
     '    if ($request_method !~ ^(GET|HEAD)$) { return 405; }\n'
-    '    auth_request /api/page-access;\n'
+    '    auth_request /_codaris_page_access;\n'
     '    error_page 401 =401 /member-sign-in-required/;\n'
     '    error_page 403 = /member-access-unavailable/;\n'
     '    error_page 500 502 503 504 /member-service-unavailable/;\n'
