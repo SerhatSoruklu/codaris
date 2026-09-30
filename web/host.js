@@ -549,7 +549,9 @@ document.querySelector('[data-delete-step-back]')?.addEventListener('click', () 
   showAccountDeleteStep(1);
   document.querySelector('[data-delete-account-open]')?.focus();
 });
-document.querySelector('[data-delete-dialog-close]')?.addEventListener('click', () => accountDeleteDialog?.close());
+document.querySelectorAll('[data-delete-dialog-close]').forEach(button => {
+  button.addEventListener('click', () => accountDeleteDialog?.close());
+});
 accountDeletePhrase?.addEventListener('input', updateAccountDeleteReady);
 accountDeletePassword?.addEventListener('input', updateAccountDeleteReady);
 accountDeleteDialog?.addEventListener('close', () => {

@@ -279,7 +279,7 @@ static int linkedin_profile_normalize(const char *input, char out[2049]) {
         const char *slug = path + 4;
         const char *end = strchr(slug, '/');
         size_t length = end ? (size_t)(end - slug) : strlen(slug);
-        ok = length > 0 && !(length == 1 && slug[0] == '.') &&
+        ok = (!end || !end[1]) && length > 0 && !(length == 1 && slug[0] == '.') &&
              !(length == 2 && slug[0] == '.' && slug[1] == '.');
     }
     curl_free(path);
