@@ -49,6 +49,7 @@ jobs:
           done
           sudo apt-get -o Dir::Cache::archives="$apt_archives" update
           sudo apt-get -o Dir::Cache::archives="$apt_archives" install -y --no-install-recommends "${packages[@]}"
+          sudo apt-get -o Dir::Cache::archives="$apt_archives" autoclean
       - name: Make Ubuntu package archives readable for cache storage
         if: always()
         run: sudo chmod -R a+rX "$RUNNER_TEMP/codaris-apt/archives" 2>/dev/null || true
