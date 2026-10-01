@@ -53,7 +53,7 @@ Those should be designed before implementation rather than accumulated ad hoc.
 
 ## Long-term rules
 
-- Keep application code in C17 unless a later migration is explicitly decided.
+- Keep application code in C17 unless a scoped exception is explicitly approved and documented.
 - Prefer stable, boring interfaces over framework churn.
 - Add dependencies only when they remove more risk than they add.
 - Preserve portability between Windows development and Linux production.
@@ -81,5 +81,9 @@ The form is currently gated: a blurred, disabled, inert fieldset sits beneath an
 ### Ecosystem assets and claims
 
 The Ecosystem page uses relationship categories rather than company logos as stand-ins for partnerships. Membership is active; working groups and organizational participation remain in development with no active public listings. X and LinkedIn are current communication channels; the public GitHub repository is presented as a technical source. Exploratory references and planned infrastructure use are not represented as current relationships. Legacy Microsoft and Coupyn SVG files remain unused by the page. The CODARIS emblem is original decorative artwork. The globe now uses Natural Earth geographic outlines; see `web/assets/GEOGRAPHY.md` for source, projection, custom regional highlight, and regeneration instructions. CSS-only connection animation includes pause and reduced-motion support. Footer resources have dedicated, noindex placeholder routes.
+
+### Approved Three.js 404 exception
+
+The public 404 route is an explicitly approved exception to the C/Wasm browser-application boundary. `web/not-found-scene.js` owns only the page-specific Three.js room, animation and scene inspection; the renderer modules are vendored locally in `web/three.module.js` and `web/three.core.js`. The scene has no API or account-data responsibilities and loads no external runtime. Reduced-motion and offscreen pausing remain part of its runtime contract. This exception applies only to the 404 page and does not establish a general frontend architecture precedent; other browser application features remain C/Wasm unless separately approved.
 
 Both Bash and PowerShell builds compile the same C17 entrypoint with optimization, assemble static routes, and copy CSS, host bridge, and SVG assets. Home and Global Reach alone load the Wasm runtime; DOM bridges tolerate page-specific elements being absent. Both run helpers rebuild before serving. No backend or database behavior changes in this version.
