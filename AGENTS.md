@@ -11,6 +11,7 @@ The engineering principle is: BUILD. VERIFY. ADVANCE. Trust is engineered.
 - Use C17 for source code unless the repository owner explicitly approves another C standard.
 - Browser application code is C compiled to WebAssembly with Emscripten.
 - Keep HTML/JavaScript limited to unavoidable browser host/bootstrap glue. Do not migrate application logic into JavaScript.
+- Approved exception (2026-10-01): the public 404 route may use its page-specific Three.js module and locally vendored Three.js renderer modules for the interactive 3D scene. This exception applies only to the 404 page and does not establish a general frontend architecture precedent; other browser application logic remains C/Wasm.
 - Do not introduce CSS or product design work until explicitly requested.
 - Native backend code is C.
 - PostgreSQL is the authoritative datastore.

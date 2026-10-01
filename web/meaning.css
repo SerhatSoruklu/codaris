@@ -111,6 +111,10 @@
 .meaning-steps li:nth-child(5) { animation-delay: .2s; }
 .meaning-steps li:nth-child(6) { animation-delay: .25s; }
 .meaning-steps li:nth-child(7) { animation-delay: .3s; }
+.meaning-steps li.meaning-connector { opacity: .72; }
+.meaning-steps li.meaning-connector .meaning-letter { width: 38px; margin-left: 7px; border-style: dashed; border-color: #2c4951; background: transparent; box-shadow: none; color: #8396a0; font-size: 17px; }
+.meaning-steps li.meaning-connector h3 { color: #a5b5be; font-size: 15px; }
+.meaning-steps li.meaning-connector p { font-size: 12px; }
 @keyframes meaning-step-in {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }

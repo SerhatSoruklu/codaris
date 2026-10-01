@@ -51,6 +51,24 @@ class Handler(SimpleHTTPRequestHandler):
     def is_member_route(self):
         path = urlsplit(self.path).path.strip('/')
         return bool(path) and path.split('/', 1)[0] in MEMBER_ROUTES
+    def is_api_status_route(self):
+        return urlsplit(self.path).path.rstrip('/') == '/api-status'
+    def send_api_status_page(self):
+        page = ROOT / 'build/client/api-status.html'
+        try:
+            body = page.read_bytes()
+        except OSError:
+            return self.send_error(404, 'API status page has not been built')
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.send_header('Cache-Control', 'no-store')
+        self.end_headers()
+        if self.command != 'HEAD':
+            try:
+                self.wfile.write(body)
+            except BrokenPipeError:
+                pass
     def send_member_status_page(self, code, slug):
         page = ROOT / 'build/client' / slug / 'index.html'
         try:
@@ -130,6 +148,8 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header('Content-Length', str(len(payload)))
             self.end_headers()
             self.wfile.write(payload)
+        elif self.is_api_status_route():
+            self.send_api_status_page()
         elif self.path.startswith('/api/'):
             self.proxy()
         elif self.is_member_route() and not self.authorize_member_route():
@@ -137,7 +157,10 @@ class Handler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
     def do_HEAD(self):
-        if self.is_member_route() and not self.authorize_member_route():
+        if self.is_api_status_route():
+            self.send_api_status_page()
+            return
+        elif self.is_member_route() and not self.authorize_member_route():
             return
         super().do_HEAD()
     def do_POST(self):

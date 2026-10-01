@@ -86,6 +86,19 @@ static enum MHD_Result respond(struct MHD_Connection *connection, unsigned statu
                                const char *cookie) {
     return respond_cookies(connection, status, json, cookie, NULL);
 }
+static enum MHD_Result redirect(struct MHD_Connection *connection, const char *location) {
+    static const char empty[] = "";
+    struct MHD_Response *response = MHD_create_response_from_buffer(
+        sizeof(empty) - 1, (void *)empty, MHD_RESPMEM_PERSISTENT);
+    if (!response)
+        return MHD_NO;
+    int ok = MHD_add_response_header(response, "Location", location) &&
+             MHD_add_response_header(response, "Cache-Control", "no-store") &&
+             MHD_add_response_header(response, "X-Content-Type-Options", "nosniff");
+    enum MHD_Result result = ok ? MHD_queue_response(connection, MHD_HTTP_FOUND, response) : MHD_NO;
+    MHD_destroy_response(response);
+    return result;
+}
 static void clear_legacy_session_cookie(const Config *c, char *cookie, size_t capacity) {
     snprintf(cookie, capacity,
              "codaris_session=; Path=/api/; HttpOnly; SameSite=Strict; Max-Age=0%s",
@@ -496,6 +509,14 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             return respond(conn, 200, body, NULL);
         }
         return respond(conn, 503, "{\"message\":\"Unavailable\"}", NULL);
+    }
+    if (!c->production && !strcmp(path, "/") &&
+        (!strcmp(method, "GET") || !strcmp(method, "HEAD"))) {
+        char status_page[544];
+        int length = snprintf(status_page, sizeof(status_page), "%s/api-status", c->origin);
+        if (length < 0 || (size_t)length >= sizeof(status_page))
+            return respond(conn, 500, "{\"message\":\"Local status page is unavailable\"}", NULL);
+        return redirect(conn, status_page);
     }
     int post = !strcmp(method, "POST");
     if (!post && strcmp(method, "GET"))

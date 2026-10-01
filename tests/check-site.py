@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate the deployable site without third-party test dependencies."""
+import ast
 import json
 import os
 import re
@@ -75,7 +76,7 @@ class Document(HTMLParser):
             self.script = attrs
             self.script_text = ''
             if 'src' in attrs:
-                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/auth-nav.js', '/api-origin.js', '/auth-redirect.js', '/member-access.js', '/home-intro.js'), 'Unreviewed executable script'
+                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/auth-nav.js', '/api-origin.js', '/auth-redirect.js', '/member-access.js', '/home-intro.js', '/api-status.js', '/not-found-scene.js'), 'Unreviewed executable script'
             else:
                 assert attrs.get('type') == 'application/ld+json', 'Inline executable script'
                 self.jsonld_types = []
@@ -191,4 +192,28 @@ for icon in manifest['icons']:
     assert (OUT / icon['src'].lstrip('/')).is_file(), icon['src']
 assert (OUT / 'assets/x-logo-email.png').is_file()
 assert (OUT / 'assets/codaris-social-v2.png').is_file()
+
+def literal_string_set(path, name):
+    tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == name for target in node.targets
+        ):
+            value = ast.literal_eval(node.value)
+            assert isinstance(value, set) and all(isinstance(item, str) for item in value), path
+            return value
+    raise AssertionError(f'{name} allowlist missing from {path}')
+
+required_release_assets = {
+    'vision.css', 'api-status.html', 'api-status.css', 'api-status.js',
+    'not-found-scene.js', 'three.module.js', 'three.core.js', 'THREE-LICENSE.txt',
+}
+package_allowlist = literal_string_set(ROOT / 'scripts/package-site.py', 'allowed_root')
+receiver_allowlist = literal_string_set(ROOT / 'deploy/codaris-deploy-release', 'ROOT_FILES')
+assert required_release_assets <= package_allowlist
+assert required_release_assets <= receiver_allowlist
+assert package_allowlist == receiver_allowlist, 'Package and server receiver root allowlists differ'
+assert (OUT / '404.html').read_text(encoding='utf-8').count('src="/not-found-scene.js"') == 1
+assert "from '/three.module.js'" in (OUT / 'not-found-scene.js').read_text(encoding='utf-8')
+assert (OUT / 'three.module.js').is_file() and (OUT / 'three.core.js').is_file()
 print(f'PASS: {len(pages)} documents; CSP, scripts, IDs, links, assets, metadata and build hardening.')

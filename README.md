@@ -44,11 +44,11 @@ The public site is marked Beta V1. It currently includes:
 - A member dashboard in the codebase for profile and security settings, credential controls, and topic progress. Community/chat is a preview, not a live discussion service.
 - A contact form implementation, with messages queued by the native service for delivery.
 
-**Deployment status matters:** the account and contact workflows exist in the repository and can be run locally, but the repository does not establish whether the public API, database, mail delivery and operational checks are currently available on the live host. The release runbook requires those checks before public registration is advertised. The production client build intentionally disables the Join form; development builds can expose an interactive preview. A repository feature is not evidence that the corresponding production service is live.
+**Deployment status matters:** the latest recorded automatic release completed successfully, and the public site version and API health endpoint were verified. That confirms the build/deploy path and basic API readiness; it does not confirm complete registration, database migration, email delivery or account user journeys. The production client build intentionally disables the Join form; keep it that way until those flows are checked end to end. A repository feature is not evidence that the corresponding production service is fully available.
 
 Membership activates automatically after email verification; there is no staff application-review or approval workflow. Email confirmation proves access to a mailbox, not a person’s identity, qualifications, country or ownership of external profile links. A member may choose to enable a credential verification link. Anyone with that link can see the limited fields disclosed in the terms and privacy notice. CODARIS does not currently provide a browsable member directory.
 
-The ecosystem page names Microsoft, LinkedIn and Coupyn as platform or operational context. It explicitly does not claim partnerships, endorsement or an active Coupyn integration. The organization participation page currently has no organization, representative, supporter or working-group listings. CODARIS has no paid membership feature.
+The ecosystem page separates individual membership, working groups, organizational contributions, public technical work, research communities, communication channels and operational infrastructure. X and LinkedIn are current public channels; the GitHub repository is linked as a technical source. Working groups and organizational participation remain in development, with no active public listings. The page does not present exploratory or planned relationships as current partnerships. CODARIS has no paid membership feature.
 
 ## Direction: what comes next
 
@@ -163,6 +163,12 @@ CODARIS is an early-stage Beta V1 project. Public pages and member learning page
 The repository includes production build and deployment tooling, Nginx and systemd examples, an allowlisted static-site package, and a release runbook. These files describe how to deploy; their presence alone does not establish that the live backend, mail worker, monitoring, backups or privacy operations are deployed and verified. Read [release readiness](docs/RELEASE.md) and [deployment](docs/DEPLOYMENT.md) before operating a public service.
 
 The codebase does not currently provide active chat, staff administration UI, public member directory, organization directory, working-group service, payment flow, MFA or automated moderation. Future participation and governance concepts on public pages are marked as in development or coming soon.
+
+## Production changes and recovery
+
+Production changes go through the GitHub `Verify` workflow: build and security checks run before a `main` deployment, and the deploy verifies the live site version, security headers and API health. The server checks package contents and checksums, validates Nginx, and keeps a previous site/API release for guarded rollback. Keep GitHub's `main` branch protection configured to require a pull request and the `Build and security checks` result; that setting lives in GitHub, not in this repository. These checks do not cover every production user flow, and database migrations are separate from code deployment.
+
+See the [production deployment safeguards and recovery guide](docs/DEPLOYMENT-SAFEGUARDS.md) for check coverage, failure response, rollback commands and limits.
 
 ## Contributing and participation
 

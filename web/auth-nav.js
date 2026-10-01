@@ -1,5 +1,9 @@
 /* Minimal same-origin session probe for the shared header; no account data is read. */
 (() => {
+const copyrightYear = Math.max(2026, new Date().getFullYear());
+document.querySelectorAll('[data-copyright-year]').forEach(element => {
+  element.textContent = copyrightYear > 2026 ? `2026–${copyrightYear}` : '2026';
+});
 // Play the home entrance on each page load; reveal below-fold content when seen.
 if (location.pathname === '/' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const meaning = document.querySelector('.meaning-overview');

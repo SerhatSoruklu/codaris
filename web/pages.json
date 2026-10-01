@@ -10,24 +10,31 @@
   },
   {
     "slug": "mission",
-    "title": "Responsible AI Mission and Principles",
+    "title": "Mission | Practical Engineering",
     "label": "The mission",
-    "description": "Explore the CODARIS mission through clear guides, practical examples and sources. Compare key choices and trade-offs for better engineering decisions.",
+    "description": "CODARIS unites developers for practical work on safer, more secure, transparent and accountable intelligent systems while supporting useful progress.",
+    "indexing": "index"
+  },
+  {
+    "slug": "vision",
+    "title": "A Vision for Responsible Intelligence",
+    "label": "Vision",
+    "description": "See the CODARIS vision for intelligent systems whose progress moves with accountable engineering, verifiable safeguards and collaboration across borders.",
     "indexing": "index"
   },
   {
     "slug": "global-reach",
-    "title": "International Developer Community",
+    "title": "Global Reach | Participation and Verified Counts",
     "label": "Global reach",
-    "description": "Explore global developer community through clear guides, practical examples and sources. Compare key choices and trade-offs for better engineering decisions.",
+    "description": "How CODARIS is designed for cross-border participation, with live aggregate counts from active members with verified email and self-reported country data.",
     "interactive": true,
     "indexing": "index"
   },
   {
     "slug": "ecosystem",
-    "title": "Responsible AI Ecosystem and Trust",
+    "title": "Ecosystem | Relationships & Technical Work",
     "label": "Ecosystem",
-    "description": "Explore the CODARIS ecosystem through clear guides, practical examples and sources. Compare key choices and trade-offs for better engineering decisions.",
+    "description": "See how developers, working groups, organizations, technical work and public channels relate to CODARIS, with current and planned roles clearly distinguished.",
     "indexing": "index"
   },
   {
