@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="{{CSP}}">
+  <meta name="theme-color" content="#080e16">
+  <meta name="robots" content="noindex, follow">
+  <title>CODARIS API // Public Edge</title>
+  <meta name="description" content="Public CODARIS API service status and access information for developers.">
+  <link rel="icon" href="/assets/codaris-favicon-v2.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/api-status.css">
+  <script src="/api-status.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="https://codaris.org/" aria-label="CODARIS home">
+        <img src="/assets/emblem.svg" width="34" height="34" alt="">
+        <span>CODARIS<span class="brand-slash">/</span>API</span>
+      </a>
+      <div class="edge-label"><span class="pulse" aria-hidden="true"></span> PUBLIC EDGE <span class="edge-divider">/</span> v1</div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span>SYS.NODE_01</span><span class="eyebrow-line" aria-hidden="true"></span><span>EXTERNAL INTERFACE</span></p>
+          <h1 id="hero-title">Systems for a more<br><span>responsible future.</span></h1>
+          <p class="intro">The CODARIS API is the service layer behind our platform. Public access is limited while the member interface is being developed.</p>
+          <div class="hero-actions">
+            <a class="home-link" href="https://codaris.org/">Return to codaris.org <span aria-hidden="true">↗</span></a>
+            <span class="access-note"><span class="access-lock" aria-hidden="true">⌑</span> MEMBER ROUTES · IN DEVELOPMENT</span>
+          </div>
+        </div>
+        <div class="visual" aria-hidden="true">
+          <div class="visual-grid"></div>
+          <svg class="orbit" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle class="orbit-ring orbit-ring--outer" cx="210" cy="210" r="157" />
+            <circle class="orbit-ring orbit-ring--middle" cx="210" cy="210" r="111" />
+            <circle class="orbit-ring orbit-ring--inner" cx="210" cy="210" r="64" />
+            <path class="orbit-axis" d="M210 26v368M26 210h368" />
+            <path class="orbit-trace" d="M69 302 153 218 202 267 325 144" />
+            <circle class="node node--a" cx="69" cy="302" r="5" />
+            <circle class="node node--b" cx="153" cy="218" r="5" />
+            <circle class="node node--c" cx="202" cy="267" r="5" />
+            <circle class="node node--d" cx="325" cy="144" r="5" />
+            <circle class="core-halo" cx="210" cy="210" r="23" />
+            <circle class="core" cx="210" cy="210" r="8" />
+          </svg>
+          <span class="visual-coord visual-coord--top">51°30′26.4″N</span>
+          <span class="visual-coord visual-coord--bottom">BUILD · VERIFY · ADVANCE</span>
+          <span class="scanline"></span>
+        </div>
+      </section>
+
+      <section class="status-panel" aria-labelledby="status-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">SERVICE TELEMETRY <span class="eyebrow-muted">/ LIVE</span></p>
+            <h2 id="status-heading">API status</h2>
+          </div>
+          <div id="health-state" class="health-state" data-state="checking" role="status" aria-live="polite">
+            <span class="health-dot" aria-hidden="true"></span><span id="health-label">Checking connection</span>
+          </div>
+        </div>
+        <div class="telemetry-grid">
+          <div class="telemetry-cell telemetry-primary">
+            <span class="metric-label">HEALTH PROBE</span>
+            <span id="health-message" class="metric-value">Connecting to origin…</span>
+            <span id="health-time" class="metric-caption">GET /api/health</span>
+          </div>
+          <div class="telemetry-cell">
+            <span class="metric-label">SERVICE</span>
+            <span class="metric-value">CODARIS Core API</span>
+            <span class="metric-caption">HTTPS · JSON</span>
+          </div>
+          <div class="telemetry-cell">
+            <span class="metric-label">RELEASE</span>
+            <span id="api-version" class="metric-value">—</span>
+            <span class="metric-caption">API version</span>
+          </div>
+          <div class="telemetry-cell">
+            <span class="metric-label">API SURFACES</span>
+            <span id="api-contracts" class="metric-value">—</span>
+            <span id="api-access-contract" class="metric-caption">Page access —</span>
+          </div>
+        </div>
+        <div class="panel-footer"><span>CODARIS / CONTROL PLANE</span><span>REFRESH <span class="blink">●</span> 30 SEC</span></div>
+      </section>
+
+      <section class="access-panel" aria-label="Public access information">
+        <div class="access-mark" aria-hidden="true">{ }</div>
+        <div class="access-copy">
+          <p class="eyebrow">ACCESS / 403</p>
+          <p><strong>Sorry, you can’t access member API routes yet.</strong> If you’re a CODARIS member, API access is currently being developed. This public endpoint only reports service health.</p>
+        </div>
+        <a class="docs-link" href="https://codaris.org/">CODARIS HOME <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <a class="footer-brand" href="https://codaris.org/" aria-label="CODARIS home"><img src="/assets/emblem.svg" width="26" height="26" alt=""><span>CODARIS</span></a>
+      <span class="footer-muted">Coalition Of Developers Advancing Responsible Intelligent Systems</span>
+      <span>TRUST IS ENGINEERED.</span>
+      <span class="copyright">Copyright © CODARIS <span data-copyright-year>2026</span></span>
+    </footer>
+  </div>
+  <noscript><p class="noscript">Live service status requires JavaScript. The public API is available at <code>/api/health</code>.</p></noscript>
+</body>
+</html>

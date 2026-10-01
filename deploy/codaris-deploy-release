@@ -35,9 +35,11 @@ CONFIGS = {
 }
 RELEASE_RE = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}\Z')
 ROOT_FILES = {
-    'index.html', '404.html', 'styles.css', 'meaning.css', 'legal.css', 'contact.css',
+    'index.html', '404.html', 'styles.css', 'meaning.css', 'legal.css', 'contact.css', 'vision.css',
+    'api-status.html', 'api-status.css', 'api-status.js',
     'host.js', 'auth-nav.js', 'api-origin.js', 'auth-redirect.js', 'member-access.js',
-    'home-intro.js', 'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml',
+    'home-intro.js', 'not-found-scene.js', 'three.module.js', 'three.core.js', 'THREE-LICENSE.txt',
+    'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml',
     'version.txt', 'site.webmanifest',
 }
 NGINX_FILES = {

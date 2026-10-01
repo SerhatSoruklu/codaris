@@ -9,6 +9,26 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+static int copyright_year_suffix(char *suffix, size_t capacity) {
+    time_t now = time(NULL);
+    struct tm utc;
+#ifdef _WIN32
+    if (now == (time_t)-1 || gmtime_s(&utc, &now) != 0)
+        return 0;
+#else
+    if (now == (time_t)-1 || !gmtime_r(&now, &utc))
+        return 0;
+#endif
+    int year = utc.tm_year + 1900;
+    if (year <= 2026) {
+        if (!capacity)
+            return 0;
+        suffix[0] = '\0';
+        return 1;
+    }
+    int length = snprintf(suffix, capacity, "-%d", year);
+    return length > 0 && (size_t)length < capacity;
+}
 /* Fixed copy and a validated origin mean user data never enters HTML or headers.
  * Token-containing buffers are wiped; provider errors are not logged. */
 static int send_mail(const Config *c, const char *id, const char *recipient, const char *kind,
@@ -37,7 +57,9 @@ static int send_mail(const Config *c, const char *id, const char *recipient, con
                "contact contact@codaris.org immediately.";
         button = "Open CODARIS";
     }
-    char link[1024], social_image[1024], text[2048], html[4096], from[320], to[320], title[128], message_id[128];
+    char link[1024], social_image[1024], text[2048], html[4096], from[320], to[320], title[128], message_id[128], year_suffix[16];
+    if (!copyright_year_suffix(year_suffix, sizeof(year_suffix)))
+        return 0;
     int n =
         snprintf(link, sizeof(link), "%s/%s/%s%s", c->origin,
                  *token ? (!strcmp(kind, "reset") ? "reset-password" : "verify-email") : "login",
@@ -54,8 +76,8 @@ static int send_mail(const Config *c, const char *id, const char *recipient, con
                  "CODARIS — BUILD. VERIFY. ADVANCE.\n\n%s\n\n%s\n\n%s: %s\n\nNever share your "
                  "password.\nContact: contact@codaris.org\n\nFollow CODARIS on X: "
                  "https://x.com/CodarisORG\nConnect with CODARIS on LinkedIn: "
-                 "https://www.linkedin.com/company/codarisorg/\n",
-                 subject, copy, button, link);
+                 "https://www.linkedin.com/company/codarisorg/\n\nCopyright (c) 2026%s CODARIS. All rights reserved.\n",
+                 subject, copy, button, link, year_suffix);
     if (n < 0 || (size_t)n >= sizeof(text))
         return 0;
     n = snprintf(
@@ -82,8 +104,9 @@ static int send_mail(const Config *c, const char *id, const char *recipient, con
         "<a href=\"https://www.linkedin.com/company/codarisorg/\" style=\"vertical-align:middle;color:#526571;font-size:12px;"
         "text-decoration:none\">Connect with CODARIS on LinkedIn CODARISorg</a></td></tr></table><p "
         "style=\"font-size:12px;color:#526571\">BUILD. VERIFY. ADVANCE.<br>contact@codaris.org</p>"
+        "<p style=\"font-size:11px;color:#71818b\">Copyright &copy; 2026%s CODARIS. All rights reserved.</p>"
         "</td></tr></table></body></html>",
-        subject, subject, copy, link, button, social_image);
+        subject, subject, copy, link, button, social_image, year_suffix);
     if (n < 0 || (size_t)n >= sizeof(html))
         return 0;
     snprintf(from, sizeof(from), "From: CODARIS <%s>", c->mail_from);
@@ -207,13 +230,15 @@ static int send_contact_mail(const Config *c, const char *id, const char *kind,
     int is_admin = !strcmp(kind, "admin");
     if ((!is_admin && strcmp(kind, "receipt")) || !contact_email_valid(recipient) ||
         (is_admin && !contact_email_valid(reply_to)) || !codaris_contact_topic_allowed(topic)) return 0;
+    char year_suffix[16];
+    if (!copyright_year_suffix(year_suffix, sizeof(year_suffix))) return 0;
     size_t cap = strlen(message) + 2048;
     if (cap > 20000) return 0;
     char *text = malloc(cap);
     if (!text) return 0;
     int n = is_admin
-        ? snprintf(text, cap, "New CODARIS contact message\n\nName: %s\nEmail: %s\nTopic: %s\n\nMessage:\n%s\n", name, email, topic, message)
-        : snprintf(text, cap, "Hello,\n\nCODARIS has received your message about: %s.\n\nWe aim to reply within " CODARIS_CONTACT_REPLY_TARGET ". This is an aim, not a guaranteed deadline.\n\nPlease do not reply with passwords, verification links or sensitive personal information.\n\nCODARIS\n", topic);
+        ? snprintf(text, cap, "New CODARIS contact message\n\nName: %s\nEmail: %s\nTopic: %s\n\nMessage:\n%s\n\nCopyright (c) 2026%s CODARIS. All rights reserved.\n", name, email, topic, message, year_suffix)
+        : snprintf(text, cap, "Hello,\n\nCODARIS has received your message about: %s.\n\nWe aim to reply within " CODARIS_CONTACT_REPLY_TARGET ". This is an aim, not a guaranteed deadline.\n\nPlease do not reply with passwords, verification links or sensitive personal information.\n\nCODARIS\nCopyright (c) 2026%s CODARIS. All rights reserved.\n", topic, year_suffix);
     if (n < 0 || (size_t)n >= cap) { sodium_memzero(text, cap); free(text); return 0; }
     size_t body_len = (size_t)n;
     char from[320], to[320], subject[128], message_id[160], reply[320], date[80];

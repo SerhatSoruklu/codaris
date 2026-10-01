@@ -106,6 +106,7 @@ for page in pages:
     legal_css = '<link rel="stylesheet" href="/legal.css">' if slug in {'privacy', 'terms'} else ''
     meaning_css = '<link rel="stylesheet" href="/meaning.css">' if slug in {'', 'mission'} else ''
     contact_css = '<link rel="stylesheet" href="/contact.css">' if slug == 'contact' else ''
+    vision_css = '<link rel="stylesheet" href="/vision.css">' if slug == 'vision' else ''
     if page.get('interactive'):
         runtime = '''<p id="runtime-status" role="status">Loading interactive features…</p>
 <noscript><p class="runtime-error">Interactive features require JavaScript and WebAssembly. You can still read the pages and navigate the site.</p></noscript>
@@ -119,7 +120,7 @@ for page in pages:
     if page.get('development_only'):
         content = '<section class="wrap section resource-page"><p class="eyebrow">MEMBERSHIP / COMING SOON</p><h1 class="page-title">' + title + '</h1><p>Staff access is not available yet.</p><a class="button" href="/join/">Explore membership</a></section>'
     home_intro = '<script src="/home-intro.js?v=2"></script>' if not slug else ''
-    values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HOMEINTRO': home_intro, 'LEGALCSS': legal_css, 'MEANINGCSS': meaning_css, 'CONTACTCSS': contact_css, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'MEMBER_ROUTE': 'true' if member_only else 'false', 'FOOTER': footer, 'RUNTIME': runtime}
+    values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HOMEINTRO': home_intro, 'LEGALCSS': legal_css, 'MEANINGCSS': meaning_css, 'CONTACTCSS': contact_css, 'VISIONCSS': vision_css, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'MEMBER_ROUTE': 'true' if member_only else 'false', 'FOOTER': footer, 'RUNTIME': runtime}
     document = shell
     for key, value in values.items():
         document = document.replace('{{' + key + '}}', value)
@@ -138,6 +139,16 @@ else:
 shutil.copy2(WEB / 'legal.css', OUT / 'legal.css')
 shutil.copy2(WEB / 'meaning.css', OUT / 'meaning.css')
 shutil.copy2(WEB / 'contact.css', OUT / 'contact.css')
+shutil.copy2(WEB / 'vision.css', OUT / 'vision.css')
+api_status = (WEB / 'api-status.html').read_text(encoding='utf-8')
+api_status = api_status.replace('{{CSP}}', html.escape(meta_csp, quote=True))
+(OUT / 'api-status.html').write_text(api_status, encoding='utf-8')
+shutil.copy2(WEB / 'api-status.css', OUT / 'api-status.css')
+shutil.copy2(WEB / 'api-status.js', OUT / 'api-status.js')
+shutil.copy2(WEB / 'not-found-scene.js', OUT / 'not-found-scene.js')
+shutil.copy2(WEB / 'three.module.js', OUT / 'three.module.js')
+shutil.copy2(WEB / 'three.core.js', OUT / 'three.core.js')
+shutil.copy2(WEB / 'THREE-LICENSE.txt', OUT / 'THREE-LICENSE.txt')
 shutil.copy2(WEB / 'auth-nav.js', OUT / 'auth-nav.js')
 shutil.copy2(WEB / 'api-origin.js', OUT / 'api-origin.js')
 shutil.copy2(WEB / 'site.webmanifest', OUT / 'site.webmanifest')
@@ -165,7 +176,32 @@ member_routes_conf = (
 (deploy_out / 'member-routes.conf').write_text(member_routes_conf, encoding='utf-8')
 # A real 404 document prevents static hosts from falling back to the homepage.
 not_found = shell
-values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page could not be found.', 'SEO': '<meta name="robots" content="noindex, follow">', 'LEGALCSS': '', 'MEANINGCSS': '', 'CONTACTCSS': '', 'HEADER': header, 'BREADCRUMB': '', 'MEMBER_ROUTE': 'false', 'RUNTIME': '', 'CONTENT': '<section class="wrap section resource-page"><h1 class="page-title">Page not found.</h1><p>The page may have moved. <a href="/">Return to the homepage.</a></p></section>'})
+not_found_content = r'''<section class="not-found wrap" aria-labelledby="not-found-title">
+  <div class="not-found__copy">
+    <p class="not-found__eyebrow"><span aria-hidden="true"></span> CODARIS / ROUTE RECOVERY</p>
+    <p class="not-found__code">ERROR 404 <span>·</span> PATH NOT FOUND</p>
+    <h1 id="not-found-title">This page isn’t in the system.</h1>
+    <p class="not-found__message">The route is missing, moved, or still waiting to be built. Our engineer has been staring at the trace for a while.</p>
+    <div class="not-found__actions">
+      <a class="button" href="/">Return to CODARIS <span aria-hidden="true">↗</span></a>
+      <a class="not-found__secondary" href="/mission/">Explore the mission</a>
+    </div>
+    <p class="not-found__trace"><span>REQUEST</span> &nbsp; RESOURCE ABSENT<br><span>STATUS</span> &nbsp; HTTP 404</p>
+  </div>
+  <div class="not-found__scene" data-route-scene tabindex="0" role="group" aria-labelledby="route-scene-label" aria-describedby="route-scene-help">
+    <canvas class="not-found__canvas" data-route-scene-canvas aria-hidden="true"></canvas>
+    <div class="not-found__scene-chrome">
+      <div class="not-found__scene-label" id="route-scene-label">NODE 04 <span>·</span> NO RESPONSE</div>
+      <div class="not-found__scene-tip">HOVER / TAP / ARROW KEYS TO INSPECT</div>
+    </div>
+    <p class="not-found__scene-fallback" data-route-scene-fallback>NODE 04 / 404 · INTERACTIVE SCENE UNAVAILABLE</p>
+    <div class="not-found__scene-status" aria-hidden="true"><span>ENGINEER STATUS</span><strong>TRACE REVIEW IN PROGRESS</strong></div>
+    <p class="not-found__scene-selection" data-route-scene-selection aria-live="polite">SCENE READY · SELECT A COMPONENT</p>
+    <span id="route-scene-help" class="sr-only">Three-dimensional route recovery workspace. Move the pointer over or tap the developer, chair, keyboard, mouse, field device, coffee mug, room, or equipment to inspect it. Focus this scene and use the arrow keys to cycle through all components.</span>
+    <script type="module" src="/not-found-scene.js"></script>
+  </div>
+</section>'''
+values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page could not be found.', 'SEO': '<meta name="robots" content="noindex, follow">', 'LEGALCSS': '', 'MEANINGCSS': '', 'CONTACTCSS': '', 'HEADER': header, 'BREADCRUMB': '', 'MEMBER_ROUTE': 'false', 'RUNTIME': '', 'CONTENT': not_found_content})
 for key, value in values.items():
     not_found = not_found.replace('{{' + key + '}}', value)
 (OUT / '404.html').write_text(not_found, encoding='utf-8')

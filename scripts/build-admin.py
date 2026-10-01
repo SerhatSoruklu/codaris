@@ -36,7 +36,7 @@ for target, slug in routes.items():
     directory = OUT / target
     directory.mkdir(parents=True, exist_ok=True)
     (directory / 'index.html').write_text(document, encoding='utf-8')
-for asset in ('styles.css', 'host.js', 'auth-nav.js', 'api-origin.js'):
+for asset in ('styles.css', 'host.js', 'auth-nav.js', 'api-origin.js', 'not-found-scene.js', 'three.module.js', 'three.core.js', 'THREE-LICENSE.txt'):
     shutil.copyfile(ROOT / 'web' / asset, OUT / asset)
 for asset in ('codaris.js', 'codaris.wasm'):
     if (SOURCE / asset).is_file():
