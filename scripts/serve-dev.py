@@ -159,6 +159,7 @@ class Handler(SimpleHTTPRequestHandler):
     def do_HEAD(self):
         if self.is_api_status_route():
             self.send_api_status_page()
+            return
         elif self.is_member_route() and not self.authorize_member_route():
             return
         super().do_HEAD()
