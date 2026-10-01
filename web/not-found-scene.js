@@ -501,7 +501,7 @@ for (const x of [-0.095, 0.095]) {
 sphere(0.055, [0.0, -0.005, 0.283], [0.68, 0.7, 0.78], materials.skin, 'head', headRig, 14);
 segment([0.03, -0.105, 0.27], [0.13, -0.11, 0.252], 0.01, materials.rubber, 'head', headRig, 8);
 // Ear cups sit on the sides of the skull; the band follows a true arc over the crown.
-const headsetCup = sphere(0.082, [-0.27, 0.02, 0.015], [0.56, 1.32, 1.04], materials.metalDark, 'head', headRig, 18);
+sphere(0.082, [-0.27, 0.02, 0.015], [0.56, 1.32, 1.04], materials.metalDark, 'head', headRig, 18);
 const headsetRing = new THREE.Mesh(new THREE.TorusGeometry(0.068, 0.009, 8, 20), materials.glow.clone());
 headsetRing.position.set(-0.319, 0.02, 0.015);
 headsetRing.rotation.y = Math.PI / 2;
