@@ -137,7 +137,7 @@ member_routes = sorted(page['slug'] for page in pages if page.get('access') == '
 server_guarded_routes = sorted(page['slug'] for page in pages if page.get('access') == 'member' and not page.get('client_guard'))
 robots = 'User-agent: *\nAllow: /\nDisallow: /api/\n' + ''.join('Disallow: /' + route + '/\n' for route in member_routes)
 if origin and production:
-    sitemap_namespace = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+    sitemap_namespace = 'http://www.sitemaps.org/schemas/sitemap/0.9'  # NOSONAR: required XML namespace identifier; never fetched.
     ElementTree.register_namespace('', sitemap_namespace)
     sitemap = ElementTree.Element('{' + sitemap_namespace + '}urlset')
     for url in urls:
