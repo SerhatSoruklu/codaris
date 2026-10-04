@@ -147,7 +147,23 @@ for entry in REGISTRY:
         assert ('BreadcrumbList' in doc.jsonld_types) == bool(entry['slug']), entry['slug']
 expected = sum(entry['indexing'] == 'index' and entry.get('access') != 'member' for entry in REGISTRY) if production else 0
 if production:
-    urls = list(ElementTree.parse(OUT / 'sitemap.xml').iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc'))
+    sitemap_namespace = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
+    sitemap = ElementTree.parse(OUT / 'sitemap.xml').getroot()
+    assert sitemap.tag == sitemap_namespace + 'urlset', 'Invalid sitemap root or namespace'
+    assert not (sitemap.text or '').strip(), 'Unexpected text outside sitemap entries'
+    urls = []
+    for entry in sitemap:
+        assert entry.tag == sitemap_namespace + 'url', 'Sitemap must contain url entries'
+        assert not (entry.text or '').strip() and not (entry.tail or '').strip(), 'Stray sitemap text'
+        assert len(entry) == 1 and entry[0].tag == sitemap_namespace + 'loc', 'Each entry must have one location'
+        location = entry[0]
+        assert len(location) == 0 and location.text and location.text == location.text.strip(), 'Invalid location text'
+        assert not (location.tail or '').strip(), 'Stray text after location'
+        parsed_location = urlsplit(location.text)
+        assert parsed_location.scheme == 'https' and parsed_location.netloc == urlsplit(ORIGIN).netloc
+        assert not parsed_location.query and not parsed_location.fragment
+        urls.append(location)
+    assert len({node.text for node in urls}) == len(urls), 'Duplicate sitemap URLs'
 else:
     assert not (OUT / 'sitemap.xml').exists(), 'Preview builds must omit the sitemap'
     urls = []
