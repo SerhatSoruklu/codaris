@@ -8,6 +8,7 @@ import re
 import runpy
 from pathlib import Path
 from urllib.parse import urlsplit
+from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[1]
 runpy.run_path(str(ROOT / 'scripts/build-language-docs.py'))
@@ -136,7 +137,15 @@ member_routes = sorted(page['slug'] for page in pages if page.get('access') == '
 server_guarded_routes = sorted(page['slug'] for page in pages if page.get('access') == 'member' and not page.get('client_guard'))
 robots = 'User-agent: *\nAllow: /\nDisallow: /api/\n' + ''.join('Disallow: /' + route + '/\n' for route in member_routes)
 if origin and production:
-    (OUT / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join('<url><loc>' + html.escape(url) + '</loc></url>' for url in urls) + '</urlset>\n', encoding='utf-8')
+    # The protocol requires this exact XML namespace identifier; it is never fetched.
+    sitemap_namespace = 'http://www.sitemaps.org/schemas/sitemap/0.9'  # NOSONAR(S5332)
+    ElementTree.register_namespace('', sitemap_namespace)
+    sitemap = ElementTree.Element('{' + sitemap_namespace + '}urlset')
+    for url in urls:
+        entry = ElementTree.SubElement(sitemap, '{' + sitemap_namespace + '}url')
+        ElementTree.SubElement(entry, '{' + sitemap_namespace + '}loc').text = url
+    ElementTree.indent(sitemap, space='  ')
+    (OUT / 'sitemap.xml').write_bytes(ElementTree.tostring(sitemap, encoding='utf-8', xml_declaration=True) + b'\n')
     robots += 'Sitemap: ' + origin + '/sitemap.xml\n'
 else:
     (OUT / 'sitemap.xml').unlink(missing_ok=True)

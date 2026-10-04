@@ -156,6 +156,8 @@ tests/                 Site, data-generation and account checks
 
 Static pages are authored in `web/pages/` and assembled from `web/index.html`, shared partials and `web/pages.json` by `scripts/build-pages.py`. Generated topic pages and catalogues have source data and editing guidance in their relevant `docs/` files. Do not edit generated build output as the source of truth.
 
+Production builds serialize a UTF-8 XML sitemap with one canonical public URL per entry; Nginx serves `/sitemap.xml` as `application/xml; charset=utf-8`. Submit `https://codaris.org/sitemap.xml` in Search Console (enter `sitemap.xml` when the field already shows the site prefix). The browser's message about missing style information is normal for an XML sitemap. A Search Console “Unknown” type can also mean it has not been processed yet; inspect the submission's fetch/error details as described in [Google's Sitemaps report guide](https://support.google.com/webmasters/answer/7451001).
+
 ## Current status
 
 CODARIS is an early-stage Beta V1 project. Public pages and member learning pages are generated as static content; the learning routes require a session check in the development server and production Nginx. Account, credential, contact and mail functionality is implemented in the repository and has local development/test workflows. The production client build disables the Join form; development builds can expose the preview form. The repository does not establish whether the public account API and its production operations are currently available. Verify the API, database, mail delivery and operational checks before treating registration as live or enabling the form.
