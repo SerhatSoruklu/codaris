@@ -4,6 +4,8 @@ Internal working record for the privacy notice and membership terms. Audited aga
 
 ## Factual matrix
 
+Update, 4 October 2026: the analytics findings below describe the earlier audit. Optional Google Analytics with a C/Wasm consent controller has since been added for production public information pages. See [ANALYTICS.md](ANALYTICS.md) for current collection, consent storage, cookie expiry and deployment requirements. This does not assert that it is deployed or that the property's external settings have been verified.
+
 | Data | Purpose | Source | Storage | Retention in code | Public? | Third party | Legal text needed |
 |---|---|---|---|---|---|---|---|
 | Name, email, country, role, joining statement, random membership ID | Create account, identify it, verify access, provide membership | Applicant | PostgreSQL `app.users` and `app.accounts` | No automatic expiry while account is open; joining statement is immutable in account settings. Permanent account deletion cascades linked app rows; backup retention is not established. | Name/email/role/statement are not in public output. Public aggregates include only verified active memberships and distinct self-reported countries. | Hosting/database operator/provider is not established by checked-in production facts. | Describe required and optional fields, source, purposes, basis, visibility, inability to edit joining statement, and deletion behavior. Do not imply staff review. |

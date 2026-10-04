@@ -43,6 +43,15 @@ if ($LASTEXITCODE -ne 0) {
     throw "Client build failed with exit code $LASTEXITCODE"
 }
 
+& emcc `
+    (Join-Path $Root "src\client\analytics.c") `
+    -std=c17 -Wall -Wextra -Wpedantic -O2 `
+    -sDYNAMIC_EXECUTION=0 -sNO_EXIT_RUNTIME=1 -sASSERTIONS=0 `
+    -sENVIRONMENT=web -sMODULARIZE=1 -sEXPORT_NAME=CodarisAnalytics `
+    --extern-post-js (Join-Path $Root "web\analytics-bootstrap.js") `
+    -o (Join-Path $BuildDir "analytics-consent.js")
+if ($LASTEXITCODE -ne 0) { throw "Analytics consent build failed" }
+
 Copy-Item (Join-Path $Root "web\styles.css") $BuildDir -Force
 Copy-Item (Join-Path $Root "web\host.js") $BuildDir -Force
 New-Item -ItemType Directory -Force (Join-Path $BuildDir "assets") | Out-Null

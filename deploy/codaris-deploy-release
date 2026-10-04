@@ -41,6 +41,8 @@ ROOT_FILES = {
     'home-intro.js', 'not-found-scene.js', 'three.module.js', 'three.core.js', 'THREE-LICENSE.txt',
     'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml',
     'version.txt', 'site.webmanifest',
+    'google12ca11a422470d51.html',
+    'analytics-consent.js', 'analytics-consent.wasm',
 }
 NGINX_FILES = {
     'nginx/codaris.conf',
