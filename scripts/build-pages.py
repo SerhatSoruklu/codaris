@@ -39,6 +39,9 @@ pages = json.loads((WEB / 'pages.json').read_text(encoding='utf-8'))
 shell = (WEB / 'index.html').read_text(encoding='utf-8')
 header = (WEB / 'partials/header.html').read_text(encoding='utf-8')
 footer = (WEB / 'partials/footer.html').read_text(encoding='utf-8')
+analytics = (WEB / 'partials/analytics.html').read_text(encoding='utf-8')
+if production and origin == 'https://codaris.org':
+    footer = footer.replace('href="/privacy/#cookies"', 'href="/privacy/#analytics-settings"')
 headers = json.loads((ROOT / 'deploy/security-headers.json').read_text(encoding='utf-8'))
 # frame-ancestors is an HTTP-only directive; production Nginx enforces it.
 meta_csp = headers['Content-Security-Policy'].replace("; frame-ancestors 'none'", '')
@@ -122,6 +125,8 @@ for page in pages:
     home_intro = '<script src="/home-intro.js?v=2"></script>' if not slug else ''
     values = {'CSP': html.escape(meta_csp, quote=True), 'TITLE': title, 'DESCRIPTION': description, 'SEO': seo, 'HOMEINTRO': home_intro, 'LEGALCSS': legal_css, 'MEANINGCSS': meaning_css, 'CONTACTCSS': contact_css, 'VISIONCSS': vision_css, 'HEADER': header.replace('href="' + route + '"', 'href="' + route + '" aria-current="page"'), 'BREADCRUMB': breadcrumb, 'CONTENT': content, 'DEVELOPMENT': 'false' if production else 'true', 'MEMBER_ROUTE': 'true' if member_only else 'false', 'FOOTER': footer, 'RUNTIME': runtime}
     document = shell
+    # Public information only: exclude forms, credentials, accounts and errors.
+    values['ANALYTICS'] = analytics if production and origin == 'https://codaris.org' and indexable and slug not in {'join', 'contact'} else ''
     for key, value in values.items():
         document = document.replace('{{' + key + '}}', value)
     target = OUT / slug
@@ -136,6 +141,7 @@ if origin and production:
 else:
     (OUT / 'sitemap.xml').unlink(missing_ok=True)
 (OUT / 'robots.txt').write_text(robots, encoding='utf-8')
+shutil.copy2(WEB / 'google12ca11a422470d51.html', OUT / 'google12ca11a422470d51.html')
 shutil.copy2(WEB / 'legal.css', OUT / 'legal.css')
 shutil.copy2(WEB / 'meaning.css', OUT / 'meaning.css')
 shutil.copy2(WEB / 'contact.css', OUT / 'contact.css')
@@ -201,7 +207,7 @@ not_found_content = r'''<section class="not-found wrap" aria-labelledby="not-fou
     <script type="module" src="/not-found-scene.js"></script>
   </div>
 </section>'''
-values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page could not be found.', 'SEO': '<meta name="robots" content="noindex, follow">', 'LEGALCSS': '', 'MEANINGCSS': '', 'CONTACTCSS': '', 'HEADER': header, 'BREADCRUMB': '', 'MEMBER_ROUTE': 'false', 'RUNTIME': '', 'CONTENT': not_found_content})
+values.update({'TITLE': 'Page Not Found | CODARIS', 'DESCRIPTION': 'This page could not be found.', 'SEO': '<meta name="robots" content="noindex, follow">', 'LEGALCSS': '', 'MEANINGCSS': '', 'CONTACTCSS': '', 'HEADER': header, 'BREADCRUMB': '', 'MEMBER_ROUTE': 'false', 'RUNTIME': '', 'ANALYTICS': '', 'CONTENT': not_found_content})
 for key, value in values.items():
     not_found = not_found.replace('{{' + key + '}}', value)
 (OUT / '404.html').write_text(not_found, encoding='utf-8')

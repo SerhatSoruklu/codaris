@@ -76,7 +76,8 @@ class Document(HTMLParser):
             self.script = attrs
             self.script_text = ''
             if 'src' in attrs:
-                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/auth-nav.js', '/api-origin.js', '/auth-redirect.js', '/member-access.js', '/home-intro.js', '/api-status.js', '/not-found-scene.js'), 'Unreviewed executable script'
+                assert not urlsplit(attrs['src']).netloc, 'External script must be loaded only after consent'
+                assert urlsplit(attrs['src']).path in ('/host.js', '/codaris.js', '/analytics-consent.js', '/auth-nav.js', '/api-origin.js', '/auth-redirect.js', '/member-access.js', '/home-intro.js', '/api-status.js', '/not-found-scene.js'), 'Unreviewed executable script'
             else:
                 assert attrs.get('type') == 'application/ld+json', 'Inline executable script'
                 self.jsonld_types = []
@@ -92,8 +93,12 @@ class Document(HTMLParser):
                 self.jsonld_types = [node['@type'] for node in payload.get('@graph', [])]
             self.script = None
 
+verification_file = OUT / 'google12ca11a422470d51.html'
+assert verification_file.read_bytes() == b'google-site-verification: google12ca11a422470d51.html\n'
 pages = {}
 for path in OUT.rglob('*.html'):
+    if path == verification_file:
+        continue  # Google expects a plain verification response, not a site page.
     doc = Document()
     doc.feed(path.read_text(encoding='utf-8'))
     assert doc.headings == 1, (path, 'Expected one H1')
@@ -133,6 +138,9 @@ for entry in REGISTRY:
     assert doc.og_image_width == '1200' and doc.og_image_height == '630', entry['slug']
     assert doc.twitter_card == 'summary_large_image', entry['slug']
     assert doc.twitter_image == doc.og_image, entry['slug']
+    analytics_expected = production and ORIGIN == 'https://codaris.org' and entry['indexing'] == 'index' and not member_only and entry['slug'] not in {'join', 'contact'}
+    assert ('/analytics-consent.js' in doc.assets) == analytics_expected, entry['slug']
+    assert ('analytics-settings' in doc.ids) == analytics_expected, entry['slug']
     if production and entry['indexing'] == 'index' and not member_only:
         assert 'WebPage' in doc.jsonld_types, entry['slug']
         assert ('Organization' in doc.jsonld_types) == (entry['slug'] == ''), entry['slug']
@@ -205,6 +213,8 @@ def literal_string_set(path, name):
     raise AssertionError(f'{name} allowlist missing from {path}')
 
 required_release_assets = {
+    'analytics-consent.js', 'analytics-consent.wasm',
+    'google12ca11a422470d51.html',
     'vision.css', 'api-status.html', 'api-status.css', 'api-status.js',
     'not-found-scene.js', 'three.module.js', 'three.core.js', 'THREE-LICENSE.txt',
 }

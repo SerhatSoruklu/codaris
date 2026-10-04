@@ -3,7 +3,7 @@
     <p class="eyebrow">CODARIS / GOVERNANCE / 01</p>
     <h1 id="privacy-title">Privacy notice</h1>
     <p class="legal-summary">What information CODARIS uses when you visit the site, apply for membership or use an account, and how to ask us about it.</p>
-    <p class="legal-date"><span>LAST REVIEWED</span> <time datetime="2026-09-26">26 September 2026</time></p>
+    <p class="legal-date"><span>LAST REVIEWED</span> <time datetime="2026-10-04">4 October 2026</time></p>
   </header>
   <div class="legal-layout">
     <nav class="legal-toc" aria-label="Privacy notice contents">
@@ -80,13 +80,17 @@
       <section class="legal-section" id="cookies" aria-labelledby="cookies-title">
         <p class="legal-number">06</p><h2 id="cookies-title">Cookies and browser storage</h2>
         <p>The signed-in account service uses a first-party cookie named <code>codaris_session</code>. It carries an opaque session token, is marked HttpOnly and SameSite=Strict, and expires after 12 hours. Production is configured to mark it Secure. It is used to keep you signed in and is not an advertising cookie.</p>
-        <p>The site code contains no analytics or advertising scripts and does not use localStorage or sessionStorage for account data. The public site also links to external websites; opening one takes you under that site’s privacy and cookie practices.</p>
+        <p>Google Analytics is optional on our production public information pages. It is not loaded, and no Analytics requests are sent, until you choose <strong>Allow analytics cookies</strong> in the Optional analytics control. Rejecting it does not affect access to CODARIS. Use <strong>Analytics choices</strong> in the footer to change your decision; rejecting a previously allowed choice removes this integration’s Analytics cookies and reloads the page to unload Google’s tag.</p>
+        <p>We use your consent to measure visits and improve the public site. After you allow it, Google receives information such as the page visited, browser and device details, network information and cookie identifiers. The integration removes query strings and fragments from the page URL it supplies and supplies an empty referrer. It does not send account identifiers or form values. Account, credential, membership and contact-form pages, staff pages, previews and error pages are excluded. Advertising storage, advertising user data, advertising personalization and Google signals are disabled in the integration.</p>
+        <p>Your choice is stored under <code>codaris_analytics_consent_v1</code> in localStorage and expires after 180 days, checked when an eligible page loads or regains focus. Analytics cookies named <code>_ga</code> and <code>_ga_8P0VYMWP0J</code> are configured for this host and a 180-day lifetime without renewal on each page load. If your browser cannot save your choice, Analytics stays off for a new visitor. If it cannot save a withdrawal, Analytics is disabled on that page; clear this site’s browser data to remove any previously saved permission. Neither localStorage nor sessionStorage is used here to store account data.</p>
+        <p>The public site also links to external websites; opening one takes you under that site’s privacy and cookie practices.</p>
       </section>
 
       <section class="legal-section" id="providers" aria-labelledby="providers-title">
         <p class="legal-number">07</p><h2 id="providers-title">Providers and international transfers</h2>
         <p>The account service uses PostgreSQL for account data and SMTP for transactional account messages. The current release configuration uses Google Workspace SMTP through <code>admin@coupyn.com</code>; the operator confirmed successful live verification-email delivery on 29 September 2026. The contact form routes submissions to <code>admin@coupyn.com</code> and sends an acknowledgement to the address you supplied. Delivered messages are also held by receiving email providers under their own access and retention controls. The hosting, database and mail providers’ locations, subprocessors and transfer arrangements still need operator confirmation.</p>
         <p>We do not yet have verified information about the live providers’ locations, subprocessors or international transfer arrangements. We will identify relevant providers and explain applicable safeguards before relying on processing that transfers your information outside the UK.</p>
+        <p>If you allow optional analytics, Google processes Analytics data and may process it outside the UK. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google’s privacy policy</a> and <a href="https://business.safety.google/adsprocessorterms/" target="_blank" rel="noopener noreferrer">Google’s data processing terms</a>. Analytics event retention and other property settings are managed in Google Analytics rather than this repository.</p>
       </section>
 
       <section class="legal-section" id="retention" aria-labelledby="retention-title">
@@ -131,7 +135,7 @@
         <p>We will update this notice when our data use or service changes. If a change is material, we will bring it to your attention before using your information for a new purpose.</p>
         <p>Read the <a href="/terms/">Membership terms</a> or visit <a href="/contact/">Contact CODARIS</a>.</p>
       </section>
-      <p class="legal-endnote">CODARIS / PRIVACY NOTICE / 26 SEP 2026</p>
+      <p class="legal-endnote">CODARIS / PRIVACY NOTICE / 04 OCT 2026</p>
     </article>
   </div>
 </section>

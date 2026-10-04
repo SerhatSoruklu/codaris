@@ -22,7 +22,8 @@ allowed_root = {'index.html', '404.html', 'styles.css', 'meaning.css', 'legal.cs
                 'api-status.html', 'api-status.css', 'api-status.js',
                 'host.js', 'auth-nav.js', 'api-origin.js', 'auth-redirect.js', 'member-access.js', 'home-intro.js',
                 'not-found-scene.js', 'three.module.js', 'three.core.js', 'THREE-LICENSE.txt',
-                'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml', 'version.txt', 'site.webmanifest'}
+                'codaris.js', 'codaris.wasm', 'robots.txt', 'sitemap.xml', 'version.txt', 'site.webmanifest',
+                'google12ca11a422470d51.html', 'analytics-consent.js', 'analytics-consent.wasm'}
 for file in sorted(source.rglob('*')):
     if file.is_symlink():
         raise SystemExit('Symlinks are not allowed in site output')
