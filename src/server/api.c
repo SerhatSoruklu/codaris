@@ -556,22 +556,9 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         goto done;
     if (!strcmp(path, "/api/session") && !post) {
         int authenticated = authenticate(db, conn, id, session_hash);
-        const char *raw = MHD_lookup_connection_value(conn, MHD_COOKIE_KIND, "codaris_session_v2");
-        char current_cookie[256] = "", legacy_cookie[128] = "";
-        const char *set_cookie = NULL, *clear_cookie = NULL;
-        if (raw) {
-            if (authenticated && strlen(raw) == 64)
-                snprintf(current_cookie, sizeof(current_cookie),
-                         "codaris_session_v2=%s; Path=/; HttpOnly; SameSite=Strict; Max-Age=2419200%s",
-                         raw, c->production ? "; Domain=codaris.org; Secure" : "");
-            else
-                snprintf(current_cookie, sizeof(current_cookie),
-                         "codaris_session_v2=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0%s",
-                         c->production ? "; Domain=codaris.org; Secure" : "");
-            set_cookie = current_cookie;
-            clear_legacy_session_cookie(c, legacy_cookie, sizeof(legacy_cookie));
-            clear_cookie = legacy_cookie;
-        }
+        /* A background probe may arrive after a newer login/logout response.
+         * Keep it read-only: replaying or clearing its request cookie would
+         * overwrite the browser's newer session. Lifetime starts at login. */
         char session_json[512] = "{\"authenticated\":false}";
         if (authenticated) {
             const char *v[] = {session_hash, id};
@@ -584,7 +571,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
                 snprintf(session_json, sizeof(session_json), "%s", PQgetvalue(r, 0, 0));
             if (r) { PQclear(r); r = NULL; }
         }
-        enum MHD_Result result = respond_cookies(conn, 200, session_json, set_cookie, clear_cookie);
+        enum MHD_Result result = respond(conn, 200, session_json, NULL);
         if (body)
             json_object_put(body);
         PQfinish(db);

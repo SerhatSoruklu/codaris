@@ -4,6 +4,7 @@ import email
 import base64
 import email.policy
 import http.client
+from http.cookies import SimpleCookie
 import json
 import os
 from pathlib import Path
@@ -162,6 +163,25 @@ try:
     _,cookie=call('login',dict(identifier=registration['email'],password=password))
     assert 'Path=/' in cookie and 'HttpOnly' in cookie and 'SameSite=Strict' in cookie
     assert json.loads(raw_get('session',cookie)[2])['authenticated'] is True
+    # Deliver a probe for an absent, stale or older valid cookie after a fresh
+    # login. Apply its Set-Cookie headers as a browser would: the new login
+    # must survive, rather than being deleted or replaced with the old token.
+    for probe_cookie in ('', 'codaris_session_v2=' + '0' * 64, cookie):
+        delayed = http.client.HTTPConnection('127.0.0.1', port, timeout=20)
+        delayed.request('GET', '/api/session', headers={'Cookie': probe_cookie})
+        probe_response = delayed.getresponse()
+        _, fresh_cookie = call('login', dict(identifier=registration['email'], password=password))
+        browser_cookie = SimpleCookie(fresh_cookie)['codaris_session_v2'].value
+        for name, value in probe_response.getheaders():
+            if name.lower() == 'set-cookie':
+                update = SimpleCookie(value).get('codaris_session_v2')
+                if update is not None:
+                    browser_cookie = None if update['max-age'] == '0' else update.value
+        probe_response.read()
+        delayed.close()
+        assert browser_cookie == SimpleCookie(fresh_cookie)['codaris_session_v2'].value, \
+            'A delayed session probe overwrote the newer login cookie'
+        call('me', cookie='codaris_session_v2=' + browser_cookie)
     assert raw_get('page-access',cookie)[0] == 403
     me,_=call('me',cookie=cookie)
     assert not me['email_verified'] and me['email']=='test@example.test'

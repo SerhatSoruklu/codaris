@@ -198,25 +198,30 @@ const codarisLoader = (() => {
       // A successful sign-in commonly lands directly on the dashboard. Keep
       // its loader active until the profile request confirms workspace access.
       const isDashboard = /^\/dashboard(?:\/|$)/.test(location.pathname);
+      const returnedToLogin = /^\/login(?:\/|$)/.test(location.pathname)
+        && (navigation.kind === 'login' || navigation.kind === 'dashboard');
       const kind = ((navigation.kind === 'login' || navigation.kind === 'dashboard') && isDashboard)
         ? 'dashboard'
         : navigation.kind === 'dashboard' ? 'login' : navigation.kind;
-      start(kind, '', navigation);
-      const actionLabel = routeAction(kind);
-      if (actionLabel) setContinueAction(actionLabel);
-      window.addEventListener('load', () => {
-        navigationLoaded = true;
-        if (kind !== 'dashboard') {
-          requestComplete = true;
-          pendingNetworkProgress = 100;
-          pendingNetworkMessage = kind === 'logout' ? 'Signed out.' : kind === 'register' ? 'Confirmation page ready.' : 'Workspace page ready.';
-          networkIndeterminate = false;
-          if (introDone) showNetworkProgress();
-        }
-        const loadedAction = routeAction(kind);
-        if (loadedAction) setContinueAction(loadedAction);
-        if (introDone && requestComplete) finishRoute();
-      }, {once: true});
+      // A rejected workspace session must show the sign-in form immediately.
+      if (!returnedToLogin) {
+        start(kind, '', navigation);
+        const actionLabel = routeAction(kind);
+        if (actionLabel) setContinueAction(actionLabel);
+        window.addEventListener('load', () => {
+          navigationLoaded = true;
+          if (kind !== 'dashboard') {
+            requestComplete = true;
+            pendingNetworkProgress = 100;
+            pendingNetworkMessage = kind === 'logout' ? 'Signed out.' : kind === 'register' ? 'Confirmation page ready.' : 'Workspace page ready.';
+            networkIndeterminate = false;
+            if (introDone) showNetworkProgress();
+          }
+          const loadedAction = routeAction(kind);
+          if (loadedAction) setContinueAction(loadedAction);
+          if (introDone && requestComplete) finishRoute();
+        }, {once: true});
+      }
     }
   } catch {}
   function navigateToDashboard(event) {
@@ -340,9 +345,6 @@ window.codarisLoader = codarisLoader;
       else delete document.body.dataset.memberRouteAuthenticated;
       if (state === 'unauthenticated') {
         const returnTo = location.pathname + location.search + location.hash;
-        if (onDashboard) {
-          try { sessionStorage.setItem('codaris-loader-navigation', JSON.stringify({kind: 'dashboard', startedAt: Date.now()})); } catch {}
-        }
         location.replace('/login/?return_to=' + encodeURIComponent(returnTo));
         return;
       }
