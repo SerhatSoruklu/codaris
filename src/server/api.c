@@ -559,12 +559,16 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
         /* A background probe may arrive after a newer login/logout response.
          * Keep it read-only: replaying or clearing its request cookie would
          * overwrite the browser's newer session. Lifetime starts at login. */
-        char session_json[512] = "{\"authenticated\":false}";
+        char session_json[512];
+        snprintf(session_json, sizeof(session_json), "%s",
+                 authenticated ? "{\"authenticated\":true}" : "{\"authenticated\":false}");
         if (authenticated) {
             const char *v[] = {session_hash, id};
             r = query(db,
                 "SELECT json_build_object('authenticated',true,'name',u.display_name,"
-                "'session_started_at',extract(epoch from s.created_at)::bigint)::text "
+                /* Session age is optional metadata added in migration 011.
+                 * Reading the row as JSON also works before that migration. */
+                "'session_started_at',extract(epoch from (to_jsonb(s)->>'created_at')::timestamptz)::bigint)::text "
                 "FROM app.sessions s JOIN app.users u ON u.id=s.user_id "
                 "WHERE s.token_hash=$1 AND s.user_id=$2::bigint", 2, v);
             if (r && PQntuples(r) == 1)
@@ -932,7 +936,7 @@ static enum MHD_Result route(const Config *c, struct MHD_Connection *conn, const
             "json_build_object('name',u.display_name,'membership_id',u.username,'email',a.email,'"
             "email_verified',a.email_verified,'country',a.country,'role',a.role,'motivation',a."
             "motivation,'linkedin',a.linkedin,'github',a.github,'website',a.website,'avatar',"
-            "encode(a.avatar_rgba,'base64'),'credential',json_build_object('membership_number',c.membership_number,'verification_id',c.verification_id::text,'status',c.status,'issued_at',c.issued_at,'public_enabled',c.public_enabled),'session_started_at',(SELECT extract(epoch from s.created_at)::bigint FROM app.sessions s WHERE s.token_hash=$2),'progress',"
+            "encode(a.avatar_rgba,'base64'),'credential',json_build_object('membership_number',c.membership_number,'verification_id',c.verification_id::text,'status',c.status,'issued_at',c.issued_at,'public_enabled',c.public_enabled),'session_started_at',(SELECT extract(epoch from (to_jsonb(s)->>'created_at')::timestamptz)::bigint FROM app.sessions s WHERE s.token_hash=$2),'progress',"
             "COALESCE((SELECT sum(1::bigint << topic::integer) FROM app.learning_progress WHERE "
             "user_id=a.user_id),0))::text FROM "
             "app.accounts a JOIN app.users u ON u.id=a.user_id JOIN app.membership_credentials c ON c.user_id=a.user_id WHERE a.user_id=$1::bigint",
