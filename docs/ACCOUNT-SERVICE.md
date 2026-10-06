@@ -8,6 +8,8 @@ Sessions use the `codaris_session_v2` random 256-bit opaque cookie, scoped to `D
 
 The dashboard and topic hub with its 22 topic routes are member-only. The local static server and production Nginx check the session before serving topic routes. The dashboard shell uses the browser auth guard because URL fragments such as `#security` are never sent to the server; its account and progress APIs independently require authentication. The guard carries the full dashboard URL through login so visitors return to the selected tab. Public editorial routes such as Terms remain readable when signed out.
 
+Session probes are read-only and never set or clear cookies. A probe issued before login or logout can finish after that operation; changing cookies in its response would overwrite the newer browser session. Cookie lifetime is 28 days from login, matching the database expiry, rather than being extended by header probes. Login and explicit account operations own cookie updates. Returning to sign-in after a rejected dashboard session displays the form immediately instead of restoring a successful workspace transition.
+
 A durable mail outbox is committed with account changes. It stores encrypted action tokens (libsodium secretbox), never passwords; the encryption key is backend-only. Delivery workers decrypt only while sending, retry with bounded attempts, erase payload on success, and use a stable Message-ID. SMTP delivery is at-least-once: a crash after acceptance may repeat a message. Tokens remain single-use. SMTP requires TLS with certificate validation in production. Local development uses a loopback SMTP capture service. No SMTP credentials are copied from other applications.
 
 ## Native dependencies
