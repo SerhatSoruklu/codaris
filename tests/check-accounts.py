@@ -234,6 +234,15 @@ try:
     me,_=call('me',cookie=cookie);assert me['email_verified']
     assert me['credential']['status']=='active'
     assert raw_get('page-access',cookie)[0] == 204
+    # Migration 011 adds session-age metadata. An older live schema must not
+    # turn a valid login into authenticated:false or break the profile API.
+    psql('ALTER TABLE app.sessions DROP COLUMN created_at')
+    session, _ = call('session', cookie=cookie)
+    assert session['authenticated'] is True and session['session_started_at'] is None
+    legacy_me, _ = call('me', cookie=cookie)
+    assert legacy_me['email_verified'] and legacy_me['session_started_at'] is None
+    assert raw_get('page-access', cookie)[0] == 204
+    psql('ALTER TABLE app.sessions ADD COLUMN created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP')
     credential_id=me['credential']['verification_id']
     verified,_=call('credential/verify?credential='+credential_id)
     assert verified=={'valid':True,'display_name':registration['name'],'membership_number':me['credential']['membership_number'],'role':registration['role'],'status':'active','issued_at':verified['issued_at']}
